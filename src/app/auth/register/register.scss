@@ -1,0 +1,45 @@
+  .register-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 640px;
+    margin: 2rem auto;
+    padding: 0.2rem;
+    background-color: #ece5e5;
+    border-radius: 20px;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  }
+
+  #project-title {
+    font-size: 3rem;
+    font-weight: 598;
+    margin-bottom: 2rem;
+  }
+
+  #project-subtitle {
+    font-size: 1.25rem;
+    font-weight: 400;
+    margin-bottom: 1rem;
+  }
+
+
+  mat-card {
+    padding: 1.5rem;
+  }
+
+  .register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-top: 1rem;
+  }
+
+  .name-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .name-row mat-form-field {
+    flex: 1 1 240px;
+  }

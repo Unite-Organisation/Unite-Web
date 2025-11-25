@@ -59,6 +59,10 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "port": 4204,
+            "host": "localhost"
+          },
           "configurations": {
             "production": {
               "buildTarget": "Unite-Frontend:build:production"
@@ -94,5 +98,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "087e8889-a2d3-4e35-9959-34f9506fa78e"
   }
 }

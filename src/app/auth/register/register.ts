@@ -1,0 +1,71 @@
+import { CommonModule } from '@angular/common';
+import { Component, computed, inject } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { UserRegisterRequest } from '../../models/auth.models';
+import { AuthApiService } from '../../core/auth-api.service';
+import { finalize } from 'rxjs/operators';
+import { ToastService } from '../../core/toast.service';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-register',
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule
+  ],
+  standalone: true, 
+  templateUrl: './register.html',
+  styleUrl: './register.scss',
+})
+export class Register {
+  private readonly fb = inject(FormBuilder);
+  private readonly authApi = inject(AuthApiService);
+  private readonly toast = inject(ToastService);
+  private readonly router = inject(Router);
+
+  protected isSubmitting = false;
+  readonly roles = ['RESIDENT', 'ADMIN', 'MANAGER'];
+
+  readonly form: FormGroup = this.fb.group({
+    firstName: this.fb.control('', { validators: [Validators.required, Validators.minLength(2)], nonNullable: true }),
+    lastName: this.fb.control('', { validators: [Validators.required, Validators.minLength(2)], nonNullable: true }),
+    username: this.fb.control('', { validators: [Validators.required, Validators.minLength(4)], nonNullable: true }),
+    email: this.fb.control('', { validators: [Validators.required, Validators.email], nonNullable: true }),
+    password: this.fb.control('', { validators: [Validators.required, Validators.minLength(8)], nonNullable: true }),
+    role: this.fb.control('USER', { validators: [Validators.required], nonNullable: true })
+  });
+
+  readonly formValue = computed<UserRegisterRequest | null>(() =>
+    this.form.valid ? (this.form.value as UserRegisterRequest) : null
+  );
+
+  handleSubmit(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const payload = this.form.value as UserRegisterRequest;
+    this.isSubmitting = true;
+
+    this.authApi.register(payload)
+      .pipe(finalize(() => (this.isSubmitting = false)))
+      .subscribe({
+        next: () => {
+          this.toast.success('Account created successfully');
+          this.router.navigateByUrl('/home');
+        },
+        error: (error) => console.error('Registration failed', error)
+      });
+    }
+}
