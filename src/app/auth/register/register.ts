@@ -6,11 +6,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
-import { UserRegisterRequest } from '../../models/auth.models';
-import { AuthApiService } from '../../core/auth-api.service';
-import { finalize } from 'rxjs/operators';
+import { UserLoginRequest, UserRegisterRequest } from '../../models/auth-models/auth.models';
+import { AuthApiService } from '../services/auth-api.service';
+import { finalize, switchMap } from 'rxjs/operators';
 import { ToastService } from '../../core/toast.service';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ErrorService } from '../../core/error.sevice';
+import { AuthService } from '../services/auth';
 
 @Component({
   selector: 'app-register',
@@ -25,13 +28,15 @@ import { Router } from '@angular/router';
   ],
   standalone: true, 
   templateUrl: './register.html',
-  styleUrl: './register.scss',
+  styleUrl: './register.scss'
 })
 export class Register {
   private readonly fb = inject(FormBuilder);
   private readonly authApi = inject(AuthApiService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
+  private readonly errorService = inject(ErrorService)
+  private readonly authService = inject(AuthService);
 
   protected isSubmitting = false;
   readonly roles = ['RESIDENT', 'ADMIN', 'MANAGER'];
@@ -59,13 +64,30 @@ export class Register {
     this.isSubmitting = true;
 
     this.authApi.register(payload)
-      .pipe(finalize(() => (this.isSubmitting = false)))
+      .pipe(
+        switchMap(() => {
+          const loginPayload: UserLoginRequest = {
+            username: payload.username,
+            password: payload.password
+          };
+          return this.authApi.login(loginPayload);
+        }),
+        finalize(() => (this.isSubmitting = false))
+      )
       .subscribe({
-        next: () => {
+        next: (tokenResponse) => {
+          this.authService.saveToken(tokenResponse.token);
           this.toast.success('Account created successfully');
           this.router.navigateByUrl('/home');
         },
-        error: (error) => console.error('Registration failed', error)
+        error: (error: HttpErrorResponse) => {
+          console.error('Registration or login failed', error);
+          this.errorService.handleServerError(error);
+        }
       });
+    }
+
+    switchToLogin(): void {
+      this.router.navigateByUrl('/login')
     }
 }

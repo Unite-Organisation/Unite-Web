@@ -1,0 +1,32 @@
+<div class="dashboard-container">
+  <div *ngIf="isLoading" class="loading">
+    Loading...
+  </div>
+
+  <div *ngIf="!isLoading" class="dashboard-grid">
+    <div class="dashboard-card main-block">
+      <div class="building-section">
+        <h2>My building</h2>
+        <h1>{{ personalData?.buildingName || 'Unknown' }}</h1>
+      </div>
+
+      <div class="address-section">
+        <h2>Address</h2>
+        <p>{{ personalData?.country || 'Unknown' }}</p>
+        <p>
+          {{ 
+            (personalData?.street || 'Unknown') + 
+            ' ' + 
+            (personalData?.number || 'Unknown') 
+          }}
+        </p>
+      </div>
+    </div>
+
+    <div class="dashboard-card area-block">
+      <h2>My area</h2>
+      <h3>{{ personalData?.areaName || 'Unknown' }}</h3>
+      <p>{{ personalData?.areaType || 'Unknown' }}</p>
+    </div>
+  </div>
+</div>

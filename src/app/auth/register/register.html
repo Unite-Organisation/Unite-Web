@@ -1,10 +1,12 @@
-<div class="register-shell">
-  <mat-card>
-    <mat-card-title id="project-title">Unite</mat-card-title>
-    <mat-card-subtitle id="project-subtitle">Create an account</mat-card-subtitle>
+<div class="auth-shell">
+  <mat-card class="auth-card">
 
     <mat-card-content>
-      <form [formGroup]="form" (ngSubmit)="handleSubmit()" class="register-form">
+      <mat-card-title class="auth-title">
+        Register
+      </mat-card-title>
+
+      <form [formGroup]="form" (ngSubmit)="handleSubmit()" class="auth-form">
         <div class="name-row">
           <mat-form-field appearance="outline">
             <mat-label>First name</mat-label>
@@ -80,6 +82,11 @@
             Create account
           </ng-container>
         </button>
+
+        <mat-card-actions class="auth-action-row">
+          <a class="auth-action-link" (click)="switchToLogin()">Have account? Log in</a>
+        </mat-card-actions>
+
         <ng-template #submittingTpl>Submitting…</ng-template>
       </form>
     </mat-card-content>

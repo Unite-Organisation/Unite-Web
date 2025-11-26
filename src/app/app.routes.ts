@@ -4,7 +4,41 @@ export const routes: Routes = [
 
     {
         path: 'home',
-        loadComponent: () => import('./home/home').then(m => m.Home)
+        loadComponent: () => import('./home/home').then(m => m.Home),
+        children: [
+            {
+                path: '',
+                loadComponent: () => import('./home/home-dashboard/home-dashboard').then(m => m.HomeDashboard)
+            },
+            {
+                path: 'polls',
+                loadComponent: () => import('./polls/polls').then(m => m.Polls)
+            },
+            {
+                path: 'events',
+                loadComponent: () => import('./events/events').then(m => m.Events)
+            },
+            {
+                path: 'facilities',
+                loadComponent: () => import('./facilities/facilities').then(m => m.Facilities)
+            },
+            {
+                path: 'offerings',
+                loadComponent: () => import('./offerings/offerings').then(m => m.Offerings)
+            },
+            {
+                path: 'issues',
+                loadComponent: () => import('./issues/issues').then(m => m.Issues)
+            },
+            {
+                path: 'chats',
+                loadComponent: () => import('./chats/chats').then(m => m.Chats)
+            },
+            {
+                path: 'settings',
+                loadComponent: () => import('./settings/settings').then(m => m.Settings)
+            }
+        ]
     },
 
     {

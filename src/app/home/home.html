@@ -1,1 +1,67 @@
-<p>home works!</p>
+<div class="home-layout">
+  <aside class="home-sidenav">
+    <div class="home-brand">
+      Unite ...
+    </div>
+
+    <nav class="home-nav">
+      <button mat-button routerLink="/home" routerLinkActive="home-link-active" [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon>home</mat-icon>
+        <span>Home</span>
+      </button>
+      <button mat-button routerLink="/home/polls" routerLinkActive="home-link-active">
+        <mat-icon>how_to_vote</mat-icon>
+        <span>Polls</span>
+      </button>
+      <button mat-button routerLink="/home/events" routerLinkActive="home-link-active">
+        <mat-icon>event</mat-icon>
+        <span>Events</span>
+      </button>
+      <button mat-button routerLink="/home/facilities" routerLinkActive="home-link-active">
+        <mat-icon>apartment</mat-icon>
+        <span>Facilities</span>
+      </button>
+      <button mat-button routerLink="/home/offerings" routerLinkActive="home-link-active">
+        <mat-icon>local_offer</mat-icon>
+        <span>Offerings</span>
+      </button>
+      <button mat-button routerLink="/home/issues" routerLinkActive="home-link-active">
+        <mat-icon>report_problem</mat-icon>
+        <span>Issues</span>
+      </button>
+      <button mat-button routerLink="/home/chats" routerLinkActive="home-link-active">
+        <mat-icon>chat</mat-icon>
+        <span>Chats</span>
+      </button>
+      <button mat-button routerLink="/home/settings" routerLinkActive="home-link-active">
+        <mat-icon>settings</mat-icon>
+        <span>Settings</span>
+      </button>
+    </nav>
+
+    <button mat-stroked-button color="primary" class="home-logout" (click)="logout()">
+      Logout
+    </button>
+  </aside>
+
+  <main class="home-content">
+    <div class="content-header">
+      <div class="action-buttons">
+        <button mat-flat-button color="primary">
+          <mat-icon>add</mat-icon>
+          <span>Report problem</span>
+        </button>
+        <button mat-icon-button clas="notification-button">
+          <mat-icon>notifications</mat-icon>
+        </button>
+      </div>
+      
+      <div class="user-info">
+        <mat-icon class="user-avatar" fontIcon="account_circle"></mat-icon>
+      </div>
+    </div>
+    <div class="main-content">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

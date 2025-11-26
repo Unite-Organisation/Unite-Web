@@ -1,0 +1,93 @@
+.home-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+.home-sidenav {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1rem;
+  background-color: #121826;
+  color: #e5e7eb;
+}
+
+.home-brand {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  margin-top: 1rem;
+}
+
+.home-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+
+  button {
+    font-size: 16px;
+  }
+}
+
+.home-nav button {
+  justify-content: flex-start;
+  color: #e5e7eb;
+}
+
+.home-nav button.home-link-active {
+  background-color: rgba(59, 130, 246, 0.15);
+}
+
+.home-logout {
+  margin-top: 1.5rem;
+}
+
+.home-content {
+  padding: 2rem;
+  background: radial-gradient(circle at top left, #11293d, #327e9c);
+  color: #e5e7eb;
+}
+
+.home-content {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+  }
+  
+  .content-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    margin-bottom: 20px;
+    background-color: #121826;
+    border-radius: 8px;
+    padding: 0 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .main-content{
+    background-color: #121826;
+    border-radius: 8px;
+    padding: 0 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    // opacity: 60%;
+  }
+  
+  .user-info {
+    display: flex;
+    align-items: center;
+    
+    .user-avatar {
+      font-size: 32px;
+      height: 32px;
+      width: 32px;
+      color: #9e9e9e;
+    }
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+  }

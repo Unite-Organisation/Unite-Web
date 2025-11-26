@@ -1,1 +1,43 @@
-<p>login works!</p>
+<div class="auth-shell">
+  <mat-card class="auth-card">
+
+    <mat-card-content>
+      <mat-card-title class="auth-title">
+        Log in
+      </mat-card-title>
+      <form [formGroup]="form" (ngSubmit)="handleSubmit()" class="auth-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Username</mat-label>
+          <input matInput formControlName="username" autocomplete="username" />
+          <mat-error *ngIf="form.controls['username'].hasError('required')">
+            Username is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" formControlName="password" autocomplete="current-password" />
+          <mat-error *ngIf="form.controls['password'].hasError('required')">
+            Password is required
+          </mat-error>
+        </mat-form-field>
+
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="form.invalid || isSubmitting">
+          <ng-container *ngIf="!isSubmitting; else loggingInTpl">
+            Log in
+          </ng-container>
+        </button>
+
+        <mat-card-actions class="auth-action-row">
+          <a class="auth-action-link" (click)="switchToRegister()">New? Register to Unite</a>
+        </mat-card-actions>
+
+        <ng-template #loggingInTpl>Logging in…</ng-template>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
