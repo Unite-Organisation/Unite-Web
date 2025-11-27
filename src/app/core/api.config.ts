@@ -5,6 +5,7 @@ export const API_URLS = {
 
   register: API_BASE_PATH + '/auth/register',
   login: API_BASE_PATH + '/auth/login',
-  personal_data: API_BASE_PATH + '/user/my-data'
+  personal_data: API_BASE_PATH + '/user/my-data',
+  posts: API_BASE_PATH + '/post'
 
 } as const;

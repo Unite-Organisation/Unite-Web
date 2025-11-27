@@ -1,0 +1,21 @@
+<div class="post-container">
+    <div class="button-container">
+        <add-button>
+            Add new post
+        </add-button>
+    </div>
+
+    <div class="posts-list">
+        <div *ngFor="let post of posts" class="post-card">
+            <div class="post-info">
+                <h3>{{ post?.name || 'Unknown' }}</h3>
+                <small>{{ post?.content || 'Unknown' }}</small>
+            </div>
+            <div class="post-image-container">
+                <img [src]="getImageUrl(post)" (error)="onImageError($event)" alt="Post image">
+            </div>
+        </div>
+    </div>
+
+    <p *ngIf="posts.length === 0">No posts for you</p>
+</div>

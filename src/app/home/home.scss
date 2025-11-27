@@ -1,15 +1,41 @@
 .home-layout {
-  display: grid;
-  grid-template-columns: 260px 1fr;
+  display: flex;
   min-height: 100vh;
 }
 
 .home-sidenav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 260px;
   display: flex;
   flex-direction: column;
   padding: 1.5rem 1rem;
   background-color: #121826;
   color: #e5e7eb;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 1000;
+  box-sizing: border-box;
+
+  /* Stylowanie scrollbara */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
 }
 
 .home-brand {
@@ -44,16 +70,14 @@
 }
 
 .home-content {
-  padding: 2rem;
+  margin-left: 260px;
+  flex: 1;
+  padding: 1.5rem;
   background: radial-gradient(circle at top left, #11293d, #327e9c);
   color: #e5e7eb;
+  min-height: 100vh;
+  box-sizing: border-box;
 }
-
-.home-content {
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-  }
   
   .content-header {
     display: flex;
@@ -72,7 +96,6 @@
     border-radius: 8px;
     padding: 0 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    // opacity: 60%;
   }
   
   .user-info {
