@@ -15,8 +15,12 @@ export const routes: Routes = [
                 loadComponent: () => import('./polls/polls').then(m => m.Polls)
             },
             {
+                path: 'announcements',
+                loadComponent: () => import('./announcements/announcements').then(m => m.Announcements)
+            },
+            {
                 path: 'events',
-                loadComponent: () => import('./posts/posts').then(m => m.Posts)
+                loadComponent: () => import('./events/events').then(m => m.Events)
             },
             {
                 path: 'facilities',

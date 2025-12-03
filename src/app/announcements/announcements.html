@@ -1,0 +1,14 @@
+<div class="post-container">
+    <div class="button-container">
+        <add-button>
+            Add new announcement
+        </add-button>
+    </div>
+
+    <div class="posts-list">
+        <post-card *ngFor="let post of posts" [post]="post"></post-card>
+    </div>
+
+    <p *ngIf="posts.length === 0 && !isLoading">No announcements for you</p>
+</div>
+
