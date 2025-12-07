@@ -1,0 +1,25 @@
+<div class="buildings-container">
+  <div class="buildings-header">
+    <h2>Buildings Management</h2>
+    <button mat-flat-button color="primary" (click)="openCreateAreaDialog()">
+      <mat-icon>add</mat-icon>
+      <span>Create Area</span>
+    </button>
+  </div>
+
+  <div class="buildings-content">
+    <div *ngIf="isLoading" class="loading">
+      Loading buildings...
+    </div>
+    <div *ngIf="!isLoading && buildings.length === 0" class="no-buildings">
+      <p>No buildings found. Create an area with buildings to get started.</p>
+    </div>
+    <plain-card 
+      *ngFor="let building of buildings" 
+      [building]="building"
+      (addUsers)="onAddUsers($event)">
+    </plain-card>
+  </div>
+</div>
+
+

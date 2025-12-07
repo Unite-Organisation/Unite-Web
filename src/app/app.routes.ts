@@ -41,6 +41,10 @@ export const routes: Routes = [
             {
                 path: 'settings',
                 loadComponent: () => import('./settings/settings').then(m => m.Settings)
+            },
+            {
+                path: 'buildings',
+                loadComponent: () => import('./buildings/buildings').then(m => m.Buildings)
             }
         ]
     },

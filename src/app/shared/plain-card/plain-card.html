@@ -1,0 +1,18 @@
+<div class="plain-card">
+    <div class="card-info">
+        <h3>{{ building?.name || 'Unknown' }}</h3>
+        <div class="card-details">
+            <small>
+                <strong>Address:</strong> {{ building?.street || 'Unknown' }} {{ building?.number || '' }}, 
+                {{ building?.city || 'Unknown' }}, {{ building?.country || 'Unknown' }}
+            </small>
+        </div>
+    </div>
+    <div class="card-actions">
+        <button mat-flat-button color="primary" (click)="onAddUsers()">
+            <mat-icon>person_add</mat-icon>
+            <span>Add Users</span>
+        </button>
+    </div>
+</div>
+

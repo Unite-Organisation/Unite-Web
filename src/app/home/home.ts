@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../auth/services/auth';
+import { RolesService } from '../auth/services/roles.service';
 
 @Component({
   selector: 'app-home',
@@ -15,6 +16,7 @@ import { AuthService } from '../auth/services/auth';
 export class Home {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  protected readonly rolesService = inject(RolesService);
 
   logout(): void {
     console.info('User logged out - token removed');

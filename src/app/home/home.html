@@ -41,6 +41,10 @@
         <mat-icon>settings</mat-icon>
         <span>Settings</span>
       </button>
+      <button mat-button routerLink="/home/buildings" routerLinkActive="home-link-active" *ngIf="rolesService.isManager()">
+        <mat-icon>business</mat-icon>
+        <span>Buildings</span>
+      </button>
     </nav>
 
     <button mat-stroked-button color="primary" class="home-logout" (click)="logout()">
