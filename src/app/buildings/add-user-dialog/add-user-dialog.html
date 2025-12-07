@@ -1,0 +1,52 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>Add User to Building</h2>
+
+  <mat-dialog-content>
+    <div class="building-info">
+      <p><strong>Building:</strong> {{ data.building?.name || 'Unknown' }}</p>
+      <p><strong>Address:</strong> {{ data.building?.street || 'Unknown' }} {{ data.building?.number || '' }}, 
+         {{ data.building?.city || 'Unknown' }}, {{ data.building?.country || 'Unknown' }}</p>
+    </div>
+
+    <div class="users-section">
+      <h3>Select User to Add</h3>
+      
+      <div *ngIf="isLoading" class="loading">
+        Loading users...
+      </div>
+
+      <div *ngIf="!isLoading && users.length === 0" class="no-users">
+        <p>No users available to add.</p>
+      </div>
+
+      <div *ngIf="!isLoading && users.length > 0" class="users-list">
+        <div 
+          *ngFor="let user of users" 
+          [class.selected]="isSelected(user.userId)"
+          (click)="selectUser(user.userId)"
+          class="user-item">
+          <div class="user-info">
+            <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
+          </div>
+          <mat-icon *ngIf="isSelected(user.userId)" class="check-icon">check_circle</mat-icon>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button type="button" (click)="cancel()" [disabled]="isSubmitting">Cancel</button>
+    <button 
+      mat-flat-button 
+      color="primary" 
+      type="button" 
+      (click)="submit()" 
+      [disabled]="!selectedUserId || isSubmitting">
+      <ng-container *ngIf="!isSubmitting; else submittingTpl">
+        Add User
+      </ng-container>
+      <ng-template #submittingTpl>Adding...</ng-template>
+    </button>
+  </mat-dialog-actions>
+</div>
+

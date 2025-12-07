@@ -11,6 +11,7 @@ import { ToastService } from '../core/toast.service';
 import { ErrorService } from '../core/error.sevice';
 import { AreaCreateRequest, BuildingResponse } from '../models/api-models/area.models';
 import { PlainCard } from '../shared/plain-card/plain-card';
+import { AddUserDialog } from './add-user-dialog/add-user-dialog';
 
 @Component({
   selector: 'app-buildings',
@@ -76,8 +77,19 @@ export class Buildings implements OnInit {
   }
 
   onAddUsers(building: BuildingResponse): void {
-    // TODO: Open dialog to add users to building
-    console.log('Add users to building:', building);
+    const dialogRef = this.dialog.open(AddUserDialog, {
+      width: '600px',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      data: { building }
+    });
+
+    dialogRef.afterClosed().subscribe((result: boolean | undefined) => {
+      if (result) {
+        // Refresh buildings list after adding user
+        this.getBuildings();
+      }
+    });
   }
 }
 

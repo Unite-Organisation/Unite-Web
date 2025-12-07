@@ -14,7 +14,7 @@ import { RolesService } from '../auth/services/roles.service';
   styleUrl: './home.scss',
 })
 export class Home {
-  private readonly authService = inject(AuthService);
+  protected readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   protected readonly rolesService = inject(RolesService);
 

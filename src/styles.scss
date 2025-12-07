@@ -1,16 +1,38 @@
 @use '@angular/material' as mat;
 
-$toast-success-bg: #1b5e20;
-$toast-error-bg: #b71c1c;
+$toast-success-accent: #4caf50;
+$toast-error-accent: #f44336;
+
+.mat-mdc-snack-bar-container {
+  border-radius: 0 !important;
+}
 
 .toast-success {
-  background-color: $toast-success-bg;
-  color: #fff;
+  border-left: 4px solid $toast-success-accent !important;
+  color: var(--mat-sys-on-surface) !important;
+  border-radius: 0 !important;
+  
+  .mat-mdc-snack-bar-action {
+    color: $toast-success-accent !important;
+  }
+  
+  .mat-mdc-snack-bar-container {
+    border-radius: 0 !important;
+  }
 }
 
 .toast-error {
-  background-color: $toast-error-bg;
-  color: #fff;
+  border-left: 4px solid $toast-error-accent !important;
+  color: var(--mat-sys-on-surface) !important;
+  border-radius: 0 !important;
+  
+  .mat-mdc-snack-bar-action {
+    color: $toast-error-accent !important;
+  }
+  
+  .mat-mdc-snack-bar-container {
+    border-radius: 0 !important;
+  }
 }
 
 /* Shared auth card layout (login/register) */

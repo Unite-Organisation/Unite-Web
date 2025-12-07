@@ -29,3 +29,9 @@ export interface BuildingResponse {
   number: string;
   areaId: string;
 }
+
+export interface ResidentToAdd {
+  firstName: string;
+  lastName: string;
+  userId: string;
+}

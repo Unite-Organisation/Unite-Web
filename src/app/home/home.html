@@ -5,7 +5,7 @@
     </div>
 
     <nav class="home-nav">
-      <button mat-button routerLink="/home" routerLinkActive="home-link-active" [routerLinkActiveOptions]="{ exact: true }">
+      <button mat-button routerLink="/home" *ngIf="rolesService.isResident()" routerLinkActive="home-link-active" [routerLinkActiveOptions]="{ exact: true } ">
         <mat-icon>home</mat-icon>
         <span>Home</span>
       </button>
@@ -46,6 +46,18 @@
         <span>Buildings</span>
       </button>
     </nav>
+
+    <div class="role-info" *ngIf="rolesService.isResident()">
+      <h3>Logged in as Resident</h3>
+    </div>
+
+    <div class="role-info" *ngIf="rolesService.isManager()">
+      <h3>Logged in as Manager</h3>
+    </div>
+
+    <div class="role-info" *ngIf="rolesService.isAdmin()">
+      <h3>Logged in as Admin</h3>
+    </div>
 
     <button mat-stroked-button color="primary" class="home-logout" (click)="logout()">
       Logout
