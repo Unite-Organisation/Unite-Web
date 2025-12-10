@@ -13,6 +13,7 @@ export interface Post {
   locationName: string;
   onlineUrl: string;
   maxAttendees: number;
+  photoPresent: boolean;
 }
 
 export enum PostType {
