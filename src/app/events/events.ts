@@ -1,25 +1,48 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ErrorService } from '../core/error.sevice';
 import { Post, PostType } from '../models/api-models/posts.models';
 import { PostService } from '../posts/services/post.service';
 import { AddButton } from '../shared/add-button/add-button';
 import { PostCard } from '../shared/post-card/post-card';
+import { CreateEventDialog } from './create-event-dialog/create-event-dialog';
+import { RolesService } from '../auth/services/roles.service';
 
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [CommonModule, AddButton, PostCard],
+  imports: [CommonModule, AddButton, PostCard, MatDialogModule],
   templateUrl: './events.html',
   styleUrl: './events.scss',
 })
 export class Events implements OnInit {
   private readonly errorService = inject(ErrorService);
   private readonly postService = inject(PostService);
+  private readonly dialog = inject(MatDialog);
+  private readonly rolesService = inject(RolesService);
 
   isLoading = false;
   posts: Post[] = [];
+
+  get canCreateEvent(): boolean {
+    return this.rolesService.isManager() || this.rolesService.isAdmin();
+  }
+
+  openCreateEventDialog(): void {
+    const dialogRef = this.dialog.open(CreateEventDialog, {
+      width: '700px',
+      maxWidth: '90vw',
+      maxHeight: '90vh'
+    });
+
+    dialogRef.afterClosed().subscribe((result: boolean | undefined) => {
+      if (result) {
+        this.loadPosts();
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.loadPosts();

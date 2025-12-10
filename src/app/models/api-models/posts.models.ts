@@ -16,6 +16,27 @@ export interface Post {
 }
 
 export enum PostType {
-    ANNOUNCEMENT = 'ANNOUNCEMENT',
-    EVENT = 'EVENT',
-  }
+  ANNOUNCEMENT = 'ANNOUNCEMENT',
+  EVENT = 'EVENT',
+}
+
+export interface AnnouncementRequest {
+  name: string;
+  buildingId: string;
+  content: string;
+  relatedDate: string;
+  postType: PostType;
+}
+
+export interface EventRequest {
+  name: string;
+  buildingId: string | null;
+  content: string;
+  relatedDate: string;
+  postType: PostType;
+  startDate: string;
+  endDate: string;
+  location: string;
+  onlineUrl: string;
+  maxAttendees: number;
+}

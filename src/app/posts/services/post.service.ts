@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_URLS } from '../../core/api.config';
-import { Post, PostType } from '../../models/api-models/posts.models';
+import { AnnouncementRequest, EventRequest, Post, PostType } from '../../models/api-models/posts.models';
 
 export interface PostsQueryParams {
   pageSize: number;
@@ -24,5 +24,13 @@ export class PostService {
     httpParams = httpParams.append('postType', params.postType);
 
     return this.http.get<Post[]>(API_URLS.posts, { params: httpParams });
+  }
+
+  createAnnouncement(payload: AnnouncementRequest): Observable<void> {
+    return this.http.post<void>(API_URLS.announcements, payload);
+  }
+
+  createEvent(payload: EventRequest): Observable<void> {
+    return this.http.post<void>(API_URLS.events, payload);
   }
 }

@@ -11,5 +11,7 @@ export const API_URLS = {
   buildings: API_BASE_PATH + '/building',
   users_to_add: API_BASE_PATH + '/user/to-add',
   add_user_to_building: API_BASE_PATH + '/building/user',
+  announcements: API_BASE_PATH + '/post/announcement',
+  events: API_BASE_PATH + '/post/event',
 
 } as const;
