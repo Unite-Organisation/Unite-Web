@@ -1,0 +1,61 @@
+<div class="chats-container">
+    <div class="chats-sidebar">
+        <div class="sidebar-header">
+            <h2>Conversations</h2>
+        </div>
+
+        <div class="loading-container" *ngIf="isLoading">
+            <mat-spinner diameter="32"></mat-spinner>
+        </div>
+
+        <div class="chats-list" *ngIf="!isLoading">
+            <div class="empty-state" *ngIf="conversations.length === 0">
+                <mat-icon>chat_bubble_outline</mat-icon>
+                <p>No conversations yet</p>
+            </div>
+
+            <div 
+                class="chat-item" 
+                *ngFor="let conversation of conversations"
+                [class.selected]="isSelected(conversation)"
+                [class.group]="conversation.isGroup"
+                (click)="selectConversation(conversation)">
+                <div class="chat-avatar">
+                    <mat-icon>{{ conversation.isGroup ? 'group' : 'person' }}</mat-icon>
+                </div>
+                <div class="chat-info">
+                    <div class="chat-header">
+                        <span class="chat-name">{{ conversation.name || 'Unknown' }}</span>
+                        <span class="chat-time">{{ formatDate(conversation.updatedAt) }}</span>
+                    </div>
+                    <div class="chat-preview">
+                        <span class="chat-type">{{ conversation.isGroup ? 'Group chat' : 'Direct message' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-content">
+        <div class="no-chat-selected" *ngIf="!selectedConversation">
+            <mat-icon>forum</mat-icon>
+            <h3>Select a conversation</h3>
+            <p>Choose a chat from the list to start messaging</p>
+        </div>
+
+        <div class="chat-view" *ngIf="selectedConversation">
+            <div class="chat-view-header">
+                <div class="chat-avatar">
+                    <mat-icon>{{ selectedConversation.isGroup ? 'group' : 'person' }}</mat-icon>
+                </div>
+                <div class="chat-view-info">
+                    <h3>{{ selectedConversation.name }}</h3>
+                    <span>{{ selectedConversation.isGroup ? 'Group chat' : 'Direct message' }}</span>
+                </div>
+            </div>
+            <div class="chat-messages">
+                <p class="coming-soon">Messages coming soon...</p>
+            </div>
+        </div>
+    </div>
+</div>

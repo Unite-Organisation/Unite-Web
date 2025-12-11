@@ -1,0 +1,246 @@
+.chats-container {
+  display: flex;
+  height: calc(100vh - 120px);
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+// Sidebar
+.chats-sidebar {
+  width: 350px;
+  min-width: 300px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.sidebar-header {
+  padding: 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #ffffff;
+  }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  flex: 1;
+}
+
+.chats-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: rgba(255, 255, 255, 0.5);
+
+  mat-icon {
+    font-size: 3rem;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
+// Chat item
+.chat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  &.selected {
+    background-color: rgba(99, 102, 241, 0.15);
+    border-left: 3px solid #6366f1;
+    padding-left: calc(1.25rem - 3px);
+  }
+
+  &.group .chat-avatar {
+    background-color: rgba(139, 92, 246, 0.2);
+    color: #a78bfa;
+  }
+}
+
+.chat-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: rgba(99, 102, 241, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #818cf8;
+  }
+}
+
+.chat-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.chat-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-time {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+.chat-preview {
+  display: flex;
+  align-items: center;
+}
+
+.chat-type {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+// Chat content area
+.chat-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.no-chat-selected {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.4);
+
+  mat-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+}
+
+// Chat view
+.chat-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-view-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.chat-view-info {
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  span {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+.chat-messages {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.coming-soon {
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .chats-sidebar {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .chat-content {
+    display: none;
+  }
+
+  .chats-container.has-selected {
+    .chats-sidebar {
+      display: none;
+    }
+
+    .chat-content {
+      display: flex;
+    }
+  }
+}

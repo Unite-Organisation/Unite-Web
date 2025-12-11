@@ -7,9 +7,9 @@
             <span class="post-date">{{ formatDate(post.createdAt) }}</span>
         </div>
         
-        <h3>{{ post?.name || 'Unknown' }}</h3>
+        <h3>{{ post.name || 'Unknown' }}</h3>
         
-        <p class="post-content">{{ post?.content || '' }}</p>
+        <p class="post-content">{{ post.content || '' }}</p>
         
         <div class="post-meta">
             <div class="meta-item" *ngIf="post.relatedDate">
