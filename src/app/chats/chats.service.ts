@@ -1,6 +1,6 @@
 import { inject, Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { ConversationResponse } from "../models/api-models/chat.models";
+import { ConversationContentResponse, ConversationResponse, CreateMessageRequest } from "../models/api-models/chat.models";
 import { PaginationParams } from "../models/common/common.models";
 import { API_URLS } from "../core/api.config";
 import { Observable } from "rxjs";
@@ -18,5 +18,21 @@ export class ConversationService {
         httpParams = httpParams.append('page', pagination.page.toString());
 
         return this.http.get<ConversationResponse[]>(API_URLS.conversations, { params: httpParams });
+    }
+
+    fetchConversationContent(conversationId: string, pagination: PaginationParams): Observable<ConversationContentResponse> {
+        let httpParams = new HttpParams();
+
+        httpParams = httpParams.append('pageSize', pagination.pageSize.toString());
+        httpParams = httpParams.append('page', pagination.page.toString());
+
+        return this.http.get<ConversationContentResponse>(
+            `${API_URLS.conversations}/${conversationId}`, 
+            { params: httpParams }
+        );
+    }
+
+    sendMessage(request: CreateMessageRequest): Observable<void> {
+        return this.http.post<void>(API_URLS.messages, request);
     }
 }

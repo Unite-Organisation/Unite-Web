@@ -53,8 +53,53 @@
                     <span>{{ selectedConversation.isGroup ? 'Group chat' : 'Direct message' }}</span>
                 </div>
             </div>
-            <div class="chat-messages">
-                <p class="coming-soon">Messages coming soon...</p>
+
+            <div class="chat-messages" #messagesContainer>
+                <div class="messages-loading" *ngIf="isLoadingMessages">
+                    <mat-spinner diameter="32"></mat-spinner>
+                </div>
+
+                <div class="messages-empty" *ngIf="!isLoadingMessages && messages.length === 0">
+                    <mat-icon>chat</mat-icon>
+                    <p>No messages yet. Start the conversation!</p>
+                </div>
+
+                <ng-container *ngIf="!isLoadingMessages && messages.length > 0">
+                    <ng-container *ngFor="let message of messages; let i = index">
+                        <div class="date-separator" *ngIf="shouldShowDateSeparator(i)">
+                            <span>{{ formatMessageDate(message.sendAt) }}</span>
+                        </div>
+                        
+                        <div class="message">
+                            <div class="message-avatar">
+                                <mat-icon>person</mat-icon>
+                            </div>
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <span class="message-author">{{ message.author }}</span>
+                                    <span class="message-time">{{ formatMessageTime(message.sendAt) }}</span>
+                                </div>
+                                <div class="message-text">{{ message.content }}</div>
+                            </div>
+                        </div>
+                    </ng-container>
+                </ng-container>
+            </div>
+
+            <div class="chat-input">
+                <input 
+                    type="text" 
+                    placeholder="Type a message..." 
+                    [(ngModel)]="messageInput"
+                    (keydown)="onKeyDown($event)"
+                    [disabled]="isSending" />
+                <button 
+                    mat-icon-button 
+                    (click)="sendMessage()"
+                    [disabled]="!messageInput.trim() || isSending">
+                    <mat-icon *ngIf="!isSending">send</mat-icon>
+                    <mat-spinner *ngIf="isSending" diameter="20"></mat-spinner>
+                </button>
             </div>
         </div>
     </div>
