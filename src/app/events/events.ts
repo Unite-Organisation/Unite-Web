@@ -6,11 +6,12 @@ import { Post, PostType } from '../models/api-models/posts.models';
 import { PostService } from '../posts/services/post.service';
 import { AddButton } from '../shared/add-button/add-button';
 import { PostCard } from '../shared/post-card/post-card';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [CommonModule, AddButton, PostCard],
+  imports: [CommonModule, AddButton, PostCard, ReactiveFormsModule],
   templateUrl: './events.html',
   styleUrl: './events.scss',
 })
@@ -43,5 +44,6 @@ export class Events implements OnInit {
       }
     });
   }
+
 }
 

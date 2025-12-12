@@ -4,6 +4,7 @@
   max-height: 90vh;
   display: flex;
   flex-direction: column;
+
 }
 
 h2[mat-dialog-title] {
@@ -22,6 +23,7 @@ mat-dialog-content {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  margin-top: 1.5rem;
 }
 
 .form-row {

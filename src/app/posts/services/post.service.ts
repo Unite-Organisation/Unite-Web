@@ -10,6 +10,29 @@ export interface PostsQueryParams {
   postType: PostType;
 }
 
+export interface CreateEventPayload {
+  name: string;
+  areaId: string;
+  buildingId: string;
+  content: string;
+  relatedDate: string;
+  postType: PostType;
+  startDate: string;
+  endDate: string;
+  location: string;
+  onlineUrl: string;
+  maxAttendees: number;
+}
+
+export interface CreateAnnouncementPayload {
+  name: string;
+  areaId: string;
+  buildingId: string;
+  content: string;
+  relatedDate: string;
+  postType: PostType;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -24,5 +47,13 @@ export class PostService {
     httpParams = httpParams.append('postType', params.postType);
 
     return this.http.get<Post[]>(API_URLS.posts, { params: httpParams });
+  }
+
+  createEvent(payload: CreateEventPayload): Observable<void> {
+    return this.http.post<void>(API_URLS.create_event, payload);
+  }
+
+  createAnnouncement(payload: CreateAnnouncementPayload): Observable<void> {
+    return this.http.post<void>(API_URLS.create_announcement, payload);
   }
 }
