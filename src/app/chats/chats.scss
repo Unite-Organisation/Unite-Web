@@ -1,6 +1,6 @@
 .chats-container {
   display: flex;
-  height: calc(100vh - 120px);
+  height: calc(100vh - 130px);
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 12px;
   overflow: hidden;
@@ -185,6 +185,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0; // Important for flex overflow
+  overflow: hidden;
 }
 
 .chat-view-header {
@@ -194,6 +196,7 @@
   padding: 1rem 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background-color: rgba(255, 255, 255, 0.02);
+  flex-shrink: 0;
 }
 
 .chat-view-info {
@@ -218,6 +221,7 @@
   padding: 1rem 1.5rem;
   overflow-y: auto;
   gap: 0.5rem;
+  min-height: 0; // Important for flex overflow
 }
 
 .messages-loading,
@@ -326,6 +330,7 @@
   padding: 1rem 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   background-color: rgba(255, 255, 255, 0.02);
+  flex-shrink: 0; // Prevent input from shrinking
 
   input {
     flex: 1;
