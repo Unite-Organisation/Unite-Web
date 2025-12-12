@@ -9,6 +9,7 @@ import { AddButton } from '../shared/add-button/add-button';
 import { PostCard } from '../shared/post-card/post-card';
 import { CreateEventDialog } from './create-event-dialog/create-event-dialog';
 import { RolesService } from '../auth/services/roles.service';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-events',
@@ -66,5 +67,6 @@ export class Events implements OnInit {
       }
     });
   }
+
 }
 
