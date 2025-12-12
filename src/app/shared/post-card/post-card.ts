@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Post } from '../../models/api-models/posts.models';
+import { Post, PostType } from '../../models/api-models/posts.models';
 
 @Component({
   selector: 'post-card',
@@ -14,6 +14,10 @@ export class PostCard {
   
   defaultImageUrl = 'assets/default-post.jpg';
 
+  get isEvent(): boolean {
+    return this.post.postType === PostType.EVENT;
+  }
+
   getImageUrl(): string {
     return this.defaultImageUrl;
   }
@@ -21,6 +25,27 @@ export class PostCard {
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     img.src = 'assets/default-post.png';
+  }
+
+  formatDate(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pl-PL', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  }
+
+  formatDateTime(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pl-PL', {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 }
 

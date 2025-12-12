@@ -1,0 +1,106 @@
+<div class="chats-container">
+    <div class="chats-sidebar">
+        <div class="sidebar-header">
+            <h2>Conversations</h2>
+        </div>
+
+        <div class="loading-container" *ngIf="isLoading">
+            <mat-spinner diameter="32"></mat-spinner>
+        </div>
+
+        <div class="chats-list" *ngIf="!isLoading">
+            <div class="empty-state" *ngIf="conversations.length === 0">
+                <mat-icon>chat_bubble_outline</mat-icon>
+                <p>No conversations yet</p>
+            </div>
+
+            <div 
+                class="chat-item" 
+                *ngFor="let conversation of conversations"
+                [class.selected]="isSelected(conversation)"
+                [class.group]="conversation.isGroup"
+                (click)="selectConversation(conversation)">
+                <div class="chat-avatar">
+                    <mat-icon>{{ conversation.isGroup ? 'group' : 'person' }}</mat-icon>
+                </div>
+                <div class="chat-info">
+                    <div class="chat-header">
+                        <span class="chat-name">{{ conversation.name || 'Unknown' }}</span>
+                        <span class="chat-time">{{ formatDate(conversation.updatedAt) }}</span>
+                    </div>
+                    <div class="chat-preview">
+                        <span class="chat-type">{{ conversation.isGroup ? 'Group chat' : 'Direct message' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-content">
+        <div class="no-chat-selected" *ngIf="!selectedConversation">
+            <mat-icon>forum</mat-icon>
+            <h3>Select a conversation</h3>
+            <p>Choose a chat from the list to start messaging</p>
+        </div>
+
+        <div class="chat-view" *ngIf="selectedConversation">
+            <div class="chat-view-header">
+                <div class="chat-avatar">
+                    <mat-icon>{{ selectedConversation.isGroup ? 'group' : 'person' }}</mat-icon>
+                </div>
+                <div class="chat-view-info">
+                    <h3>{{ selectedConversation.name }}</h3>
+                    <span>{{ selectedConversation.isGroup ? 'Group chat' : 'Direct message' }}</span>
+                </div>
+            </div>
+
+            <div class="chat-messages" #messagesContainer>
+                <div class="messages-loading" *ngIf="isLoadingMessages">
+                    <mat-spinner diameter="32"></mat-spinner>
+                </div>
+
+                <div class="messages-empty" *ngIf="!isLoadingMessages && messages.length === 0">
+                    <mat-icon>chat</mat-icon>
+                    <p>No messages yet. Start the conversation!</p>
+                </div>
+
+                <ng-container *ngIf="!isLoadingMessages && messages.length > 0">
+                    <ng-container *ngFor="let message of messages; let i = index">
+                        <div class="date-separator" *ngIf="shouldShowDateSeparator(i)">
+                            <span>{{ formatMessageDate(message.sendAt) }}</span>
+                        </div>
+                        
+                        <div class="message">
+                            <div class="message-avatar">
+                                <mat-icon>person</mat-icon>
+                            </div>
+                            <div class="message-content">
+                                <div class="message-header">
+                                    <span class="message-author">{{ message.authorName }} {{ message.authorLastName }}</span>
+                                    <span class="message-time">{{ formatMessageTime(message.sendAt) }}</span>
+                                </div>
+                                <div class="message-text">{{ message.content }}</div>
+                            </div>
+                        </div>
+                    </ng-container>
+                </ng-container>
+            </div>
+
+            <div class="chat-input">
+                <input 
+                    type="text" 
+                    placeholder="Type a message..." 
+                    [(ngModel)]="messageInput"
+                    (keydown)="onKeyDown($event)"
+                    [disabled]="isSending" />
+                <button 
+                    mat-icon-button 
+                    (click)="sendMessage()"
+                    [disabled]="!messageInput.trim() || isSending">
+                    <mat-icon *ngIf="!isSending">send</mat-icon>
+                    <mat-spinner *ngIf="isSending" diameter="20"></mat-spinner>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

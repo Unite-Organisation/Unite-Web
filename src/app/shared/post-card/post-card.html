@@ -1,9 +1,45 @@
-<div class="post-card">
+<div class="post-card" [class.event-card]="isEvent">
     <div class="post-info">
-        <h3>{{ post?.name || 'Unknown' }}</h3>
-        <small>{{ post?.content || 'Unknown' }}</small>
+        <div class="post-header">
+            <span class="post-type-badge" [class.event]="isEvent">
+                {{ isEvent ? 'Event' : 'Announcement' }}
+            </span>
+            <span class="post-date">{{ formatDate(post.createdAt) }}</span>
+        </div>
+        
+        <h3>{{ post.name || 'Unknown' }}</h3>
+        
+        <p class="post-content">{{ post.content || '' }}</p>
+        
+        <div class="post-meta">
+            <div class="meta-item" *ngIf="post.relatedDate">
+                <span class="meta-icon">📅</span>
+                <span>{{ formatDate(post.relatedDate) }}</span>
+            </div>
+        </div>
+
+        <!-- Event-specific details -->
+        <div class="event-details" *ngIf="isEvent">
+            <div class="event-item" *ngIf="post.startDate && post.endDate">
+                <span class="event-icon">🕐</span>
+                <span>{{ formatDateTime(post.startDate) }} - {{ formatDateTime(post.endDate) }}</span>
+            </div>
+            <div class="event-item" *ngIf="post.locationName">
+                <span class="event-icon">📍</span>
+                <span>{{ post.locationName }}</span>
+            </div>
+            <div class="event-item" *ngIf="post.onlineUrl">
+                <span class="event-icon">🔗</span>
+                <span class="online-link">Online</span>
+            </div>
+            <div class="event-item" *ngIf="post.maxAttendees">
+                <span class="event-icon">👥</span>
+                <span>Max {{ post.maxAttendees }}</span>
+            </div>
+        </div>
     </div>
-    <div class="post-image-container">
+    
+    <div class="post-image-container" *ngIf="post.photoPresent">
         <img [src]="getImageUrl()" (error)="onImageError($event)" alt="Post image">
     </div>
 </div>

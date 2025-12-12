@@ -39,10 +39,22 @@
 }
 
 .home-brand {
-  font-size: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 2rem;
   font-weight: 700;
   margin-bottom: 2rem;
   margin-top: 1rem;
+  font-size: 50px;
+  color: #ffffff;
+
+  .brand-icon {
+    font-size: 3.5rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    color: #60a5fa;
+  }
 }
 
 .home-nav {

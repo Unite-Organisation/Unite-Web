@@ -1,0 +1,106 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>Create New Event</h2>
+
+  <mat-dialog-content>
+    <div *ngIf="isLoadingBuildings" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading buildings...</p>
+    </div>
+
+    <form *ngIf="!isLoadingBuildings" [formGroup]="form" class="event-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Event Name</mat-label>
+        <input matInput formControlName="name" />
+        <mat-error *ngIf="form.controls['name'].hasError('required')">
+          Name is required
+        </mat-error>
+      </mat-form-field>
+
+      <div class="area-toggle-section">
+        <mat-slide-toggle 
+          [checked]="isAreaWide"
+          (change)="onAreaWideToggle($event.checked)">
+          Area-wide event (for entire neighborhood)
+        </mat-slide-toggle>
+      </div>
+
+      <mat-form-field *ngIf="!isAreaWide" appearance="outline" class="full-width">
+        <mat-label>Building</mat-label>
+        <mat-select formControlName="buildingId">
+          <mat-option *ngFor="let building of buildings" [value]="building.id">
+            {{ building.name }} ({{ building.street }} {{ building.number }}, {{ building.city }})
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.controls['buildingId'].hasError('required')">
+          Building is required
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="content" rows="4"></textarea>
+        <mat-error *ngIf="form.controls['content'].hasError('required')">
+          Description is required
+        </mat-error>
+      </mat-form-field>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Start Date</mat-label>
+          <input matInput [matDatepicker]="startPicker" formControlName="startDate" />
+          <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+          <mat-error *ngIf="form.controls['startDate'].hasError('required')">
+            Start date is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>End Date</mat-label>
+          <input matInput [matDatepicker]="endPicker" formControlName="endDate" />
+          <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+          <mat-datepicker #endPicker></mat-datepicker>
+          <mat-error *ngIf="form.controls['endDate'].hasError('required')">
+            End date is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Related Date</mat-label>
+        <input matInput [matDatepicker]="relatedPicker" formControlName="relatedDate" />
+        <mat-datepicker-toggle matIconSuffix [for]="relatedPicker"></mat-datepicker-toggle>
+        <mat-datepicker #relatedPicker></mat-datepicker>
+        <mat-error *ngIf="form.controls['relatedDate'].hasError('required')">
+          Related date is required
+        </mat-error>
+      </mat-form-field>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Location</mat-label>
+          <input matInput formControlName="location" placeholder="e.g., Community Hall" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Online URL</mat-label>
+          <input matInput formControlName="onlineUrl" placeholder="e.g., https://zoom.us/..." />
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Max Attendees</mat-label>
+        <input matInput type="number" formControlName="maxAttendees" min="0" />
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button type="button" (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" type="button" (click)="submit()" 
+            [disabled]="form.invalid || isSubmitting || isLoadingBuildings">
+      <span *ngIf="!isSubmitting">Create Event</span>
+      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+    </button>
+  </mat-dialog-actions>
+</div>

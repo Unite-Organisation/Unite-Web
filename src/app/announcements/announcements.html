@@ -1,6 +1,8 @@
 <div class="post-container">
     <div class="button-container">
-        <add-button>
+        <add-button 
+            *ngIf="canCreateAnnouncement"
+            (buttonClick)="openCreateAnnouncementDialog()">
             Add new announcement
         </add-button>
     </div>
