@@ -70,8 +70,8 @@ export class Chats implements OnInit {
     this.conversationService.fetchConversationContent(conversationId, this.messagesPagination)
       .pipe(finalize(() => (this.isLoadingMessages = false)))
       .subscribe({
-        next: (response) => {
-          this.messages = this.sortMessagesByDate(response.conversationMessages);
+        next: (messages) => {
+          this.messages = this.sortMessagesByDate(messages);
           this.scrollToBottom();
         },
         error: (error: HttpErrorResponse) => {

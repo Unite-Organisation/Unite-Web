@@ -8,12 +8,10 @@ export interface ConversationResponse {
 
 export interface ConversationMessage {
     author: string;
+    authorName: string;
+    authorLastName: string;
     sendAt: string;
     content: string;
-}
-
-export interface ConversationContentResponse {
-    conversationMessages: ConversationMessage[];
 }
 
 export interface CreateMessageRequest {
