@@ -1,0 +1,113 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>{{ poll.title }}</h2>
+
+  <mat-dialog-content>
+    <div class="poll-info">
+      <div class="poll-header-info">
+        <span class="poll-badge" [class.area-wide]="poll.target === PollTarget.AREA">
+          {{ targetLabel }}
+        </span>
+        <span class="poll-anonymous" *ngIf="poll.anonymous">🔒 Anonymous</span>
+      </div>
+
+      <div class="poll-description" *ngIf="poll.description">
+        <p>{{ poll.description }}</p>
+      </div>
+
+      <div class="poll-meta-info">
+        <div class="meta-row">
+          <span class="meta-label">Author:</span>
+          <span *ngIf="poll.anonymous">Anonymous</span>
+          <span *ngIf="!poll.anonymous">{{ poll.author }} ({{ poll.authorRole }})</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Start:</span>
+          <span>{{ formatDateTime(poll.pollStartTime) }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">End:</span>
+          <span>{{ formatDateTime(poll.pollEndTime) }}</span>
+        </div>
+        <div class="meta-row" *ngIf="isFinished">
+          <span class="meta-label status-finished">Status:</span>
+          <span class="status-finished">Finished</span>
+        </div>
+      </div>
+
+      <!-- Voting Section (only for active polls) -->
+      <div class="poll-options-section" *ngIf="!isFinished">
+        <h3>Options</h3>
+        <p class="options-hint">Select one option to vote</p>
+        
+        <div class="options-list">
+          <mat-radio-group [(ngModel)]="selectedOptionId" [disabled]="!isPollActive()">
+            <div class="option-item" *ngFor="let option of poll.options">
+              <mat-radio-button [value]="option.id" [disabled]="!isPollActive()">
+                {{ option.content }}
+              </mat-radio-button>
+            </div>
+          </mat-radio-group>
+        </div>
+      </div>
+
+      <!-- Results Section (only for finished polls) -->
+      <div class="poll-results-section" *ngIf="isFinished">
+        <h3>Results</h3>
+        
+        <div *ngIf="isLoadingResults" class="loading-results">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading results...</p>
+        </div>
+
+        <div *ngIf="!isLoadingResults && pollResult" class="results-content">
+          <div class="results-summary">
+            <div class="summary-item">
+              <span class="summary-label">Total Votes:</span>
+              <span class="summary-value">{{ pollResult.numberOfVotes }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Eligible Voters:</span>
+              <span class="summary-value">{{ pollResult.numberOfPeopleEligibleToVote }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Voter Turnout:</span>
+              <span class="summary-value">{{ pollResult.votersPercentage * 100 | number:'1.1-1' }}%</span>
+            </div>
+          </div>
+
+          <div class="results-list">
+            <div class="result-item" 
+                 *ngFor="let vote of pollResult.sortedVotes"
+                 [class.winner]="isWinner(vote.optionId)">
+              <div class="result-header">
+                <span class="result-option">{{ vote.content }}</span>
+                <span class="result-badge winner-badge" *ngIf="isWinner(vote.optionId)">🏆 Winner</span>
+              </div>
+              <div class="result-stats">
+                <div class="result-numbers">
+                  <span class="result-count">{{ vote.count }} votes</span>
+                  <span class="result-percentage">{{ getOptionPercentage(vote.optionId) * 100 | number:'1.1-1' }}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button type="button" (click)="cancel()" [disabled]="isSubmitting">Close</button>
+    <button 
+      *ngIf="!isFinished"
+      mat-flat-button 
+      color="primary" 
+      type="button" 
+      (click)="submitVote()" 
+      [disabled]="!canVote()">
+      <span *ngIf="!isSubmitting">Submit Vote</span>
+      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+    </button>
+  </mat-dialog-actions>
+</div>
+

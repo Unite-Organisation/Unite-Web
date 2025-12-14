@@ -1,0 +1,35 @@
+<div class="poll-card" 
+     [class.voted]="isVoted"
+     [class.finished]="isFinished"
+     [class.clickable]="!isVoted || isFinished">
+    <div class="poll-header">
+        <span class="poll-badge" [class.area-wide]="poll.target === PollTarget.AREA">
+            {{ targetLabel }}
+        </span>
+        <span class="poll-status" *ngIf="isVoted && !isFinished">✓ Voted</span>
+        <span class="poll-status finished-status" *ngIf="isFinished">Finished</span>
+    </div>
+    
+    <h3>{{ poll.title || 'Untitled Poll' }}</h3>
+    
+    <p class="poll-description" *ngIf="poll.description">
+        {{ poll.description }}
+    </p>
+    
+    <div class="poll-meta">
+        <div class="meta-item">
+            <span class="meta-icon">👤</span>
+            <span *ngIf="poll.anonymous">Anonymous</span>
+            <span *ngIf="!poll.anonymous">{{ poll.author }}</span>
+        </div>
+        <div class="meta-item">
+            <span class="meta-icon">📅</span>
+            <span>{{ formatDateTime(poll.pollStartTime) }} - {{ formatDateTime(poll.pollEndTime) }}</span>
+        </div>
+        <div class="meta-item">
+            <span class="meta-icon">📊</span>
+            <span>{{ poll.options.length }} options</span>
+        </div>
+    </div>
+</div>
+

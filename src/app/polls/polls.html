@@ -1,0 +1,23 @@
+<div class="post-container">
+    <div class="button-container" *ngIf="canCreatePoll">
+        <add-button 
+            (buttonClick)="openCreatePollDialog()">
+            Add new poll
+        </add-button>
+    </div>
+
+    <div class="polls-grid" *ngIf="!isLoading && polls.length > 0">
+        <poll-card 
+            *ngFor="let poll of polls" 
+            [poll]="poll"
+            (click)="openPollDetails(poll)">
+        </poll-card>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-container">
+        <p>Loading polls...</p>
+    </div>
+
+    <p *ngIf="!isLoading && polls.length === 0" class="no-polls">No polls available</p>
+</div>
+

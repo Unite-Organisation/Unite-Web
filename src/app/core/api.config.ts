@@ -17,7 +17,8 @@ export const API_URLS = {
   messages: API_BASE_PATH + '/message',
   create_event: API_BASE_PATH + '/post/event',
   create_announcement: API_BASE_PATH + '/post/announcement',
-  get_managers_area: API_BASE_PATH + '/area'
+  get_managers_area: API_BASE_PATH + '/area',
+  polls: API_BASE_PATH + '/poll'
 
 
 } as const;

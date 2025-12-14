@@ -1,0 +1,120 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>Create New Poll</h2>
+
+  <mat-dialog-content>
+    <div *ngIf="isLoadingBuildings" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading buildings...</p>
+    </div>
+
+    <form *ngIf="!isLoadingBuildings" [formGroup]="form" class="poll-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Title</mat-label>
+        <input matInput formControlName="title" />
+        <mat-error *ngIf="form.controls['title'].hasError('required')">
+          Title is required
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="4"></textarea>
+      </mat-form-field>
+
+      <div class="area-toggle-section">
+        <mat-slide-toggle 
+          [checked]="isAreaWide"
+          (change)="onAreaWideToggle($event.checked)">
+          Area-wide poll (for entire neighborhood)
+        </mat-slide-toggle>
+      </div>
+
+      <mat-form-field *ngIf="!isAreaWide" appearance="outline" class="full-width">
+        <mat-label>Building</mat-label>
+        <mat-select formControlName="buildingId">
+          <mat-option *ngFor="let building of buildings" [value]="building.id">
+            {{ building.name }} ({{ building.street }} {{ building.number }}, {{ building.city }})
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.controls['buildingId'].hasError('required')">
+          Building is required
+        </mat-error>
+      </mat-form-field>
+
+      <div class="area-toggle-section">
+        <mat-slide-toggle 
+          formControlName="anonymous">
+          Anonymous poll
+        </mat-slide-toggle>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Start Time</mat-label>
+          <input matInput [matDatepicker]="startPicker" formControlName="startTime" />
+          <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+          <mat-datepicker #startPicker></mat-datepicker>
+          <mat-error *ngIf="form.controls['startTime'].hasError('required')">
+            Start time is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>End Time</mat-label>
+          <input matInput [matDatepicker]="endPicker" formControlName="endTime" />
+          <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+          <mat-datepicker #endPicker></mat-datepicker>
+          <mat-error *ngIf="form.controls['endTime'].hasError('required')">
+            End time is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="options-section">
+        <div class="options-header">
+          <h3>Options</h3>
+          <button 
+            mat-icon-button 
+            type="button"
+            (click)="addOption()" 
+            [disabled]="optionsArray.length >= 10"
+            matTooltip="Add option">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+        <p class="options-hint">Minimum 2 options, maximum 10 options</p>
+        
+        <div formArrayName="options" class="options-list">
+          <div *ngFor="let option of optionsArray.controls; let i = index" class="option-item">
+            <mat-form-field appearance="outline" class="option-input">
+              <mat-label>Option {{ i + 1 }}</mat-label>
+              <input matInput [formControlName]="i" />
+              <mat-error *ngIf="optionsArray.at(i).hasError('required')">
+                Option is required
+              </mat-error>
+            </mat-form-field>
+            <button 
+              mat-icon-button 
+              type="button"
+              (click)="removeOption(i)" 
+              [disabled]="optionsArray.length <= 2"
+              color="warn"
+              matTooltip="Remove option">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button type="button" (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" type="button" (click)="submit()" 
+            [disabled]="form.invalid || isSubmitting || isLoadingBuildings">
+      <span *ngIf="!isSubmitting">Create Poll</span>
+      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+    </button>
+  </mat-dialog-actions>
+</div>
+

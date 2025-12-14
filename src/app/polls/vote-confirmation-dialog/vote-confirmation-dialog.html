@@ -1,0 +1,28 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>Confirm Your Vote</h2>
+
+  <mat-dialog-content>
+    <div class="confirmation-content">
+      <p class="confirmation-question">
+        Are you sure you want to vote for this option?
+      </p>
+      
+      <div class="poll-info">
+        <p class="poll-title"><strong>Poll:</strong> {{ data.pollTitle }}</p>
+        <p class="selected-option"><strong>Your choice:</strong> {{ data.selectedOption.content }}</p>
+      </div>
+
+      <p class="warning-text">
+        ⚠️ You cannot change your vote after submitting.
+      </p>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button type="button" (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" type="button" (click)="confirm()">
+      Confirm Vote
+    </button>
+  </mat-dialog-actions>
+</div>
+

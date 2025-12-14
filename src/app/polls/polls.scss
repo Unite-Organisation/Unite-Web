@@ -1,0 +1,51 @@
+.post-container {
+  width: 100%;
+  max-width: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.button-container {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.polls-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+  margin-top: 1.5rem; 
+  margin-bottom: 2rem;
+  box-sizing: border-box;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+  
+  p {
+    font-size: 1.1rem;
+    color: #9ca3af;
+  }
+}
+
+.no-polls {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+  color: #d1d5db;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .polls-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
