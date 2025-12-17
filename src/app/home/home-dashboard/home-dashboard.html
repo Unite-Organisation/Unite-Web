@@ -4,7 +4,7 @@
   </div>
 
   <div *ngIf="!isLoading" class="dashboard-grid">
-    <div class="dashboard-card main-block">
+    <div class="dashboard-card main-block" (click)="navigateToFacilities()">
       <div class="building-section">
         <h2>My building</h2>
         <h1>{{ personalData?.buildingName || 'Unknown' }}</h1>

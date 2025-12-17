@@ -1,0 +1,96 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>Reserve Facility: {{ facility.name }}</h2>
+
+  <mat-dialog-content>
+    <div *ngIf="isLoadingAvailability" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading availability...</p>
+    </div>
+
+    <form *ngIf="!isLoadingAvailability" [formGroup]="form" class="reservation-form">
+      <div class="facility-info-section">
+        <p><strong>Type:</strong> {{ facility.type }}</p>
+        <p *ngIf="facility.capacity"><strong>Capacity:</strong> {{ facility.capacity }} people</p>
+        <p *ngIf="facility.location"><strong>Location:</strong> {{ facility.location }}</p>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Date</mat-label>
+        <input matInput [matDatepicker]="datePicker" formControlName="date" [matDatepickerFilter]="dateFilter" />
+        <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
+        <mat-datepicker #datePicker></mat-datepicker>
+        <mat-error *ngIf="form.controls['date'].hasError('required')">
+          Date is required
+        </mat-error>
+      </mat-form-field>
+
+      <p class="info-text">Reservations can be made in 30-minute intervals</p>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Start Time</mat-label>
+          <mat-select formControlName="startTime">
+            <mat-option *ngFor="let time of timeSlots" [value]="time">
+              {{ formatTimeDisplay(time) }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.controls['startTime'].hasError('required')">
+            Start time is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>End Time</mat-label>
+          <mat-select formControlName="endTime">
+            <mat-option *ngFor="let time of getAvailableEndTimes()" [value]="time">
+              {{ formatTimeDisplay(time) }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.controls['endTime'].hasError('required')">
+            End time is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-errors" *ngIf="form.hasError('timeRangeInvalid') || form.hasError('maxDurationExceeded') || form.hasError('overlapsWithReservation')">
+        <p class="error-message" *ngIf="form.hasError('timeRangeInvalid')">
+          End time must be after start time
+        </p>
+        <p class="error-message" *ngIf="form.hasError('maxDurationExceeded')">
+          Maximum reservation duration is 12 hours
+        </p>
+        <p class="error-message" *ngIf="form.hasError('overlapsWithReservation')">
+          Selected time overlaps with an existing reservation
+        </p>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Purpose</mat-label>
+        <textarea matInput formControlName="purpose" rows="3" placeholder="Describe the purpose of your reservation"></textarea>
+        <mat-error *ngIf="form.controls['purpose'].hasError('required')">
+          Purpose is required
+        </mat-error>
+      </mat-form-field>
+
+      <div class="reservations-info" *ngIf="reservations.length > 0">
+        <h4>Existing Reservations</h4>
+        <div class="reservations-list">
+          <div *ngFor="let reservation of reservations" class="reservation-item">
+            <p><strong>{{ reservation.userFirstName }} {{ reservation.userLastName }}</strong></p>
+            <p>{{ formatDateTime(reservation.startTime) }} - {{ formatDateTime(reservation.endTime) }}</p>
+          </div>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button type="button" (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" type="button" (click)="submit()" 
+            [disabled]="form.invalid || isSubmitting || isLoadingAvailability">
+      <span *ngIf="!isSubmitting">Reserve</span>
+      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+    </button>
+  </mat-dialog-actions>
+</div>
+

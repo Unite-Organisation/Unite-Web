@@ -25,6 +25,7 @@
 
 .dashboard-card {
   background-color: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
   border-radius: 12px;
   padding: 2rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -79,6 +80,14 @@
 .building-section,
 .address-section {
   flex: 1;
+}
+
+.building-section {
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
 }
 
 @media (max-width: 1024px) {

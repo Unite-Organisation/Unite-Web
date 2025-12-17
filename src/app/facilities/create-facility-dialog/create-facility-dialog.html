@@ -1,0 +1,99 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>Add New Facilities</h2>
+
+  <mat-dialog-content>
+    <div *ngIf="isLoadingBuildings" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading buildings...</p>
+    </div>
+
+    <form *ngIf="!isLoadingBuildings" [formGroup]="form" class="facility-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Building</mat-label>
+        <mat-select formControlName="buildingId">
+          <mat-option *ngFor="let building of buildings" [value]="building.id">
+            {{ building.name }} ({{ building.street }} {{ building.number }}, {{ building.city }})
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.controls['buildingId'].hasError('required')">
+          Building is required
+        </mat-error>
+      </mat-form-field>
+
+      <div class="facilities-section">
+        <div class="section-header">
+          <h3>Facilities</h3>
+          <button mat-icon-button type="button" color="primary" (click)="addFacility()" title="Add facility">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+
+        <div formArrayName="facilities" class="facilities-list">
+          <div *ngFor="let facility of facilitiesFormArray.controls; let i = index" 
+               [formGroupName]="i" 
+               class="facility-item">
+            <div class="facility-header">
+              <h4>Facility {{ i + 1 }}</h4>
+              <button mat-icon-button type="button" 
+                      (click)="removeFacility(i)" 
+                      [disabled]="facilitiesFormArray.length === 1"
+                      title="Remove facility">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+
+            <div class="facility-fields">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name" placeholder="e.g., Ping Pong Table" />
+                <mat-error *ngIf="facility.get('name')?.hasError('required')">
+                  Name is required
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Type</mat-label>
+                <mat-select formControlName="type">
+                  <mat-option *ngFor="let facilityType of facilityTypes" [value]="facilityType">
+                    {{ facilityType }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="facility.get('type')?.hasError('required')">
+                  Type is required
+                </mat-error>
+              </mat-form-field>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Capacity</mat-label>
+                  <input matInput type="number" formControlName="capacity" min="1" placeholder="Optional" />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Location</mat-label>
+                  <input matInput formControlName="location" placeholder="e.g., Basement, Floor 2" />
+                </mat-form-field>
+              </div>
+
+              <div class="toggle-section">
+                <mat-slide-toggle formControlName="requiresApproval">
+                  Requires Approval
+                </mat-slide-toggle>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button type="button" (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" type="button" (click)="submit()" 
+            [disabled]="form.invalid || isSubmitting || isLoadingBuildings">
+      <span *ngIf="!isSubmitting">Create Facilities</span>
+      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+    </button>
+  </mat-dialog-actions>
+</div>
+

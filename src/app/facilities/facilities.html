@@ -1,0 +1,45 @@
+<div class="facilities-container">
+    <div class="button-container" *ngIf="canCreateFacility">
+        <add-button 
+            (buttonClick)="openCreateFacilityDialog()">
+            Add new facility
+        </add-button>
+    </div>
+
+    <div class="facilities-grid" *ngIf="!isLoading && facilities.length > 0">
+        <div class="facility-card" *ngFor="let facility of facilities">
+            <div class="facility-info">
+                <div class="facility-header">
+                    <h3>{{ facility.name }}</h3>
+                    <button *ngIf="canReserveFacility" mat-icon-button 
+                            class="reserve-button"
+                            (click)="openReservationDialog(facility)"
+                            title="Reserve facility">
+                        <mat-icon>event</mat-icon>
+                    </button>
+                </div>
+                <div class="facility-details">
+                    <p class="facility-type">
+                        <strong>Type:</strong> {{ facility.type }}
+                    </p>
+                    <p class="facility-capacity" *ngIf="facility.capacity">
+                        <strong>Capacity:</strong> {{ facility.capacity }} people
+                    </p>
+                    <p class="facility-location" *ngIf="facility.location">
+                        <strong>Location:</strong> {{ facility.location }}
+                    </p>
+                    <p class="facility-approval" *ngIf="facility.requiresApproval">
+                        <span class="approval-badge">Requires Approval</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-container">
+        <p>Loading facilities...</p>
+    </div>
+
+    <p *ngIf="!isLoading && facilities.length === 0" class="no-facilities">No facilities available</p>
+</div>
+

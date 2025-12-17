@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthApiService } from '../../auth/services/auth-api.service';
 import { PersonalData } from '../../models/api-models/personal-info.models';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -17,6 +18,7 @@ import { HomeService } from '../services/home.service';
 export class HomeDashboard implements OnInit {
   private readonly homeService = inject(HomeService);
   private readonly errorService = inject(ErrorService);
+  private readonly router = inject(Router);
 
   personalData: PersonalData | null = null;
   isLoading = false;
@@ -38,6 +40,10 @@ export class HomeDashboard implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  navigateToFacilities(): void {
+    this.router.navigate(['/home/facilities']);
   }
 }
 
