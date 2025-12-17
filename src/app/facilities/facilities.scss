@@ -50,6 +50,12 @@
   margin-bottom: 1rem;
 }
 
+.facility-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .reserve-button {
   color: #60a5fa !important;
   
@@ -60,6 +66,37 @@
   
   mat-icon {
     color: inherit;
+  }
+}
+
+.issue-button {
+  position: relative;
+  color: #ef4444 !important;
+  
+  &:hover {
+    color: #dc2626 !important;
+    background-color: rgba(239, 68, 68, 0.1);
+  }
+  
+  .issue-icon {
+    color: inherit;
+  }
+
+  .issue-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background-color: #ef4444;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #121826;
   }
 }
 

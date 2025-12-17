@@ -29,4 +29,39 @@
       <p>{{ personalData?.areaType || 'Unknown' }}</p>
     </div>
   </div>
+
+  <!-- Issues Section -->
+  <div *ngIf="!isLoading && personalData" class="issues-section">
+    <!-- Building Issues -->
+    <div class="issues-container">
+      <h2 class="issues-title">Building Issues</h2>
+      <div *ngIf="isLoadingIssues" class="loading">
+        Loading issues...
+      </div>
+      <div *ngIf="!isLoadingIssues" class="issues-list">
+        <issue-card 
+          *ngFor="let issue of buildingIssues" 
+          [issue]="issue"
+          issueType="BUILDING">
+        </issue-card>
+        <p *ngIf="buildingIssues.length === 0" class="no-issues">No building issues</p>
+      </div>
+    </div>
+
+    <!-- Area Issues -->
+    <div class="issues-container">
+      <h2 class="issues-title">Area Issues</h2>
+      <div *ngIf="isLoadingIssues" class="loading">
+        Loading issues...
+      </div>
+      <div *ngIf="!isLoadingIssues" class="issues-list">
+        <issue-card 
+          *ngFor="let issue of areaIssues" 
+          [issue]="issue"
+          issueType="AREA">
+        </issue-card>
+        <p *ngIf="areaIssues.length === 0" class="no-issues">No area issues</p>
+      </div>
+    </div>
+  </div>
 </div>

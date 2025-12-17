@@ -10,7 +10,10 @@
         <poll-card 
             *ngFor="let poll of polls" 
             [poll]="poll"
-            (click)="openPollDetails(poll)">
+            [hasIssues]="hasIssues(poll.id)"
+            [issuesCount]="getIssuesCount(poll.id)"
+            (click)="openPollDetails(poll)"
+            (issueClick)="openPollIssuesDialog(poll, $event)">
         </poll-card>
     </div>
 

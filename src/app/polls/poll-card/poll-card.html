@@ -3,11 +3,23 @@
      [class.finished]="isFinished"
      [class.clickable]="!isVoted || isFinished">
     <div class="poll-header">
-        <span class="poll-badge" [class.area-wide]="poll.target === PollTarget.AREA">
-            {{ targetLabel }}
-        </span>
-        <span class="poll-status" *ngIf="isVoted && !isFinished">✓ Voted</span>
-        <span class="poll-status finished-status" *ngIf="isFinished">Finished</span>
+        <div class="poll-badges">
+            <span class="poll-badge" [class.area-wide]="poll.target === PollTarget.AREA">
+                {{ targetLabel }}
+            </span>
+            <span class="poll-status" *ngIf="isVoted && !isFinished">✓ Voted</span>
+            <span class="poll-status finished-status" *ngIf="isFinished">Finished</span>
+        </div>
+        <button *ngIf="hasIssues" 
+                mat-icon-button 
+                class="issue-button"
+                (click)="issueClick.emit($event)"
+                [title]="'View ' + issuesCount + ' issue(s)'">
+            <mat-icon class="issue-icon">error</mat-icon>
+            <span class="issue-badge" *ngIf="issuesCount > 1">
+                {{ issuesCount }}
+            </span>
+        </button>
     </div>
     
     <h3>{{ poll.title || 'Untitled Poll' }}</h3>

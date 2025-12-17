@@ -1,0 +1,44 @@
+.dialog-container {
+  min-width: 500px;
+  max-width: 600px;
+}
+
+.issue-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.toggle-section {
+  margin-top: 8px;
+}
+
+.info-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 14px;
+
+  mat-icon {
+    color: #1976d2;
+  }
+}
+
+mat-dialog-actions {
+  padding: 16px 24px;
+  margin: 0;
+}
+
+mat-dialog-content {
+  padding: 0 24px;
+}
+

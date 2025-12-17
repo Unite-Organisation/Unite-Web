@@ -1,0 +1,110 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>Report Problem</h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="form" class="issue-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Title</mat-label>
+        <input matInput formControlName="title" placeholder="Brief description of the problem" />
+        <mat-error *ngIf="form.controls['title'].hasError('required')">
+          Title is required
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="4" placeholder="Detailed description of the problem"></textarea>
+        <mat-error *ngIf="form.controls['description'].hasError('required')">
+          Description is required
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Priority</mat-label>
+        <mat-select formControlName="priority">
+          <mat-option *ngFor="let priority of priorities" [value]="priority">
+            {{ priority }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.controls['priority'].hasError('required')">
+          Priority is required
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field *ngIf="availableIssueObjects.length > 1" appearance="outline" class="full-width">
+        <mat-label>Issue Type</mat-label>
+        <mat-select formControlName="issueObject">
+          <mat-option *ngFor="let issueObj of availableIssueObjects" [value]="issueObj">
+            {{ issueObj }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.controls['issueObject'].hasError('required')">
+          Issue type is required
+        </mat-error>
+      </mat-form-field>
+
+      <div *ngIf="selectedIssueObject === 'BUILDING' && buildings.length > 0">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Building</mat-label>
+          <mat-select formControlName="buildingId">
+            <mat-option *ngFor="let building of buildings" [value]="building.id">
+              {{ building.name }} ({{ building.street }} {{ building.number }}, {{ building.city }})
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.controls['buildingId'].hasError('required')">
+            Building is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div *ngIf="selectedIssueObject === 'FACILITY' && facilities.length > 0">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Facility</mat-label>
+          <mat-select formControlName="facilityId">
+            <mat-option *ngFor="let facility of facilities" [value]="facility.id">
+              {{ facility.name }} ({{ facility.type }})
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.controls['facilityId'].hasError('required')">
+            Facility is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div *ngIf="selectedIssueObject === 'POLL' && polls.length > 0">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Poll</mat-label>
+          <mat-select formControlName="pollId">
+            <mat-option *ngFor="let poll of polls" [value]="poll.id">
+              {{ poll.title }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.controls['pollId'].hasError('required')">
+            Poll is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div *ngIf="selectedIssueObject === 'AREA'" class="info-message">
+        <mat-icon>info</mat-icon>
+        <span>This issue will be reported for your area: {{ data.areaId ? 'Area ' + data.areaId : 'Your area' }}</span>
+      </div>
+
+      <div class="toggle-section">
+        <mat-slide-toggle formControlName="notifyEveryone">
+          Notify Everyone
+        </mat-slide-toggle>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button type="button" (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" type="button" (click)="submit()" 
+            [disabled]="form.invalid || isSubmitting">
+      <span *ngIf="!isSubmitting">Report Issue</span>
+      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+    </button>
+  </mat-dialog-actions>
+</div>
+

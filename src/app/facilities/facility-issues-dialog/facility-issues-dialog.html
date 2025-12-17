@@ -1,0 +1,45 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>
+    <mat-icon>report_problem</mat-icon>
+    <span>Issues for {{ data.facilityName }}</span>
+  </h2>
+
+  <mat-dialog-content>
+    <div *ngIf="data.issues.length === 0" class="no-issues">
+      <p>No issues reported for this facility.</p>
+    </div>
+
+    <div *ngIf="data.issues.length > 0" class="issues-list">
+      <div *ngFor="let issue of data.issues" class="issue-item">
+        <div class="issue-header">
+          <span class="issue-priority-badge" [style.background-color]="getPriorityColor(issue.priority)">
+            {{ issue.priority }}
+          </span>
+          <span class="issue-status-badge" [style.background-color]="getStatusColor(issue.status)">
+            {{ getStatusLabel(issue.status) }}
+          </span>
+        </div>
+        
+        <h3 class="issue-title">{{ issue.title || 'Untitled Issue' }}</h3>
+        
+        <p class="issue-description">{{ issue.description || '' }}</p>
+        
+        <div class="issue-meta">
+          <div class="meta-item" *ngIf="issue.recipient">
+            <span class="meta-icon">👤</span>
+            <span>Recipient: {{ getRecipientName(issue) }}</span>
+          </div>
+          <div class="meta-item" *ngIf="issue.seenByRecipientAt">
+            <span class="meta-icon">👁️</span>
+            <span>Seen: {{ formatDate(issue.seenByRecipientAt) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button type="button" (click)="close()">Close</button>
+  </mat-dialog-actions>
+</div>
+

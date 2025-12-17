@@ -1,0 +1,35 @@
+<div class="issue-card" 
+     [class.building-issue]="issueType === 'BUILDING'" 
+     [class.area-issue]="issueType === 'AREA'"
+     [class.facility-issue]="issueType === 'FACILITY'">
+    <div class="issue-info">
+        <div class="issue-header">
+            <span class="issue-type-badge" 
+                  [style.background-color]="issueType === 'BUILDING' ? '#3b82f6' : (issueType === 'AREA' ? '#8b5cf6' : '#10b981')">
+                {{ issueType === 'BUILDING' ? 'Building' : (issueType === 'AREA' ? 'Area' : 'Facility') }}
+            </span>
+            <span class="issue-priority-badge" [style.background-color]="getPriorityColor()">
+                {{ issue.priority }}
+            </span>
+            <span class="issue-status-badge" [style.background-color]="getStatusColor()">
+                {{ getStatusLabel() }}
+            </span>
+        </div>
+        
+        <h3>{{ issue.title || 'Untitled Issue' }}</h3>
+        
+        <p class="issue-description">{{ issue.description || '' }}</p>
+        
+        <div class="issue-meta">
+            <div class="meta-item" *ngIf="issue.recipient">
+                <span class="meta-icon">👤</span>
+                <span>Recipient: {{ getRecipientName() }}</span>
+            </div>
+            <div class="meta-item" *ngIf="issue.seenByRecipientAt">
+                <span class="meta-icon">👁️</span>
+                <span>Seen: {{ formatDate(issue.seenByRecipientAt) }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+

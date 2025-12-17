@@ -68,7 +68,10 @@
   <main class="home-content">
     <div class="content-header">
       <div class="action-buttons">
-        <button mat-flat-button color="primary">
+        <button mat-flat-button 
+                [color]="canReportIssue ? 'primary' : null"
+                [style.opacity]="canReportIssue ? 1 : 0.5"
+                (click)="openReportIssueDialog()">
           <mat-icon>add</mat-icon>
           <span>Report problem</span>
         </button>

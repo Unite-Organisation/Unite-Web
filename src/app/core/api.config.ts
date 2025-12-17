@@ -21,7 +21,12 @@ export const API_URLS = {
   polls: API_BASE_PATH + '/poll',
   facility: API_BASE_PATH + '/facility',
   create_facilities: API_BASE_PATH + '/building/facilities',
-  facility_reserve: API_BASE_PATH + '/facility/reserve'
+  facility_reserve: API_BASE_PATH + '/facility/reserve',
+  issue: API_BASE_PATH + '/issue',
+  building_issues: API_BASE_PATH + '/issue/building',
+  area_issues: API_BASE_PATH + '/issue/area',
+  facility_issues: API_BASE_PATH + '/issue/facility',
+  poll_issues: API_BASE_PATH + '/issue/poll'
 
 
 } as const;

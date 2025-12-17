@@ -11,12 +11,24 @@
             <div class="facility-info">
                 <div class="facility-header">
                     <h3>{{ facility.name }}</h3>
-                    <button *ngIf="canReserveFacility" mat-icon-button 
-                            class="reserve-button"
-                            (click)="openReservationDialog(facility)"
-                            title="Reserve facility">
-                        <mat-icon>event</mat-icon>
-                    </button>
+                    <div class="facility-actions">
+                        <button *ngIf="hasIssues(facility.id)" 
+                                mat-icon-button 
+                                class="issue-button"
+                                (click)="openFacilityIssuesDialog(facility)"
+                                [title]="'View ' + getIssuesCount(facility.id) + ' issue(s)'">
+                            <mat-icon class="issue-icon">error</mat-icon>
+                            <span class="issue-badge" *ngIf="getIssuesCount(facility.id) > 1">
+                                {{ getIssuesCount(facility.id) }}
+                            </span>
+                        </button>
+                        <button *ngIf="canReserveFacility" mat-icon-button 
+                                class="reserve-button"
+                                (click)="openReservationDialog(facility)"
+                                title="Reserve facility">
+                            <mat-icon>event</mat-icon>
+                        </button>
+                    </div>
                 </div>
                 <div class="facility-details">
                     <p class="facility-type">
