@@ -68,4 +68,13 @@ export class AuthService {
     return userRole === requiredRole;
   }
 
+  public getCurrentUserId(): string | null {
+    const decodedToken = this.getDecodedToken();
+    
+    if (decodedToken && decodedToken['sub']) {
+      return decodedToken['sub'];
+    }
+    return null;
+  }
+
 }

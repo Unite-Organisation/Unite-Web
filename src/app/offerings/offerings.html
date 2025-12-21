@@ -1,0 +1,132 @@
+<div class="offerings-container">
+  <!-- Header -->
+  <div class="offerings-header">
+    <div class="header-content">
+      <h1>Community Offerings</h1>
+      <p class="subtitle">Services and offers shared within your community</p>
+    </div>
+    <add-button 
+      *ngIf="canCreateOffering"
+      (buttonClick)="openCreateOfferingDialog()">
+      New Offering
+    </add-button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="filter-group">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Category</mat-label>
+        <mat-select [(ngModel)]="selectedCategory">
+          <mat-option [value]="null">All Categories</mat-option>
+          <mat-option *ngFor="let cat of categories" [value]="cat">
+            <mat-icon>{{ getCategoryIcon(cat) }}</mat-icon>
+            {{ getCategoryLabel(cat) }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Price Condition</mat-label>
+        <mat-select [(ngModel)]="selectedModifier">
+          <mat-option *ngFor="let mod of modifiers" [value]="mod">
+            {{ getModifierLabel(mod) }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field price-field">
+        <mat-label>Price (PLN)</mat-label>
+        <input matInput type="number" [(ngModel)]="priceValue" min="0" step="1" />
+        <mat-icon matPrefix>payments</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="filter-actions">
+      <button mat-stroked-button (click)="clearFilters()">
+        <mat-icon>clear</mat-icon>
+        Clear
+      </button>
+      <button mat-flat-button color="primary" (click)="applyFilters()">
+        <mat-icon>filter_list</mat-icon>
+        Apply Filters
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Loading offerings...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && offerings.length === 0">
+    <mat-icon>storefront</mat-icon>
+    <h2>No Offerings Found</h2>
+    <p>There are no offerings matching your criteria. Try adjusting filters or check back later.</p>
+  </div>
+
+  <!-- Offerings Grid -->
+  <div class="offerings-grid" *ngIf="!isLoading && offerings.length > 0">
+    <div class="offering-card" 
+         *ngFor="let offering of offerings"
+         [class.own-offering]="isOwnOffering(offering)">
+      
+      <div class="card-header">
+        <span class="category-badge">
+          <mat-icon>{{ getCategoryIcon(offering.category) }}</mat-icon>
+          {{ getCategoryLabel(offering.category) }}
+        </span>
+        <span class="price-tag">{{ formatPrice(offering.price) }}</span>
+      </div>
+
+      <div class="card-content">
+        <h3>{{ offering.title }}</h3>
+        <p class="description">{{ offering.description }}</p>
+      </div>
+
+      <div class="provider-info">
+        <mat-icon>person</mat-icon>
+        <span class="provider-name">
+          {{ offering.providerData.firstName }} {{ offering.providerData.lastName }}
+        </span>
+        <span class="own-badge" *ngIf="isOwnOffering(offering)">Your Offering</span>
+      </div>
+
+      <div class="card-meta">
+        <span class="meta-item">
+          <mat-icon>schedule</mat-icon>
+          {{ formatCreatedDate(offering.createdAt) }}
+        </span>
+        <span class="meta-item" *ngIf="offering.endDate">
+          <mat-icon>event</mat-icon>
+          Until {{ formatDate(offering.endDate) }}
+        </span>
+      </div>
+
+      <div class="card-actions">
+        <ng-container *ngIf="isOwnOffering(offering)">
+          <button mat-stroked-button 
+                  color="warn" 
+                  (click)="cancelOffering(offering)"
+                  [disabled]="cancellingIds.has(offering.id)">
+            <mat-spinner *ngIf="cancellingIds.has(offering.id)" diameter="18"></mat-spinner>
+            <mat-icon *ngIf="!cancellingIds.has(offering.id)">delete</mat-icon>
+            Cancel Offering
+          </button>
+        </ng-container>
+        
+        <ng-container *ngIf="!isOwnOffering(offering)">
+          <button mat-flat-button 
+                  color="primary" 
+                  (click)="contactProvider(offering)">
+            <mat-icon>chat</mat-icon>
+            Contact Provider
+          </button>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>
+

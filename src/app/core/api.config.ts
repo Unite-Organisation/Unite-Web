@@ -30,7 +30,9 @@ export const API_URLS = {
   
   // Manager notifications
   notifications: API_BASE_PATH + '/notification',
-  notification_seen: API_BASE_PATH + '/notification'
+  notification_seen: API_BASE_PATH + '/notification',
 
+  // Offerings
+  offering: API_BASE_PATH + '/offering'
 
 } as const;

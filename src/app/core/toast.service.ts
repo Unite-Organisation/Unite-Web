@@ -22,5 +22,13 @@ export class ToastService {
       ...config
     });
   }
+
+  info(message: string, config: MatSnackBarConfig = {}): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 4000,
+      panelClass: ['toast-info'],
+      ...config
+    });
+  }
 }
 
