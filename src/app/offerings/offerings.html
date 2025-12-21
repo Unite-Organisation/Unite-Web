@@ -78,7 +78,18 @@
           <mat-icon>{{ getCategoryIcon(offering.category) }}</mat-icon>
           {{ getCategoryLabel(offering.category) }}
         </span>
-        <span class="price-tag">{{ formatPrice(offering.price) }}</span>
+        <div class="header-right">
+          <span class="price-tag">{{ formatPrice(offering.price) }}</span>
+          <button *ngIf="isOwnOffering(offering)"
+                  mat-icon-button 
+                  class="cancel-btn"
+                  (click)="cancelOffering(offering)"
+                  [disabled]="cancellingIds.has(offering.id)"
+                  title="Cancel offering">
+            <mat-spinner *ngIf="cancellingIds.has(offering.id)" diameter="18"></mat-spinner>
+            <mat-icon *ngIf="!cancellingIds.has(offering.id)">close</mat-icon>
+          </button>
+        </div>
       </div>
 
       <div class="card-content">
@@ -105,26 +116,13 @@
         </span>
       </div>
 
-      <div class="card-actions">
-        <ng-container *ngIf="isOwnOffering(offering)">
-          <button mat-stroked-button 
-                  color="warn" 
-                  (click)="cancelOffering(offering)"
-                  [disabled]="cancellingIds.has(offering.id)">
-            <mat-spinner *ngIf="cancellingIds.has(offering.id)" diameter="18"></mat-spinner>
-            <mat-icon *ngIf="!cancellingIds.has(offering.id)">delete</mat-icon>
-            Cancel Offering
-          </button>
-        </ng-container>
-        
-        <ng-container *ngIf="!isOwnOffering(offering)">
-          <button mat-flat-button 
-                  color="primary" 
-                  (click)="contactProvider(offering)">
-            <mat-icon>chat</mat-icon>
-            Contact Provider
-          </button>
-        </ng-container>
+      <div class="card-actions" *ngIf="!isOwnOffering(offering)">
+        <button mat-flat-button 
+                color="primary" 
+                (click)="contactProvider(offering)">
+          <mat-icon>chat</mat-icon>
+          Contact Provider
+        </button>
       </div>
     </div>
   </div>

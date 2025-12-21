@@ -52,6 +52,10 @@
         <p>Loading facilities...</p>
     </div>
 
-    <p *ngIf="!isLoading && facilities.length === 0" class="no-facilities">No facilities available</p>
+    <div class="empty-state" *ngIf="!isLoading && facilities.length === 0">
+        <mat-icon>apartment</mat-icon>
+        <h2>No Facilities</h2>
+        <p>There are no facilities available at the moment. Facilities like gyms, meeting rooms, and common areas will appear here.</p>
+    </div>
 </div>
 

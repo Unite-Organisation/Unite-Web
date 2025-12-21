@@ -1,15 +1,19 @@
 <div class="post-container">
-    <div class="button-container">
+    <div class="button-container" *ngIf="canCreateEvent">
         <add-button 
             (buttonClick)="openCreateEventDialog()">
             Add new event
         </add-button>
     </div>
 
-    <div class="posts-list">
+    <div class="posts-list" *ngIf="posts.length > 0">
         <post-card *ngFor="let post of posts" [post]="post"></post-card>
     </div>
 
-    <p *ngIf="posts.length === 0 && !isLoading">No events for you</p>
+    <div class="empty-state" *ngIf="posts.length === 0 && !isLoading">
+        <mat-icon>event</mat-icon>
+        <h2>No Events</h2>
+        <p>There are no upcoming events at the moment. Check back later for community gatherings and activities.</p>
+    </div>
 </div>
 

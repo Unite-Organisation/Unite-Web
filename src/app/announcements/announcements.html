@@ -1,16 +1,19 @@
 <div class="post-container">
-    <div class="button-container">
+    <div class="button-container" *ngIf="canCreateAnnouncement">
         <add-button 
-            *ngIf="canCreateAnnouncement"
             (buttonClick)="openCreateAnnouncementDialog()">
             Add new announcement
         </add-button>
     </div>
 
-    <div class="posts-list">
+    <div class="posts-list" *ngIf="posts.length > 0">
         <post-card *ngFor="let post of posts" [post]="post"></post-card>
     </div>
 
-    <p *ngIf="posts.length === 0 && !isLoading">No announcements for you</p>
+    <div class="empty-state" *ngIf="posts.length === 0 && !isLoading">
+        <mat-icon>campaign</mat-icon>
+        <h2>No Announcements</h2>
+        <p>There are no announcements at the moment. Check back later for important community updates.</p>
+    </div>
 </div>
 

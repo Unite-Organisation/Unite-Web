@@ -18,7 +18,6 @@ import { ToastService } from '../core/toast.service';
 import { RolesService } from '../auth/services/roles.service';
 import { AddButton } from '../shared/add-button/add-button';
 import { CreateOfferingDialog } from './create-offering-dialog/create-offering-dialog';
-import { AuthService } from '../auth/services/auth';
 
 @Component({
   selector: 'app-offerings',
@@ -43,7 +42,6 @@ export class Offerings implements OnInit {
   private readonly errorService = inject(ErrorService);
   private readonly toastService = inject(ToastService);
   protected readonly rolesService = inject(RolesService);
-  private readonly authService = inject(AuthService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
 
@@ -61,10 +59,6 @@ export class Offerings implements OnInit {
 
   get canCreateOffering(): boolean {
     return this.rolesService.isResident();
-  }
-
-  get currentUserId(): string {
-    return this.authService.getCurrentUserId() || '';
   }
 
   ngOnInit(): void {
@@ -136,7 +130,7 @@ export class Offerings implements OnInit {
   }
 
   isOwnOffering(offering: OfferingResponse): boolean {
-    return offering.providerData.id === this.currentUserId;
+    return offering.createdByUser;
   }
 
   getCategoryLabel(category: string): string {

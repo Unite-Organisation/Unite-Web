@@ -16,6 +16,7 @@ export interface OfferingResponse {
   price: number;
   endDate: string | null;
   createdAt: string;
+  createdByUser: boolean;
   providerData: BasicUserData;
 }
 

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { AddButton } from '../shared/add-button/add-button';
 import { CreatePollDialog } from './create-poll-dialog/create-poll-dialog';
 import { RolesService } from '../auth/services/roles.service';
@@ -18,7 +19,7 @@ import { forkJoin } from 'rxjs';
 @Component({
   selector: 'app-polls',
   standalone: true,
-  imports: [CommonModule, AddButton, MatDialogModule, PollCard],
+  imports: [CommonModule, AddButton, MatDialogModule, PollCard, MatIconModule],
   templateUrl: './polls.html',
   styleUrl: './polls.scss',
 })

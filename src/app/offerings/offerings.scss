@@ -170,6 +170,12 @@
   }
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .price-tag {
   font-size: 1.1rem;
   font-weight: 700;
@@ -177,6 +183,24 @@
   background: rgba(16, 185, 129, 0.1);
   padding: 0.35rem 0.75rem;
   border-radius: 8px;
+}
+
+.cancel-btn {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #ef4444;
+    margin-bottom: 1rem;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
 }
 
 .card-content {

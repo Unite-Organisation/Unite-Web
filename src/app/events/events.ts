@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { ErrorService } from '../core/error.sevice';
 import { Post, PostType } from '../models/api-models/posts.models';
 import { PostService } from '../posts/services/post.service';
@@ -14,7 +15,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [CommonModule, AddButton, PostCard, MatDialogModule],
+  imports: [CommonModule, AddButton, PostCard, MatDialogModule, MatIconModule],
   templateUrl: './events.html',
   styleUrl: './events.scss',
 })

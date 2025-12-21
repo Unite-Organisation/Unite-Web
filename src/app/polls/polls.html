@@ -21,6 +21,10 @@
         <p>Loading polls...</p>
     </div>
 
-    <p *ngIf="!isLoading && polls.length === 0" class="no-polls">No polls available</p>
+    <div class="empty-state" *ngIf="!isLoading && polls.length === 0">
+        <mat-icon>how_to_vote</mat-icon>
+        <h2>No Polls</h2>
+        <p>There are no active polls at the moment. Polls allow community members to vote on important decisions.</p>
+    </div>
 </div>
 
