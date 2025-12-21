@@ -1,0 +1,171 @@
+<div class="issues-container">
+  <!-- LOADING STATE -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Loading...</p>
+  </div>
+
+  <!-- ============ RESIDENT VIEW ============ -->
+  <ng-container *ngIf="!isLoading && !rolesService.isManager()">
+    <div class="issues-header">
+      <h1>
+        <!-- <mat-icon>assignment</mat-icon> -->
+        My Reported Issues
+      </h1>
+      <p class="subtitle">Track the status of issues you've reported</p>
+    </div>
+
+    <div class="empty-state" *ngIf="userIssues.length === 0">
+      <mat-icon>check_circle</mat-icon>
+      <h2>No Issues Reported</h2>
+      <p>You haven't reported any issues yet. Use the "Report problem" button to submit one.</p>
+    </div>
+
+    <div class="issues-grid" *ngIf="userIssues.length > 0">
+      <div class="issue-card" 
+           *ngFor="let issue of userIssues"
+           [class.resolved]="issue.status === 'RESOLVED' || issue.status === 'CLOSED'"
+           [class.urgent]="issue.priority === 'URGENT'"
+           [class.high]="issue.priority === 'HIGH'">
+        
+        <div class="issue-card-header">
+          <span class="priority-badge" [ngClass]="getPriorityClass(issue.priority)">
+            {{ getPriorityLabel(issue.priority) }}
+          </span>
+          <span class="status-badge" [ngClass]="getStatusClass(issue.status)">
+            {{ getStatusLabel(issue.status) }}
+          </span>
+        </div>
+
+        <div class="issue-card-content">
+          <h3>{{ issue.title }}</h3>
+          <p class="description">{{ issue.description }}</p>
+        </div>
+
+        <div class="issue-card-footer">
+          <div class="status-timeline">
+            <div class="timeline-step" [class.active]="true" [class.completed]="issue.status !== 'SUBMITTED'">
+              <mat-icon>send</mat-icon>
+              <span>Submitted</span>
+            </div>
+            <div class="timeline-connector" [class.active]="issue.status !== 'SUBMITTED'"></div>
+            <div class="timeline-step" 
+                 [class.active]="issue.status === 'SEEN_BY_RECIPIENT' || issue.status === 'TAKEN_ACTION' || issue.status === 'RESOLVED' || issue.status === 'CLOSED'"
+                 [class.completed]="issue.status === 'TAKEN_ACTION' || issue.status === 'RESOLVED' || issue.status === 'CLOSED'">
+              <mat-icon>visibility</mat-icon>
+              <span>Seen</span>
+            </div>
+            <div class="timeline-connector" [class.active]="issue.status === 'TAKEN_ACTION' || issue.status === 'RESOLVED' || issue.status === 'CLOSED'"></div>
+            <div class="timeline-step" 
+                 [class.active]="issue.status === 'TAKEN_ACTION' || issue.status === 'RESOLVED' || issue.status === 'CLOSED'"
+                 [class.completed]="issue.status === 'RESOLVED' || issue.status === 'CLOSED'">
+              <mat-icon>build</mat-icon>
+              <span>In Progress</span>
+            </div>
+            <div class="timeline-connector" [class.active]="issue.status === 'RESOLVED' || issue.status === 'CLOSED'"></div>
+            <div class="timeline-step" [class.active]="issue.status === 'RESOLVED' || issue.status === 'CLOSED'">
+              <mat-icon>check_circle</mat-icon>
+              <span>Resolved</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ============ MANAGER VIEW ============ -->
+  <ng-container *ngIf="!isLoading && rolesService.isManager()">
+    <div class="issues-header">
+      <h1>
+        <!-- <mat-icon>notifications_active</mat-icon> -->
+        Issue Notifications
+      </h1>
+      <p class="subtitle">Review and manage reported issues in your buildings</p>
+    </div>
+
+    <div class="empty-state" *ngIf="notifications.length === 0">
+      <mat-icon>inbox</mat-icon>
+      <h2>No Issues to Review</h2>
+      <p>There are no reported issues at this time. Check back later.</p>
+    </div>
+
+    <div class="notifications-grid" *ngIf="notifications.length > 0">
+      <div class="notification-card" 
+           *ngFor="let notification of notifications"
+           [class.seen]="notification.issueStatus !== 'SUBMITTED'"
+           [class.urgent]="notification.issuePriority === 'URGENT'"
+           [class.high]="notification.issuePriority === 'HIGH'">
+        
+        <div class="card-header">
+          <div class="badges">
+            <span class="object-badge" [ngClass]="getObjectClass(notification.issueObject)">
+              <mat-icon>{{ getObjectIcon(notification.issueObject) }}</mat-icon>
+              {{ notification.issueObject }}
+            </span>
+            <span class="priority-badge" [ngClass]="getPriorityClass(notification.issuePriority)">
+              {{ notification.issuePriority }}
+            </span>
+            <span class="status-badge" [ngClass]="getStatusClass(notification.issueStatus)">
+              {{ getStatusLabel(notification.issueStatus) }}
+            </span>
+          </div>
+          <span class="timestamp">
+            <mat-icon>schedule</mat-icon>
+            {{ formatDate(notification.issuerData.issueCreatedAt) }}
+          </span>
+        </div>
+
+        <div class="card-content">
+          <h3>{{ notification.issueTitle }}</h3>
+          <p class="description">{{ notification.issueDescription }}</p>
+          
+          <div class="issuer-info">
+            <mat-icon>person</mat-icon>
+            <span>
+              Reported by <strong>{{ notification.issuerData.firstName }} {{ notification.issuerData.lastName }}</strong>
+            </span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button mat-stroked-button 
+                  color="primary"
+                  *ngIf="notification.issueStatus === 'SUBMITTED'"
+                  (click)="markAsSeen(notification)"
+                  [disabled]="processingIds.has(notification.notificationId)">
+            <mat-icon>visibility</mat-icon>
+            Mark as Seen
+          </button>
+
+          <button mat-flat-button
+                  [matMenuTriggerFor]="statusMenu"
+                  *ngIf="notification.issueStatus !== 'SUBMITTED'"
+                  [disabled]="processingIds.has(notification.notificationId)">
+            <mat-icon>edit</mat-icon>
+            Change Status
+            <mat-icon>arrow_drop_down</mat-icon>
+          </button>
+
+          <mat-menu #statusMenu="matMenu" class="status-menu">
+            <button mat-menu-item 
+                    (click)="updateStatus(notification, 'TAKEN_ACTION')"
+                    [disabled]="notification.issueStatus === 'TAKEN_ACTION'">
+              <mat-icon color="warn">pending_actions</mat-icon>
+              <span>Taken Action</span>
+            </button>
+            <button mat-menu-item 
+                    (click)="updateStatus(notification, 'RESOLVED')"
+                    [disabled]="notification.issueStatus === 'RESOLVED'">
+              <mat-icon class="resolved-icon">check_circle</mat-icon>
+              <span>Resolved</span>
+            </button>
+          </mat-menu>
+
+          <div class="processing-indicator" *ngIf="processingIds.has(notification.notificationId)">
+            <mat-spinner diameter="20"></mat-spinner>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

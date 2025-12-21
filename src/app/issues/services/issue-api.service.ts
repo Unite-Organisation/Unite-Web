@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_URLS } from '../../core/api.config';
-import { IssueRequest, IssueResponse } from '../../models/api-models/issue.models';
+import { IssueRequest, IssueResponse, NotificationResponse, IssueProcessingStatus, IssueSimpleResponse } from '../../models/api-models/issue.models';
 
 @Injectable({
   providedIn: 'root'
@@ -32,6 +32,25 @@ export class IssueApiService {
   getPollIssues(pollId: string): Observable<IssueResponse[]> {
     const params = new HttpParams().set('pollId', pollId);
     return this.http.get<IssueResponse[]>(API_URLS.poll_issues, { params });
+  }
+
+  // Manager notification methods
+  getManagerNotifications(): Observable<NotificationResponse[]> {
+    return this.http.get<NotificationResponse[]>(API_URLS.notifications);
+  }
+
+  markNotificationAsSeen(notificationId: string): Observable<void> {
+    return this.http.patch<void>(`${API_URLS.notification_seen}/${notificationId}/seen`, {});
+  }
+
+  updateIssueStatus(issueId: string, status: IssueProcessingStatus): Observable<void> {
+    const params = new HttpParams().set('status', status);
+    return this.http.patch<void>(`${API_URLS.issue}/${issueId}/update-status`, {}, { params });
+  }
+
+  // Get user's own issues (for residents)
+  getUserIssues(): Observable<IssueSimpleResponse[]> {
+    return this.http.get<IssueSimpleResponse[]>(API_URLS.issue);
   }
 }
 

@@ -48,3 +48,34 @@ export interface IssueResponse {
   recipient: IssueRecipientInfo;
 }
 
+// Notification models for managers
+export interface IssuerData {
+  id: string;
+  firstName: string;
+  lastName: string;
+  userName: string;
+  userRole: string;
+  issueCreatedAt: string;
+}
+
+export interface NotificationResponse {
+  notificationId: string;
+  issueId: string;
+  issueTitle: string;
+  issueDescription: string;
+  issueStatus: IssueProcessingStatus;
+  issuePriority: IssuePriority;
+  issueObject: IssueObject;
+  entityId: string;
+  issuerData: IssuerData;
+}
+
+// Simple issue response for residents
+export interface IssueSimpleResponse {
+  id: string;
+  title: string;
+  description: string;
+  status: IssueProcessingStatus;
+  priority: IssuePriority;
+}
+
