@@ -18,3 +18,21 @@ export interface CreateMessageRequest {
     conversationId: string;
     content: string;
 }
+
+export interface BasicUserData {
+    id: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+}
+
+export interface PotentialContactResponse {
+    basicUserData: BasicUserData;
+    buildingId: string;
+    buildingName: string;
+}
+
+export interface GroupConversationRequest {
+    name: string;
+    members: string[];
+}

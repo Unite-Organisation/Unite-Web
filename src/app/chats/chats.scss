@@ -19,12 +19,25 @@
 .sidebar-header {
   padding: 1.25rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 
   h2 {
     margin: 0;
     font-size: 1.25rem;
     font-weight: 600;
     color: #ffffff;
+  }
+
+  .create-group-btn {
+    color: #818cf8;
+    transition: background-color 0.2s ease, color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+    }
   }
 }
 

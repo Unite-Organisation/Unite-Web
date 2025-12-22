@@ -5,17 +5,20 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ConversationService } from './chats.service';
 import { ConversationMessage, ConversationResponse } from '../models/api-models/chat.models';
 import { PaginationParams } from '../models/common/common.models';
 import { ErrorService } from '../core/error.sevice';
 import { ToastService } from '../core/toast.service';
 import { finalize } from 'rxjs/operators';
+import { CreateGroupDialog } from './create-group-dialog/create-group-dialog';
 
 @Component({
   selector: 'app-chats',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatProgressSpinnerModule, MatIconModule, MatButtonModule],
+  imports: [CommonModule, FormsModule, MatProgressSpinnerModule, MatIconModule, MatButtonModule, MatTooltipModule],
   templateUrl: './chats.html',
   styleUrl: './chats.scss',
 })
@@ -25,6 +28,7 @@ export class Chats implements OnInit {
   private readonly conversationService = inject(ConversationService);
   private readonly errorService = inject(ErrorService);
   private readonly toast = inject(ToastService);
+  private readonly dialog = inject(MatDialog);
 
   conversations: ConversationResponse[] = [];
   messages: ConversationMessage[] = [];
@@ -187,5 +191,18 @@ export class Chats implements OnInit {
     const currentDate = new Date(this.messages[index].sendAt).toDateString();
     const previousDate = new Date(this.messages[index - 1].sendAt).toDateString();
     return currentDate !== previousDate;
+  }
+
+  openCreateGroupDialog(): void {
+    const dialogRef = this.dialog.open(CreateGroupDialog, {
+      width: '550px',
+      maxHeight: '90vh'
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadConversations();
+      }
+    });
   }
 }

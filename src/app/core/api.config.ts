@@ -33,6 +33,10 @@ export const API_URLS = {
   notification_seen: API_BASE_PATH + '/notification',
 
   // Offerings
-  offering: API_BASE_PATH + '/offering'
+  offering: API_BASE_PATH + '/offering',
+
+  // Group conversations
+  users_in_area: API_BASE_PATH + '/user/in-area',
+  group_conversation: API_BASE_PATH + '/conversation/group'
 
 } as const;

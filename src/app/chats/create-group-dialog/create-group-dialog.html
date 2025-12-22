@@ -1,0 +1,82 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>Create new group</h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="form" class="group-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Group name</mat-label>
+        <input matInput formControlName="name" placeholder="Eg. Fish lovers" />
+        <mat-error *ngIf="form.controls['name'].hasError('required')">
+          Group name is required
+        </mat-error>
+        <mat-error *ngIf="form.controls['name'].hasError('minlength')">
+          Minimum 3 characters
+        </mat-error>
+      </mat-form-field>
+
+      <div class="members-section">
+        <div class="members-header">
+          <h3>Choose group members</h3>
+          <span class="selection-count" [class.valid]="selectedCount >= 2">
+            Selected: {{ selectedCount }} (min. 2)
+          </span>
+        </div>
+
+        <div *ngIf="isLoadingUsers" class="loading-container">
+          <mat-spinner diameter="32"></mat-spinner>
+          <p>Loading users...</p>
+        </div>
+
+        <div *ngIf="!isLoadingUsers && users.length === 0" class="empty-state">
+          <mat-icon>people_outline</mat-icon>
+          <p>No available users to add</p>
+        </div>
+
+        <div *ngIf="!isLoadingUsers && users.length > 0" class="users-list">
+          <div 
+            *ngFor="let user of users" 
+            class="user-item"
+            [class.selected]="isSelected(user.basicUserData.id)"
+            (click)="toggleSelection(user.basicUserData.id)">
+            <mat-checkbox 
+              [checked]="isSelected(user.basicUserData.id)"
+              (click)="$event.stopPropagation()"
+              (change)="toggleSelection(user.basicUserData.id)">
+            </mat-checkbox>
+            <div class="user-avatar">
+              <mat-icon>person</mat-icon>
+            </div>
+            <div class="user-info">
+              <span class="user-name">{{ getFullName(user) }}</span>
+              <span class="user-details">
+                <span class="user-role">{{ getRoleLabel(user.basicUserData.role) }}</span>
+                <span class="separator">•</span>
+                <span class="user-building">{{ user.buildingName }}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <mat-paginator
+          *ngIf="!isLoadingUsers && users.length > 0"
+          [length]="totalUsers"
+          [pageSize]="pagination.pageSize"
+          [pageIndex]="pagination.page - 1"
+          [pageSizeOptions]="[5, 10, 20]"
+          (page)="onPageChange($event)"
+          showFirstLastButtons>
+        </mat-paginator>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button type="button" (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" type="button" (click)="submit()" 
+            [disabled]="!canCreateGroup || isSubmitting || isLoadingUsers">
+      <span *ngIf="!isSubmitting">Create group</span>
+      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+    </button>
+  </mat-dialog-actions>
+</div>
+
