@@ -80,5 +80,12 @@ export class IssueCard {
     }
     return 'Unknown';
   }
+
+  getIssuerName(): string {
+    if (this.issue.issuer) {
+      return `${this.issue.issuer.firstName} ${this.issue.issuer.lastName}`;
+    }
+    return 'Unknown';
+  }
 }
 

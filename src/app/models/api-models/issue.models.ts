@@ -32,6 +32,11 @@ export enum IssueProcessingStatus {
   CLOSED = 'CLOSED'
 }
 
+export interface IssueIssuerInfo {
+  firstName: string;
+  lastName: string;
+}
+
 export interface IssueRecipientInfo {
   firstName: string;
   lastName: string;
@@ -46,6 +51,7 @@ export interface IssueResponse {
   priority: IssuePriority;
   seenByRecipientAt: string | null;
   recipient: IssueRecipientInfo;
+  issuer: IssueIssuerInfo;
 }
 
 // Notification models for managers

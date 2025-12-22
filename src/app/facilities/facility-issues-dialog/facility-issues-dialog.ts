@@ -94,6 +94,13 @@ export class FacilityIssuesDialog {
     return 'Unknown';
   }
 
+  getIssuerName(issue: IssueResponse): string {
+    if (issue.issuer) {
+      return `${issue.issuer.firstName} ${issue.issuer.lastName}`;
+    }
+    return 'Unknown';
+  }
+
   close(): void {
     this.dialogRef.close();
   }

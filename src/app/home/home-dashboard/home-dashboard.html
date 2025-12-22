@@ -3,12 +3,18 @@
     Loading...
   </div>
 
+  <div *ngIf="!isLoading && personalData" class="welcome-message">
+    <h1>Welcome, {{ personalData.username || 'Unknown' }}</h1>
+  </div>
+
+  <hr> 
+
   <div *ngIf="!isLoading" class="dashboard-grid">
     <div class="dashboard-card main-block" (click)="navigateToFacilities()">
       <div class="building-section">
         <h2>My building</h2>
         <h1>{{ personalData?.buildingName || 'Unknown' }}</h1>
-      </div>
+      </div> 
 
       <div class="address-section">
         <h2>Address</h2>

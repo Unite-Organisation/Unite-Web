@@ -25,6 +25,10 @@
         <p class="issue-description">{{ issue.description || '' }}</p>
         
         <div class="issue-meta">
+          <div class="meta-item" *ngIf="issue.issuer">
+            <span class="meta-icon">✍️</span>
+            <span>Reported by: {{ getIssuerName(issue) }}</span>
+          </div>
           <div class="meta-item" *ngIf="issue.recipient">
             <span class="meta-icon">👤</span>
             <span>Recipient: {{ getRecipientName(issue) }}</span>
