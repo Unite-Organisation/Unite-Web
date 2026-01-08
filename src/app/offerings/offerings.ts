@@ -18,6 +18,8 @@ import { ToastService } from '../core/toast.service';
 import { RolesService } from '../auth/services/roles.service';
 import { AddButton } from '../shared/add-button/add-button';
 import { CreateOfferingDialog } from './create-offering-dialog/create-offering-dialog';
+import { ConversationService } from '../chats/chats.service';
+import { PaginationParams } from '../models/common/common.models';
 
 @Component({
   selector: 'app-offerings',
@@ -44,6 +46,7 @@ export class Offerings implements OnInit {
   protected readonly rolesService = inject(RolesService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
+  private readonly conversationService = inject(ConversationService);
 
   offerings: OfferingResponse[] = [];
   isLoading = false;
@@ -124,9 +127,44 @@ export class Offerings implements OnInit {
   }
 
   contactProvider(offering: OfferingResponse): void {
-    // Navigate to chats - the user can start a conversation with the provider
-    this.router.navigate(['/home/chats']);
-    this.toastService.info(`Start a chat with ${offering.providerData.firstName} to discuss the offering`);
+    // Check if a conversation already exists with the provider
+    const pagination: PaginationParams = {
+      page: 1,
+      pageSize: 100 // Get enough conversations to find the one we're looking for
+    };
+
+    this.conversationService.fetchAllConversations(pagination)
+      .subscribe({
+        next: (conversations) => {
+          // Find a direct message conversation (not a group) with the provider
+          // The conversation name for direct messages typically contains the other user's name
+          const providerFullName = `${offering.providerData.firstName} ${offering.providerData.lastName}`;
+          const existingConversation = conversations.find(conv => 
+            !conv.isGroup && 
+            (conv.name === providerFullName || 
+             conv.name === `${offering.providerData.lastName} ${offering.providerData.firstName}` ||
+             conv.name.includes(offering.providerData.firstName) ||
+             conv.name.includes(offering.providerData.lastName))
+          );
+
+          if (existingConversation) {
+            // Navigate to chats and select the existing conversation
+            this.router.navigate(['/home/chats'], {
+              queryParams: { conversationId: existingConversation.id }
+            });
+          } else {
+            // No conversation exists, show error toast
+            this.router.navigate(['/home/chats']);
+            this.toastService.error(`Start a chat with ${offering.providerData.firstName} to discuss the offering`);
+          }
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error('Failed to load conversations', error);
+          // On error, just navigate to chats
+          this.router.navigate(['/home/chats']);
+          this.toastService.error(`Start a chat with ${offering.providerData.firstName} to discuss the offering`);
+        }
+      });
   }
 
   isOwnOffering(offering: OfferingResponse): boolean {

@@ -13,7 +13,6 @@ import { AuthService } from '../services/auth';
 import { ToastService } from '../../core/toast.service';
 import { ErrorService } from '../../core/error.sevice';
 import { HttpErrorResponse } from '@angular/common/http';
-import { AppRoles } from '../commons/app.roles';
 
 @Component({
   selector: 'app-login',
@@ -58,13 +57,7 @@ export class Login {
         next: (tokenResponse) => {
           this.authService.saveToken(tokenResponse.token);
           this.toast.success('Logged in successfully');
-
-          const role = this.authService.getUserRole();
-          if (role === AppRoles.RESIDENT) {
-            this.router.navigateByUrl('/home/events');
-          } else if (role === AppRoles.MANAGER || role === AppRoles.ADMIN) {
-            this.router.navigateByUrl('/home/buildings');
-          } 
+          this.router.navigateByUrl('/home/announcements');
         },
         error: (error: HttpErrorResponse) => {
           console.error('Login failed', error);

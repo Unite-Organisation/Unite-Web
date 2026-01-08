@@ -6,7 +6,8 @@
                 mat-icon-button 
                 (click)="openCreateGroupDialog()"
                 matTooltip="Create new group"
-                class="create-group-btn">
+                class="create-group-btn"
+                *ngIf="rolesService.isResident()">
                 <mat-icon>group_add</mat-icon>
             </button>
         </div>

@@ -47,8 +47,6 @@ export class CreateAreaDialog {
   addBuilding(): void {
     const buildingGroup = this.fb.group({
       name: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
-      country: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
-      city: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
       street: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
       number: this.fb.control('', { validators: [Validators.required], nonNullable: true })
     });
@@ -81,8 +79,6 @@ export class CreateAreaDialog {
       type: formValue.type!,
       buildings: (formValue.buildings || []).map((b: Partial<BuildingRequest>) => ({
         name: b.name!,
-        country: b.country!,
-        city: b.city!,
         street: b.street!,
         number: b.number!
       }))

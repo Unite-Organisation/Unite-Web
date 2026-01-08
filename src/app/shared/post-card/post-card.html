@@ -30,7 +30,7 @@
             </div>
             <div class="event-item" *ngIf="post.onlineUrl">
                 <span class="event-icon">🔗</span>
-                <span class="online-link">Online</span>
+                <a [href]="post.onlineUrl" target="_blank" rel="noopener noreferrer" class="online-link">Online</a>
             </div>
             <div class="event-item" *ngIf="post.maxAttendees">
                 <span class="event-icon">👥</span>

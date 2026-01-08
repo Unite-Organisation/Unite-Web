@@ -71,7 +71,7 @@ export class Home implements OnInit, OnDestroy {
 
   openReportIssueDialog(): void {
     // Prevent opening dialog if button is disabled
-    if (!this.canReportIssue) {
+    if (!this.canReportIssue || !this.rolesService.isResident()) {
       return;
     }
 

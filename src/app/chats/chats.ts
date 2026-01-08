@@ -14,6 +14,8 @@ import { ErrorService } from '../core/error.sevice';
 import { ToastService } from '../core/toast.service';
 import { finalize } from 'rxjs/operators';
 import { CreateGroupDialog } from './create-group-dialog/create-group-dialog';
+import { RolesService } from '../auth/services/roles.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-chats',
@@ -29,6 +31,9 @@ export class Chats implements OnInit {
   private readonly errorService = inject(ErrorService);
   private readonly toast = inject(ToastService);
   private readonly dialog = inject(MatDialog);
+  protected readonly rolesService = inject(RolesService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   conversations: ConversationResponse[] = [];
   messages: ConversationMessage[] = [];
@@ -59,6 +64,20 @@ export class Chats implements OnInit {
       .subscribe({
         next: (conversations) => {
           this.conversations = this.sortByUpdatedAt(conversations);
+          
+          // Check if we need to select a specific conversation from query params
+          const conversationId = this.route.snapshot.queryParams['conversationId'];
+          if (conversationId) {
+            const conversation = this.conversations.find(c => c.id === conversationId);
+            if (conversation) {
+              this.selectConversation(conversation);
+              // Clear the query param after selecting
+              this.router.navigate([], {
+                relativeTo: this.route,
+                queryParams: {}
+              });
+            }
+          }
         },
         error: (error: HttpErrorResponse) => {
           console.error('Failed to load conversations', error);
