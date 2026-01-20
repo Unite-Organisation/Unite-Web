@@ -39,7 +39,7 @@ export class Register {
   private readonly authService = inject(AuthService);
 
   protected isSubmitting = false;
-  readonly roles = ['RESIDENT', 'ADMIN', 'MANAGER'];
+  readonly roles = ['RESIDENT', 'MANAGER'];
 
   readonly form: FormGroup = this.fb.group({
     firstName: this.fb.control('', { validators: [Validators.required, Validators.minLength(2)], nonNullable: true }),

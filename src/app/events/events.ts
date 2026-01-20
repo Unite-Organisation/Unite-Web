@@ -29,7 +29,7 @@ export class Events implements OnInit {
   posts: Post[] = [];
 
   get canCreateEvent(): boolean {
-    return this.rolesService.isManager() || this.rolesService.isAdmin();
+    return this.rolesService.isManager() || this.rolesService.isResident();
   }
 
   openCreateEventDialog(): void {
