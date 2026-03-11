@@ -1,5 +1,7 @@
-const API_PORT = '8080'
-const API_BASE_PATH = `http://localhost:${API_PORT}/v1/api`
+import { environment } from "../../environments/environment";
+
+const API_BASE_PATH = environment.apiUrl;
+
 
 export const API_URLS = {
 
