@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 
 const TOKEN_KEY = 'auth-token';
 const ROLE_CLAIM = 'role';
+const USER_META_INFO_KEY = 'user-meta-info';
 
 @Injectable({
   providedIn: 'root',
@@ -26,6 +27,7 @@ export class AuthService {
 
   public logout(): void {
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_META_INFO_KEY);
   }
 
   private getDecodedToken(): any | null {

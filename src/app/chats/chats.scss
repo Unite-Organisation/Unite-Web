@@ -4,6 +4,10 @@
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 12px;
   overflow: hidden;
+  // Stała, ale „ściśnięta” szerokość, wyrównana do lewej
+  // max-width: 1000px;
+  // width: 100%;
+  // box-sizing: border-box;
 }
 
 // Sidebar
@@ -308,6 +312,9 @@
 .message-content {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  max-width: 1000px;
 }
 
 .message-header {
@@ -333,6 +340,15 @@
   color: rgba(255, 255, 255, 0.9);
   line-height: 1.5;
   word-wrap: break-word;
+  max-width: 70%;
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  border-radius: 12px;
+  // background-color: rgba(15, 23, 42, 0.6);
+}
+
+.message-own .message-author {
+  color: #ca78f7;
 }
 
 // Chat input

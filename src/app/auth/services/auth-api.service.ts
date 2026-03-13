@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { UserLoginRequest, UserRegisterRequest } from '../../models/auth-models/auth.models';
 import { API_URLS } from '../../core/api.config';
 import { TokenResponse } from '../../models/integration-models/integration.models';
-import { PersonalData } from '../../models/api-models/personal-info.models';
+import { UserMetaInfo } from '../../models/api-models/chat.models';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +18,10 @@ export class AuthApiService {
 
   login(payload: UserLoginRequest): Observable<TokenResponse> {
     return this.http.post<TokenResponse>(API_URLS.login, payload);
+  }
+
+  getUserMetaInfo(): Observable<UserMetaInfo> {
+    return this.http.get<UserMetaInfo>(API_URLS.user_meta_info);
   }
 }
 

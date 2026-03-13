@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ConversationService } from './chats.service';
-import { ConversationMessage, ConversationResponse } from '../models/api-models/chat.models';
+import { ConversationMessage, ConversationResponse, UserMetaInfo } from '../models/api-models/chat.models';
 import { PaginationParams } from '../models/common/common.models';
 import { ErrorService } from '../core/error.sevice';
 import { ToastService } from '../core/toast.service';
@@ -16,6 +16,8 @@ import { finalize } from 'rxjs/operators';
 import { CreateGroupDialog } from './create-group-dialog/create-group-dialog';
 import { RolesService } from '../auth/services/roles.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ChatSocketService } from './chat-socket.service';
+import { AuthService } from '../auth/services/auth';
 
 @Component({
   selector: 'app-chats',
@@ -24,7 +26,7 @@ import { ActivatedRoute, Router } from '@angular/router';
   templateUrl: './chats.html',
   styleUrl: './chats.scss',
 })
-export class Chats implements OnInit {
+export class Chats implements OnInit, OnDestroy {
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
 
   private readonly conversationService = inject(ConversationService);
@@ -34,6 +36,8 @@ export class Chats implements OnInit {
   protected readonly rolesService = inject(RolesService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly chatSocketService = inject(ChatSocketService);
+  private readonly authService = inject(AuthService);
 
   conversations: ConversationResponse[] = [];
   messages: ConversationMessage[] = [];
@@ -42,6 +46,7 @@ export class Chats implements OnInit {
   isLoading = false;
   isLoadingMessages = false;
   isSending = false;
+  private currentUserId: string | null = null;
 
   private pagination: PaginationParams = {
     page: 1,
@@ -53,8 +58,17 @@ export class Chats implements OnInit {
     pageSize: 50,
   };
 
+  private conversationUnsubscribe?: () => void;
+
   ngOnInit(): void {
+    this.loadCurrentUserId();
     this.loadConversations();
+  }
+
+  ngOnDestroy(): void {
+    if (this.conversationUnsubscribe) {
+      this.conversationUnsubscribe();
+    }
   }
 
   private loadConversations(): void {
@@ -86,6 +100,21 @@ export class Chats implements OnInit {
       });
   }
 
+  private loadCurrentUserId(): void {
+    const metaRaw = localStorage.getItem('user-meta-info');
+    if (metaRaw) {
+      try {
+        const meta: UserMetaInfo = JSON.parse(metaRaw);
+        this.currentUserId = meta.userId;
+        return;
+      } catch (error) {
+        console.error('Failed to parse user meta info from localStorage', error);
+      }
+    }
+
+    this.currentUserId = this.authService.getCurrentUserId();
+  }
+
   private loadMessages(conversationId: string): void {
     this.isLoadingMessages = true;
     this.messages = [];
@@ -112,21 +141,25 @@ export class Chats implements OnInit {
     const content = this.messageInput.trim();
     this.isSending = true;
 
-    this.conversationService.sendMessage({
-      conversationId: this.selectedConversation.id,
-      content
-    })
-      .pipe(finalize(() => (this.isSending = false)))
-      .subscribe({
-        next: () => {
-          this.messageInput = '';
-          this.loadMessages(this.selectedConversation!.id);
-        },
-        error: (error: HttpErrorResponse) => {
-          console.error('Failed to send message', error);
-          this.errorService.handleServerError(error);
-        }
+    try {
+      this.chatSocketService.sendMessage({
+        conversationId: this.selectedConversation.id,
+        content,
       });
+      this.messageInput = '';
+    } catch (error) {
+      console.error('Failed to send message via WebSocket', error);
+      this.toast.error('Nie udało się wysłać wiadomości.');
+    } finally {
+      this.isSending = false;
+    }
+  }
+
+  isOwnMessage(message: ConversationMessage): boolean {
+    if (!this.currentUserId) {
+      this.loadCurrentUserId();
+    }
+    return !!this.currentUserId && message.authorId === this.currentUserId;
   }
 
   onKeyDown(event: KeyboardEvent): void {
@@ -146,8 +179,8 @@ export class Chats implements OnInit {
 
   private sortMessagesByDate(messages: ConversationMessage[]): ConversationMessage[] {
     return [...messages].sort((a, b) => {
-      const dateA = new Date(a.sendAt).getTime();
-      const dateB = new Date(b.sendAt).getTime();
+      const dateA = new Date(a.sentAt).getTime();
+      const dateB = new Date(b.sentAt).getTime();
       return dateA - dateB; // Oldest first (newest at bottom)
     });
   }
@@ -162,9 +195,22 @@ export class Chats implements OnInit {
   }
 
   selectConversation(conversation: ConversationResponse): void {
+    if (this.conversationUnsubscribe) {
+      this.conversationUnsubscribe();
+      this.conversationUnsubscribe = undefined;
+    }
+
     this.selectedConversation = conversation;
     this.messageInput = '';
     this.loadMessages(conversation.id);
+
+    this.conversationUnsubscribe = this.chatSocketService.subscribeToConversation(
+      conversation.id,
+      (message) => {
+        this.messages = this.sortMessagesByDate([...this.messages, message]);
+        this.scrollToBottom();
+      }
+    );
   }
 
   isSelected(conversation: ConversationResponse): boolean {
@@ -207,8 +253,8 @@ export class Chats implements OnInit {
 
   shouldShowDateSeparator(index: number): boolean {
     if (index === 0) return true;
-    const currentDate = new Date(this.messages[index].sendAt).toDateString();
-    const previousDate = new Date(this.messages[index - 1].sendAt).toDateString();
+    const currentDate = new Date(this.messages[index].sentAt).toDateString();
+    const previousDate = new Date(this.messages[index - 1].sentAt).toDateString();
     return currentDate !== previousDate;
   }
 
