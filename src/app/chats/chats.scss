@@ -263,6 +263,23 @@
   }
 }
 
+.load-more-wrapper {
+  min-height: 1px;
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0 1rem;
+}
+
+.load-older-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  mat-spinner {
+    margin-right: 0.25rem;
+  }
+}
+
 .date-separator {
   display: flex;
   align-items: center;
@@ -342,9 +359,8 @@
   word-wrap: break-word;
   max-width: 70%;
   display: inline-block;
-  padding: 0.4rem 0.75rem;
+  padding: 0.4rem 0rem;
   border-radius: 12px;
-  // background-color: rgba(15, 23, 42, 0.6);
 }
 
 .message-own .message-author {
