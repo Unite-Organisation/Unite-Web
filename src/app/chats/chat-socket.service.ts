@@ -14,7 +14,27 @@ export class ChatSocketService implements OnDestroy {
 
   private client: Client | null = null;
   private connected = false;
-  private pendingSubscriptions: { destination: string; callback: (message: IMessage) => void }[] = [];
+  private pendingSubscriptions: {
+    destination: string;
+    callback: (message: IMessage) => void;
+    subscription?: StompSubscription;
+  }[] = [];
+
+  /**
+   * Deactivates current WebSocket connection and clears internal state.
+   * Used when user logs out or when we need to force a fresh connection.
+   */
+  disconnect(): void {
+    const existingClient = this.client;
+
+    this.connected = false;
+    this.pendingSubscriptions = [];
+    this.client = null;
+
+    if (existingClient && existingClient.active) {
+      existingClient.deactivate();
+    }
+  }
 
   private buildWsUrl(): string {
     const apiUrl = environment.unite_chatting_ApiUrl || environment.unite_ApiUrl;
@@ -49,9 +69,11 @@ export class ChatSocketService implements OnDestroy {
         this.connected = true;
 
         this.pendingSubscriptions.forEach((sub) => {
-          this.client?.subscribe(sub.destination, sub.callback);
+          const subscription = this.client?.subscribe(sub.destination, sub.callback);
+          if (subscription) {
+            sub.subscription = subscription;
+          }
         });
-        this.pendingSubscriptions = [];
       },
       onStompError: (frame) => {
         this.connected = false;
@@ -89,9 +111,15 @@ export class ChatSocketService implements OnDestroy {
       return () => subscription.unsubscribe();
     }
 
-    this.pendingSubscriptions.push({ destination, callback: messageHandler });
+    const entry: {
+      destination: string;
+      callback: (message: IMessage) => void;
+      subscription?: StompSubscription;
+    } = { destination, callback: messageHandler };
+    this.pendingSubscriptions.push(entry);
     return () => {
-      this.pendingSubscriptions = this.pendingSubscriptions.filter((s) => s.destination !== destination);
+      entry.subscription?.unsubscribe();
+      this.pendingSubscriptions = this.pendingSubscriptions.filter((s) => s !== entry);
     };
   }
 
@@ -109,9 +137,7 @@ export class ChatSocketService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.client && this.client.active) {
-      this.client.deactivate();
-    }
+    this.disconnect();
   }
 }
 

@@ -55,7 +55,7 @@ export class Chats implements OnInit, OnDestroy {
 
   private messagesPagination: PaginationParams = {
     page: 1,
-    pageSize: 50,
+    pageSize: 5,
   };
 
   private conversationUnsubscribe?: () => void;
@@ -77,7 +77,7 @@ export class Chats implements OnInit, OnDestroy {
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
         next: (conversations) => {
-          this.conversations = this.sortByUpdatedAt(conversations);
+          this.conversations = conversations;
           
           // Check if we need to select a specific conversation from query params
           const conversationId = this.route.snapshot.queryParams['conversationId'];
@@ -123,7 +123,7 @@ export class Chats implements OnInit, OnDestroy {
       .pipe(finalize(() => (this.isLoadingMessages = false)))
       .subscribe({
         next: (messages) => {
-          this.messages = this.sortMessagesByDate(messages);
+          this.messages = messages;
           this.scrollToBottom();
         },
         error: (error: HttpErrorResponse) => {
@@ -207,7 +207,7 @@ export class Chats implements OnInit, OnDestroy {
     this.conversationUnsubscribe = this.chatSocketService.subscribeToConversation(
       conversation.id,
       (message) => {
-        this.messages = this.sortMessagesByDate([...this.messages, message]);
+        this.messages.push(message); 
         this.scrollToBottom();
       }
     );
