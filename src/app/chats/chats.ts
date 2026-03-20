@@ -53,10 +53,8 @@ export class Chats implements OnInit, OnDestroy {
     pageSize: 20,
   };
 
-  private messagesPagination: PaginationParams = {
-    page: 1,
-    pageSize: 5,
-  };
+  private readonly messagePageSize = 30;
+  private hasMoreMessages = true;
 
   private conversationUnsubscribe?: () => void;
 
@@ -119,7 +117,7 @@ export class Chats implements OnInit, OnDestroy {
     this.isLoadingMessages = true;
     this.messages = [];
     
-    this.conversationService.fetchConversationContent(conversationId, this.messagesPagination)
+    this.conversationService.fetchConversationContent(conversationId, null, this.messagePageSize)
       .pipe(finalize(() => (this.isLoadingMessages = false)))
       .subscribe({
         next: (messages) => {

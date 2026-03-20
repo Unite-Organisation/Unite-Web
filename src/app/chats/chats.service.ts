@@ -20,16 +20,15 @@ export class ConversationService {
         return this.http.get<ConversationResponse[]>(API_URLS.conversations, { params: httpParams });
     }
 
-    fetchConversationContent(conversationId: string, pagination: PaginationParams): Observable<ConversationMessage[]> {
+    fetchConversationContent(conversationId: string, lastMessageId: string | null, pageSize: number): Observable<ConversationMessage[]> {
         let httpParams = new HttpParams();
 
-        httpParams = httpParams.append('pageSize', pagination.pageSize.toString());
-        httpParams = httpParams.append('page', pagination.page.toString());
+        httpParams = httpParams.append('pageSize', pageSize.toString());
+        if (lastMessageId) {
+            httpParams = httpParams.set('lastMessageId', lastMessageId);
+        }
 
-        return this.http.get<ConversationMessage[]>(
-            `${API_URLS.conversations}/${conversationId}`, 
-            { params: httpParams }
-        );
+        return this.http.get<ConversationMessage[]>(`${API_URLS.messages}/${conversationId}`, { params: httpParams });
     }
 
     sendMessage(request: CreateMessageRequest): Observable<void> {
