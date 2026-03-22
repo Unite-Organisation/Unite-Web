@@ -55,7 +55,7 @@ export class Login {
       .pipe(finalize(() => (this.isSubmitting = false)))
       .subscribe({
         next: (tokenResponse) => {
-          this.authService.saveToken(tokenResponse.token);
+          this.authService.saveToken(tokenResponse.accessToken);
           this.toast.success('Logged in successfully');
           this.router.navigateByUrl('/home/announcements');
         },

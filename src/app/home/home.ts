@@ -4,7 +4,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { filter, Subject, takeUntil } from 'rxjs';
+import { filter, finalize, Subject, takeUntil } from 'rxjs';
+import { AuthApiService } from '../auth/services/auth-api.service';
 import { AuthService } from '../auth/services/auth';
 import { RolesService } from '../auth/services/roles.service';
 import { HomeService } from './services/home.service';
@@ -26,6 +27,7 @@ import { forkJoin } from 'rxjs';
 })
 export class Home implements OnInit, OnDestroy {
   protected readonly authService = inject(AuthService);
+  private readonly authApiService = inject(AuthApiService);
   private readonly router = inject(Router);
   protected readonly rolesService = inject(RolesService);
   private readonly dialog = inject(MatDialog);
@@ -172,8 +174,18 @@ export class Home implements OnInit, OnDestroy {
   }
 
   logout(): void {
-    console.info('User logged out - token removed');
-    this.authService.logout();
-    this.router.navigateByUrl('/login');
+    this.authApiService
+      .logout()
+      .pipe(
+        finalize(() => {
+          this.authService.logout();
+          this.router.navigateByUrl('/login');
+        })
+      )
+      .subscribe({
+        error: (err: HttpErrorResponse) => {
+          console.error('Logout request failed', err);
+        },
+      });
   }
 }

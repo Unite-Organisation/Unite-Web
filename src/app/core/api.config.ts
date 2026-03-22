@@ -7,6 +7,8 @@ export const API_URLS = {
 
   register: API_BASE_PATH + '/auth/register',
   login: API_BASE_PATH + '/auth/login',
+  logout: API_BASE_PATH + '/auth/logout',
+  refresh: API_BASE_PATH + '/auth/refresh',
   personal_data: API_BASE_PATH + '/user/my-data',
   posts: API_BASE_PATH + '/post',
   area: API_BASE_PATH + '/area',

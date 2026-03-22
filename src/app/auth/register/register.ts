@@ -76,7 +76,7 @@ export class Register {
       )
       .subscribe({
         next: (tokenResponse) => {
-          this.authService.saveToken(tokenResponse.token);
+          this.authService.saveToken(tokenResponse.accessToken);
           this.toast.success('Account created successfully');
           this.router.navigateByUrl('/home/announcements');
         },
