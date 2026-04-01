@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { UserLoginRequest, UserRegisterRequest } from '../../models/auth-models/auth.models';
 import { API_URLS } from '../../core/api.config';
 import { TokenResponse } from '../../models/integration-models/integration.models';
-import { PersonalData } from '../../models/api-models/personal-info.models';
+import { UserMetaInfo } from '../../models/api-models/chat.models';
 
 @Injectable({
   providedIn: 'root'
@@ -25,6 +25,10 @@ export class AuthApiService {
   /** Invalidates refresh token on server; browser sends httpOnly refresh cookie. */
   logout(): Observable<void> {
     return this.http.post<void>(API_URLS.logout, {}, { withCredentials: true });
+  }
+
+  getUserMetaInfo(): Observable<UserMetaInfo> {
+    return this.http.get<UserMetaInfo>(API_URLS.user_meta_info);
   }
 }
 

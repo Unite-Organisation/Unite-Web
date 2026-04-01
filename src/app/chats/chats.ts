@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ConversationService } from './chats.service';
-import { ConversationMessage, ConversationResponse } from '../models/api-models/chat.models';
+import { ConversationMessage, ConversationResponse, UserMetaInfo } from '../models/api-models/chat.models';
 import { PaginationParams } from '../models/common/common.models';
 import { ErrorService } from '../core/error.sevice';
 import { ToastService } from '../core/toast.service';
@@ -16,6 +16,8 @@ import { finalize } from 'rxjs/operators';
 import { CreateGroupDialog } from './create-group-dialog/create-group-dialog';
 import { RolesService } from '../auth/services/roles.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ChatSocketService } from './chat-socket.service';
+import { AuthService } from '../auth/services/auth';
 
 @Component({
   selector: 'app-chats',
@@ -24,7 +26,7 @@ import { ActivatedRoute, Router } from '@angular/router';
   templateUrl: './chats.html',
   styleUrl: './chats.scss',
 })
-export class Chats implements OnInit {
+export class Chats implements OnInit, OnDestroy {
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
 
   private readonly conversationService = inject(ConversationService);
@@ -34,6 +36,8 @@ export class Chats implements OnInit {
   protected readonly rolesService = inject(RolesService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly chatSocketService = inject(ChatSocketService);
+  private readonly authService = inject(AuthService);
 
   conversations: ConversationResponse[] = [];
   messages: ConversationMessage[] = [];
@@ -42,19 +46,40 @@ export class Chats implements OnInit {
   isLoading = false;
   isLoadingMessages = false;
   isSending = false;
+  private currentUserId: string | null = null;
 
   private pagination: PaginationParams = {
     page: 1,
     pageSize: 20,
   };
 
-  private messagesPagination: PaginationParams = {
-    page: 1,
-    pageSize: 50,
-  };
+  readonly messagePageSize = 50;
+  hasMoreMessages = true;
+  isLoadingOlderMessages = false;
+  private oldestMessageId: string | null = null;
+
+  private conversationUnsubscribe?: () => void;
+
+  @HostListener('window:beforeunload')
+  onBeforeUnload(): void {
+    this.chatSocketService.disconnect();
+  }
 
   ngOnInit(): void {
+    this.loadCurrentUserId();
     this.loadConversations();
+  }
+
+  ngOnDestroy(): void {
+    this.cleanUpConversation();
+    this.chatSocketService.disconnect();
+  }
+
+  private cleanUpConversation(): void {
+    if (this.conversationUnsubscribe) {
+      this.conversationUnsubscribe();
+      this.conversationUnsubscribe = undefined;
+    }
   }
 
   private loadConversations(): void {
@@ -63,7 +88,7 @@ export class Chats implements OnInit {
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
         next: (conversations) => {
-          this.conversations = this.sortByUpdatedAt(conversations);
+          this.conversations = conversations;
           
           // Check if we need to select a specific conversation from query params
           const conversationId = this.route.snapshot.queryParams['conversationId'];
@@ -86,15 +111,39 @@ export class Chats implements OnInit {
       });
   }
 
+  private loadCurrentUserId(): void {
+    const metaRaw = localStorage.getItem('user-meta-info');
+    if (metaRaw) {
+      try {
+        const meta: UserMetaInfo = JSON.parse(metaRaw);
+        this.currentUserId = meta.userId;
+        return;
+      } catch (error) {
+        console.error('Failed to parse user meta info from localStorage', error);
+      }
+    }
+
+    this.currentUserId = this.authService.getCurrentUserId();
+  }
+
   private loadMessages(conversationId: string): void {
     this.isLoadingMessages = true;
     this.messages = [];
+    this.oldestMessageId = null;
+    this.hasMoreMessages = false;
     
-    this.conversationService.fetchConversationContent(conversationId, this.messagesPagination)
+    this.conversationService.fetchConversationContent(conversationId, null, this.messagePageSize)
       .pipe(finalize(() => (this.isLoadingMessages = false)))
       .subscribe({
         next: (messages) => {
-          this.messages = this.sortMessagesByDate(messages);
+          this.messages = messages.reverse();
+
+          if (this.messages.length > 0) {
+            this.oldestMessageId = this.messages[0].id
+          }
+
+          this.hasMoreMessages = messages.length === this.messagePageSize;
+      
           this.scrollToBottom();
         },
         error: (error: HttpErrorResponse) => {
@@ -102,6 +151,46 @@ export class Chats implements OnInit {
           this.errorService.handleServerError(error);
         }
       });
+  }
+
+  loadOlderMessages(): void {
+    if (!this.selectedConversation || !this.oldestMessageId || this.isLoadingOlderMessages) {
+      return;
+    }
+
+    this.isLoadingOlderMessages = true;
+
+    const container = this.messagesContainer.nativeElement;
+    const previousScrollHeight = container.scrollHeight;
+
+    this.conversationService.fetchConversationContent(
+      this.selectedConversation.id,
+      this.oldestMessageId,
+      this.messagePageSize
+    )
+    .pipe(finalize(() => (this.isLoadingOlderMessages = false)))
+    .subscribe({
+      next: (olderMessages) => {
+        if (olderMessages.length === 0) {
+            this.hasMoreMessages = false;
+            return;
+        }
+
+        const reversedOlderMessages = olderMessages.reverse();
+        this.oldestMessageId = reversedOlderMessages[0].id;
+        this.messages = [...reversedOlderMessages, ...this.messages];
+        this.hasMoreMessages = olderMessages.length === this.messagePageSize;
+
+        setTimeout(() => {
+            const newScrollHeight = container.scrollHeight;
+            container.scrollTop = newScrollHeight - previousScrollHeight;
+          }, 0);
+      },
+      error: (error: HttpErrorResponse) => {
+          console.error('Failed to load older messages', error);
+          this.toast.error('Nie udało się załadować historii.');
+        }
+    })
   }
 
   sendMessage(): void {
@@ -112,21 +201,25 @@ export class Chats implements OnInit {
     const content = this.messageInput.trim();
     this.isSending = true;
 
-    this.conversationService.sendMessage({
-      conversationId: this.selectedConversation.id,
-      content
-    })
-      .pipe(finalize(() => (this.isSending = false)))
-      .subscribe({
-        next: () => {
-          this.messageInput = '';
-          this.loadMessages(this.selectedConversation!.id);
-        },
-        error: (error: HttpErrorResponse) => {
-          console.error('Failed to send message', error);
-          this.errorService.handleServerError(error);
-        }
+    try {
+      this.chatSocketService.sendMessage({
+        conversationId: this.selectedConversation.id,
+        content,
       });
+      this.messageInput = '';
+    } catch (error) {
+      console.error('Failed to send message via WebSocket', error);
+      this.toast.error('Nie udało się wysłać wiadomości.');
+    } finally {
+      this.isSending = false;
+    }
+  }
+
+  isOwnMessage(message: ConversationMessage): boolean {
+    if (!this.currentUserId) {
+      this.loadCurrentUserId();
+    }
+    return !!this.currentUserId && message.authorId === this.currentUserId;
   }
 
   onKeyDown(event: KeyboardEvent): void {
@@ -134,22 +227,6 @@ export class Chats implements OnInit {
       event.preventDefault();
       this.sendMessage();
     }
-  }
-
-  private sortByUpdatedAt(conversations: ConversationResponse[]): ConversationResponse[] {
-    return [...conversations].sort((a, b) => {
-      const dateA = new Date(a.updatedAt).getTime();
-      const dateB = new Date(b.updatedAt).getTime();
-      return dateB - dateA; // Newest first in list
-    });
-  }
-
-  private sortMessagesByDate(messages: ConversationMessage[]): ConversationMessage[] {
-    return [...messages].sort((a, b) => {
-      const dateA = new Date(a.sendAt).getTime();
-      const dateB = new Date(b.sendAt).getTime();
-      return dateA - dateB; // Oldest first (newest at bottom)
-    });
   }
 
   private scrollToBottom(): void {
@@ -162,9 +239,20 @@ export class Chats implements OnInit {
   }
 
   selectConversation(conversation: ConversationResponse): void {
+    this.cleanUpConversation();
     this.selectedConversation = conversation;
     this.messageInput = '';
     this.loadMessages(conversation.id);
+
+    this.conversationUnsubscribe = this.chatSocketService.subscribeToConversation(
+      conversation.id,
+      (message) => {
+        if (this.selectedConversation?.id === conversation.id) {
+        this.messages.push(message); 
+        this.scrollToBottom();
+      }
+      }
+    );
   }
 
   isSelected(conversation: ConversationResponse): boolean {
@@ -207,8 +295,8 @@ export class Chats implements OnInit {
 
   shouldShowDateSeparator(index: number): boolean {
     if (index === 0) return true;
-    const currentDate = new Date(this.messages[index].sendAt).toDateString();
-    const previousDate = new Date(this.messages[index - 1].sendAt).toDateString();
+    const currentDate = new Date(this.messages[index].sentAt).toDateString();
+    const previousDate = new Date(this.messages[index - 1].sentAt).toDateString();
     return currentDate !== previousDate;
   }
 

@@ -7,11 +7,12 @@ export interface ConversationResponse {
 }
 
 export interface ConversationMessage {
-    author: string;
-    authorName: string;
-    authorLastName: string;
-    sendAt: string;
+    id: string;
+    authorId: string;
+    authorDisplayName: string;
     content: string;
+    sentAt: string;
+    messageType: string;
 }
 
 export interface CreateMessageRequest {
@@ -35,4 +36,10 @@ export interface PotentialContactResponse {
 export interface GroupConversationRequest {
     name: string;
     members: string[];
+}
+
+export interface UserMetaInfo {
+    userId: string;
+    buildingId: string;
+    areaId: string;
 }

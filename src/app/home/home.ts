@@ -17,6 +17,7 @@ import { IssueObject } from '../models/api-models/issue.models';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ErrorService } from '../core/error.sevice';
 import { forkJoin } from 'rxjs';
+import { ChatSocketService } from '../chats/chat-socket.service';
 
 @Component({
   selector: 'app-home',
@@ -27,6 +28,7 @@ import { forkJoin } from 'rxjs';
 })
 export class Home implements OnInit, OnDestroy {
   protected readonly authService = inject(AuthService);
+  private readonly chatSocketService = inject(ChatSocketService);
   private readonly authApiService = inject(AuthApiService);
   private readonly router = inject(Router);
   protected readonly rolesService = inject(RolesService);
@@ -174,6 +176,8 @@ export class Home implements OnInit, OnDestroy {
   }
 
   logout(): void {
+    console.info('User logged out - token removed');
+    this.chatSocketService.disconnect();
     this.authApiService
       .logout()
       .pipe(

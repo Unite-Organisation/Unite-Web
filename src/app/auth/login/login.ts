@@ -13,6 +13,8 @@ import { AuthService } from '../services/auth';
 import { ToastService } from '../../core/toast.service';
 import { ErrorService } from '../../core/error.sevice';
 import { HttpErrorResponse } from '@angular/common/http';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -56,6 +58,18 @@ export class Login {
       .subscribe({
         next: (tokenResponse) => {
           this.authService.saveToken(tokenResponse.accessToken);
+          this.authApi.getUserMetaInfo()
+            .pipe(
+              catchError((error) => {
+                console.error('Failed to load user meta info', error);
+                return of(null);
+              })
+            )
+            .subscribe((metaInfo) => {
+              if (metaInfo) {
+                localStorage.setItem('user-meta-info', JSON.stringify(metaInfo));
+              }
+            });
           this.toast.success('Logged in successfully');
           this.router.navigateByUrl('/home/announcements');
         },

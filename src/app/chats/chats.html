@@ -63,6 +63,22 @@
             </div>
 
             <div class="chat-messages" #messagesContainer>
+                
+                <div class="no-more-content" *ngIf="!isLoadingMessages && !isLoadingOlderMessages && messages.length > 0 && !hasMoreMessages">
+                    <span>Start of conversation</span>
+                </div>
+
+                <div class="load-more-wrapper" *ngIf="hasMoreMessages">
+                    <button
+                        mat-button
+                        class="load-older-btn"
+                        (click)="loadOlderMessages()"
+                        [disabled]="isLoadingOlderMessages">
+                        <mat-spinner *ngIf="isLoadingOlderMessages" diameter="16"></mat-spinner>
+                        <span>Load older messages</span>
+                    </button>
+                </div>
+
                 <div class="messages-loading" *ngIf="isLoadingMessages">
                     <mat-spinner diameter="32"></mat-spinner>
                 </div>
@@ -75,17 +91,17 @@
                 <ng-container *ngIf="!isLoadingMessages && messages.length > 0">
                     <ng-container *ngFor="let message of messages; let i = index">
                         <div class="date-separator" *ngIf="shouldShowDateSeparator(i)">
-                            <span>{{ formatMessageDate(message.sendAt) }}</span>
+                            <span>{{ formatMessageDate(message.sentAt) }}</span>
                         </div>
                         
-                        <div class="message">
+                        <div class="message" [class.message-own]="isOwnMessage(message)">
                             <div class="message-avatar">
                                 <mat-icon>person</mat-icon>
                             </div>
                             <div class="message-content">
                                 <div class="message-header">
-                                    <span class="message-author">{{ message.authorName }} {{ message.authorLastName }}</span>
-                                    <span class="message-time">{{ formatMessageTime(message.sendAt) }}</span>
+                                    <span class="message-author">{{ message.authorDisplayName }}</span>
+                                    <span class="message-time">{{ formatMessageTime(message.sentAt) }}</span>
                                 </div>
                                 <div class="message-text">{{ message.content }}</div>
                             </div>
