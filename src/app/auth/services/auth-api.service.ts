@@ -17,7 +17,14 @@ export class AuthApiService {
   }
 
   login(payload: UserLoginRequest): Observable<TokenResponse> {
-    return this.http.post<TokenResponse>(API_URLS.login, payload);
+    return this.http.post<TokenResponse>(API_URLS.login, payload, {
+      withCredentials: true,
+    });
+  }
+
+  /** Invalidates refresh token on server; browser sends httpOnly refresh cookie. */
+  logout(): Observable<void> {
+    return this.http.post<void>(API_URLS.logout, {}, { withCredentials: true });
   }
 
   getUserMetaInfo(): Observable<UserMetaInfo> {

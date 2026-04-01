@@ -13,5 +13,5 @@ export interface UserRegisterRequest {
 }
 
 export interface AuthResponse {
-  token: string;
+  accessToken: string;
 }

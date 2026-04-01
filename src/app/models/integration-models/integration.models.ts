@@ -5,5 +5,5 @@ export interface ServerError {
 }
 
 export interface TokenResponse {
-  token: string;
+  accessToken: string;
 }

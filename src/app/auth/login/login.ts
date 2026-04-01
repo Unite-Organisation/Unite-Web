@@ -57,7 +57,7 @@ export class Login {
       .pipe(finalize(() => (this.isSubmitting = false)))
       .subscribe({
         next: (tokenResponse) => {
-          this.authService.saveToken(tokenResponse.token);
+          this.authService.saveToken(tokenResponse.accessToken);
           this.authApi.getUserMetaInfo()
             .pipe(
               catchError((error) => {

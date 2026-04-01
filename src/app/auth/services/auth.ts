@@ -1,4 +1,3 @@
-import { P } from '@angular/cdk/keycodes';
 import { Injectable } from '@angular/core';
 
 const TOKEN_KEY = 'auth-token';
@@ -10,23 +9,24 @@ const USER_META_INFO_KEY = 'user-meta-info';
 })
 export class AuthService {
   
+  private accessToken: string | null = null;
+
   constructor() {}
 
   public saveToken(token: string): void {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.setItem(TOKEN_KEY, token);
+   this.accessToken = token;
   }
 
   public getToken(): string | null {
-    return localStorage.getItem(TOKEN_KEY);
+    return this.accessToken;
   }
 
   public isLoggedIn(): boolean {
-    return !!this.getToken();
+    return !!this.accessToken;
   }
 
   public logout(): void {
-    localStorage.removeItem(TOKEN_KEY);
+    this.accessToken = null;
     localStorage.removeItem(USER_META_INFO_KEY);
   }
 
@@ -43,8 +43,8 @@ export class AuthService {
         return null;
       }
       
-      const payload = atob(parts[1]);
-      return JSON.parse(payload);
+      const payload = JSON.parse(atob(parts[1]));
+      return payload;
 
     } catch (e) {
       console.error('Error decoding JWT:', e);
