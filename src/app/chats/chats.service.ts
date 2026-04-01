@@ -28,7 +28,7 @@ export class ConversationService {
             httpParams = httpParams.set('lastMessageId', lastMessageId);
         }
 
-        return this.http.get<ConversationMessage[]>(`${API_URLS.messages}/${conversationId}`, { params: httpParams });
+        return this.http.get<ConversationMessage[]>(`${API_URLS.conversations}/${conversationId}`, { params: httpParams });
     }
 
     sendMessage(request: CreateMessageRequest): Observable<void> {

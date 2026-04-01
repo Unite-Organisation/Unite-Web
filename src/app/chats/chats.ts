@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, inject, OnDestroy, OnInit, ViewChild, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -53,10 +53,17 @@ export class Chats implements OnInit, OnDestroy {
     pageSize: 20,
   };
 
-  private readonly messagePageSize = 30;
-  private hasMoreMessages = true;
+  readonly messagePageSize = 50;
+  hasMoreMessages = true;
+  isLoadingOlderMessages = false;
+  private oldestMessageId: string | null = null;
 
   private conversationUnsubscribe?: () => void;
+
+  @HostListener('window:beforeunload')
+  onBeforeUnload(): void {
+    this.chatSocketService.disconnect();
+  }
 
   ngOnInit(): void {
     this.loadCurrentUserId();
@@ -64,8 +71,14 @@ export class Chats implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.cleanUpConversation();
+    this.chatSocketService.disconnect();
+  }
+
+  private cleanUpConversation(): void {
     if (this.conversationUnsubscribe) {
       this.conversationUnsubscribe();
+      this.conversationUnsubscribe = undefined;
     }
   }
 
@@ -116,12 +129,21 @@ export class Chats implements OnInit, OnDestroy {
   private loadMessages(conversationId: string): void {
     this.isLoadingMessages = true;
     this.messages = [];
+    this.oldestMessageId = null;
+    this.hasMoreMessages = false;
     
     this.conversationService.fetchConversationContent(conversationId, null, this.messagePageSize)
       .pipe(finalize(() => (this.isLoadingMessages = false)))
       .subscribe({
         next: (messages) => {
-          this.messages = messages;
+          this.messages = messages.reverse();
+
+          if (this.messages.length > 0) {
+            this.oldestMessageId = this.messages[0].id
+          }
+
+          this.hasMoreMessages = messages.length === this.messagePageSize;
+      
           this.scrollToBottom();
         },
         error: (error: HttpErrorResponse) => {
@@ -129,6 +151,46 @@ export class Chats implements OnInit, OnDestroy {
           this.errorService.handleServerError(error);
         }
       });
+  }
+
+  loadOlderMessages(): void {
+    if (!this.selectedConversation || !this.oldestMessageId || this.isLoadingOlderMessages) {
+      return;
+    }
+
+    this.isLoadingOlderMessages = true;
+
+    const container = this.messagesContainer.nativeElement;
+    const previousScrollHeight = container.scrollHeight;
+
+    this.conversationService.fetchConversationContent(
+      this.selectedConversation.id,
+      this.oldestMessageId,
+      this.messagePageSize
+    )
+    .pipe(finalize(() => (this.isLoadingOlderMessages = false)))
+    .subscribe({
+      next: (olderMessages) => {
+        if (olderMessages.length === 0) {
+            this.hasMoreMessages = false;
+            return;
+        }
+
+        const reversedOlderMessages = olderMessages.reverse();
+        this.oldestMessageId = reversedOlderMessages[0].id;
+        this.messages = [...reversedOlderMessages, ...this.messages];
+        this.hasMoreMessages = olderMessages.length === this.messagePageSize;
+
+        setTimeout(() => {
+            const newScrollHeight = container.scrollHeight;
+            container.scrollTop = newScrollHeight - previousScrollHeight;
+          }, 0);
+      },
+      error: (error: HttpErrorResponse) => {
+          console.error('Failed to load older messages', error);
+          this.toast.error('Nie udało się załadować historii.');
+        }
+    })
   }
 
   sendMessage(): void {
@@ -167,22 +229,6 @@ export class Chats implements OnInit, OnDestroy {
     }
   }
 
-  private sortByUpdatedAt(conversations: ConversationResponse[]): ConversationResponse[] {
-    return [...conversations].sort((a, b) => {
-      const dateA = new Date(a.updatedAt).getTime();
-      const dateB = new Date(b.updatedAt).getTime();
-      return dateB - dateA; // Newest first in list
-    });
-  }
-
-  private sortMessagesByDate(messages: ConversationMessage[]): ConversationMessage[] {
-    return [...messages].sort((a, b) => {
-      const dateA = new Date(a.sentAt).getTime();
-      const dateB = new Date(b.sentAt).getTime();
-      return dateA - dateB; // Oldest first (newest at bottom)
-    });
-  }
-
   private scrollToBottom(): void {
     setTimeout(() => {
       if (this.messagesContainer) {
@@ -193,11 +239,7 @@ export class Chats implements OnInit, OnDestroy {
   }
 
   selectConversation(conversation: ConversationResponse): void {
-    if (this.conversationUnsubscribe) {
-      this.conversationUnsubscribe();
-      this.conversationUnsubscribe = undefined;
-    }
-
+    this.cleanUpConversation();
     this.selectedConversation = conversation;
     this.messageInput = '';
     this.loadMessages(conversation.id);
@@ -205,8 +247,10 @@ export class Chats implements OnInit, OnDestroy {
     this.conversationUnsubscribe = this.chatSocketService.subscribeToConversation(
       conversation.id,
       (message) => {
+        if (this.selectedConversation?.id === conversation.id) {
         this.messages.push(message); 
         this.scrollToBottom();
+      }
       }
     );
   }

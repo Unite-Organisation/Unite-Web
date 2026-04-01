@@ -63,6 +63,22 @@
             </div>
 
             <div class="chat-messages" #messagesContainer>
+                
+                <div class="no-more-content" *ngIf="!isLoadingMessages && !isLoadingOlderMessages && messages.length > 0 && !hasMoreMessages">
+                    <span>Start of conversation</span>
+                </div>
+
+                <div class="load-more-wrapper" *ngIf="hasMoreMessages">
+                    <button
+                        mat-button
+                        class="load-older-btn"
+                        (click)="loadOlderMessages()"
+                        [disabled]="isLoadingOlderMessages">
+                        <mat-spinner *ngIf="isLoadingOlderMessages" diameter="16"></mat-spinner>
+                        <span>Load older messages</span>
+                    </button>
+                </div>
+
                 <div class="messages-loading" *ngIf="isLoadingMessages">
                     <mat-spinner diameter="32"></mat-spinner>
                 </div>
