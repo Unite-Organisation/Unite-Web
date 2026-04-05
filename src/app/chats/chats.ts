@@ -54,6 +54,9 @@ export class Chats implements OnInit, OnDestroy {
   };
 
   readonly messagePageSize = 50;
+  /** Maks. odstęp czasu (ms) między kolejnymi wiadomościami tego samego autora, żeby zgrupować blok. */
+  private static readonly messageGroupMaxGapMs = 30_000;
+
   hasMoreMessages = true;
   isLoadingOlderMessages = false;
   private oldestMessageId: string | null = null;
@@ -298,6 +301,27 @@ export class Chats implements OnInit, OnDestroy {
     const currentDate = new Date(this.messages[index].sentAt).toDateString();
     const previousDate = new Date(this.messages[index - 1].sentAt).toDateString();
     return currentDate !== previousDate;
+  }
+
+  /** Kolejna wiadomość wizualnie „przyklejona” do poprzedniej: ten sam autor, ≤30 s, bez innego użytkownika / nowej doby. */
+  isGroupedWithPrevious(index: number): boolean {
+    if (index <= 0 || index >= this.messages.length) {
+      return false;
+    }
+    if (this.shouldShowDateSeparator(index)) {
+      return false;
+    }
+    const prev = this.messages[index - 1];
+    const curr = this.messages[index];
+    if (prev.authorId !== curr.authorId) {
+      return false;
+    }
+    const prevMs = new Date(prev.sentAt).getTime();
+    const currMs = new Date(curr.sentAt).getTime();
+    if (Number.isNaN(prevMs) || Number.isNaN(currMs)) {
+      return false;
+    }
+    return currMs - prevMs <= Chats.messageGroupMaxGapMs;
   }
 
   openCreateGroupDialog(): void {

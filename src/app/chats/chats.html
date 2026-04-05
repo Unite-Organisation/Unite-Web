@@ -94,12 +94,16 @@
                             <span>{{ formatMessageDate(message.sentAt) }}</span>
                         </div>
                         
-                        <div class="message" [class.message-own]="isOwnMessage(message)">
-                            <div class="message-avatar">
+                        <div
+                            class="message"
+                            [class.message-own]="isOwnMessage(message)"
+                            [class.message--grouped]="isGroupedWithPrevious(i)">
+                            <div class="message-avatar" *ngIf="!isGroupedWithPrevious(i)">
                                 <mat-icon>person</mat-icon>
                             </div>
+                            <div class="message-avatar-spacer" *ngIf="isGroupedWithPrevious(i)" aria-hidden="true"></div>
                             <div class="message-content">
-                                <div class="message-header">
+                                <div class="message-header" *ngIf="!isGroupedWithPrevious(i)">
                                     <span class="message-author">{{ message.authorDisplayName }}</span>
                                     <span class="message-time">{{ formatMessageTime(message.sentAt) }}</span>
                                 </div>

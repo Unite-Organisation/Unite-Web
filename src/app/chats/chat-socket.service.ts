@@ -38,6 +38,7 @@ export class ChatSocketService implements OnDestroy {
 
   private buildWsUrl(): string {
     const apiUrl = environment.unite_chatting_ApiUrl || environment.unite_ApiUrl;
+    // const url = new URL(apiUrl, window.location.origin);
     const url = new URL(apiUrl);
     const isSecure = url.protocol === 'https:';
 

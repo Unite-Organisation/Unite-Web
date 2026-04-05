@@ -44,7 +44,7 @@ export const AuthInterceptor: HttpInterceptorFn = (
   const router = inject(Router);
 
   let outgoing: HttpRequest<unknown> = req;
-  if (req.url.startsWith(environment.apiUrl) && !req.withCredentials) {
+  if (req.url.startsWith(environment.unite_ApiUrl) && !req.withCredentials) {
     outgoing = req.clone({ withCredentials: true });
   }
 
