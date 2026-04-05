@@ -1,0 +1,26 @@
+<div class="admin-panel-root">
+  <aside class="admin-panel-sidenav">
+    <h2 class="admin-panel-title">Admin panel</h2>
+    <nav class="admin-panel-nav">
+      <button
+        mat-button
+        routerLink="/home/area/admin-view"
+        routerLinkActive="admin-panel-link-active"
+        [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon>domain</mat-icon>
+        <span>Areas and buildings</span>
+      </button>
+      <button
+        mat-button
+        routerLink="/home/area/jobs"
+        routerLinkActive="admin-panel-link-active"
+        [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon>schedule</mat-icon>
+        <span>Jobs</span>
+      </button>
+    </nav>
+  </aside>
+  <section class="admin-panel-content">
+    <router-outlet></router-outlet>
+  </section>
+</div>

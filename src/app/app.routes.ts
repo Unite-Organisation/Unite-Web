@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth.guard';
+import { adminGuard } from './core/admin.guard';
 
 export const routes: Routes = [
 
@@ -47,6 +48,26 @@ export const routes: Routes = [
             {
                 path: 'buildings',
                 loadComponent: () => import('./buildings/buildings').then(m => m.Buildings)
+            },
+            {
+                path: 'area',
+                loadComponent: () => import('./admin/admin-panel-layout/admin-panel-layout').then(m => m.AdminPanelLayout),
+                canActivate: [adminGuard],
+                children: [
+                    {
+                        path: 'admin-view',
+                        loadComponent: () => import('./admin/admin-area-view/admin-area-view').then(m => m.AdminAreaView)
+                    },
+                    {
+                        path: 'jobs',
+                        loadComponent: () => import('./admin/admin-jobs-view/admin-jobs-view').then(m => m.AdminJobsView)
+                    },
+                    {
+                        path: '',
+                        pathMatch: 'full',
+                        redirectTo: 'admin-view'
+                    }
+                ]
             }
         ]
     },

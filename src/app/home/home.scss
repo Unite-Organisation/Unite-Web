@@ -70,11 +70,37 @@
 
 .home-nav button {
   justify-content: flex-start;
-  color: #e5e7eb;
+  color: #e5e7eb;  
 }
 
 .home-nav button.home-link-active {
   background-color: rgba(59, 130, 246, 0.15);
+}
+
+.home-nav button.admin-panel-button {
+  color: #e8c547;
+
+  mat-icon {
+    color: #f0d56a;
+  }
+
+  &:hover {
+    background-color: rgba(212, 175, 55, 0.14);
+    color: #fde68a;
+
+    mat-icon {
+      color: #fde68a;
+    }
+  }
+
+  &.home-link-active {
+    background-color: rgba(212, 175, 55, 0.24);
+    color: #fff3c4;
+
+    mat-icon {
+      color: #fff3c4;
+    }
+  }
 }
 
 .home-logout {

@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_URLS } from '../../core/api.config';
-import { AreaCreateRequest, BuildingResponse, ResidentToAdd } from '../../models/api-models/area.models';
+import { AreaCreateRequest, AreaInfoResponse, BuildingResponse, ResidentToAdd } from '../../models/api-models/area.models';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +27,10 @@ export class AreaApiService {
       .set('buildingId', buildingId)
       .set('userId', userId);
     return this.http.put<void>(API_URLS.add_user_to_building, null, { params });
+  }
+
+  getAdminAreaInfo(): Observable<AreaInfoResponse[]> {
+    return this.http.get<AreaInfoResponse[]>(API_URLS.area_admin_view);
   }
 }
 

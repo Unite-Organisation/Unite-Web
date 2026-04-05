@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { AuthApiService } from '../../auth/services/auth-api.service';
 import { PersonalData } from '../../models/api-models/personal-info.models';
@@ -10,11 +11,12 @@ import { IssueApiService } from '../../issues/services/issue-api.service';
 import { IssueResponse } from '../../models/api-models/issue.models';
 import { IssueCard } from '../../issues/issue-card/issue-card';
 import { forkJoin } from 'rxjs';
+import { RolesService } from '../../auth/services/roles.service';
 
 @Component({
   selector: 'app-home-dashboard',
   standalone: true,
-  imports: [CommonModule, IssueCard],
+  imports: [CommonModule, MatIconModule, IssueCard],
   templateUrl: './home-dashboard.html',
   styleUrl: './home-dashboard.scss'
   
@@ -24,6 +26,7 @@ export class HomeDashboard implements OnInit {
   private readonly errorService = inject(ErrorService);
   private readonly router = inject(Router);
   private readonly issueApiService = inject(IssueApiService);
+  protected readonly rolesService = inject(RolesService);
 
   personalData: PersonalData | null = null;
   isLoading = false;
@@ -32,6 +35,9 @@ export class HomeDashboard implements OnInit {
   areaIssues: IssueResponse[] = [];
 
   ngOnInit(): void {
+    if (this.rolesService.isAdmin()) {
+      return;
+    }
     this.loadPersonalData();
   }
 
@@ -75,6 +81,10 @@ export class HomeDashboard implements OnInit {
 
   navigateToFacilities(): void {
     this.router.navigate(['/home/facilities']);
+  }
+
+  navigateToAdminPanel(): void {
+    this.router.navigate(['/home/area']);
   }
 }
 
