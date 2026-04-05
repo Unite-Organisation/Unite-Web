@@ -6,9 +6,13 @@
     </div>
 
     <nav class="home-nav">
-      <button mat-button routerLink="/home" *ngIf="rolesService.isResident()" routerLinkActive="home-link-active" [routerLinkActiveOptions]="{ exact: true } ">
+      <button mat-button routerLink="/home" *ngIf="rolesService.isResident() || rolesService.isAdmin()" routerLinkActive="home-link-active" [routerLinkActiveOptions]="{ exact: true } ">
         <mat-icon>home</mat-icon>
         <span>Home</span>
+      </button>
+      <button mat-button routerLink="/home/area" routerLinkActive="home-link-active" *ngIf="rolesService.isAdmin()" class="admin-panel-button">
+        <mat-icon>admin_panel_settings</mat-icon>
+        <span>Admin panel</span>
       </button>
       <button mat-button routerLink="/home/announcements" routerLinkActive="home-link-active">
         <mat-icon>campaign</mat-icon>

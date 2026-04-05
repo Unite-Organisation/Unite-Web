@@ -1,0 +1,228 @@
+.admin-jobs {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-jobs-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h1 {
+    margin: 0 0 0.35rem 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #f9fafb;
+  }
+}
+
+.admin-jobs-subtitle {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 0.95rem;
+}
+
+.admin-jobs-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+}
+
+.btn-spinner {
+  display: inline-block;
+  margin-right: 0.25rem;
+}
+
+.status-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.65rem 0.85rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.legend-label {
+  color: #9ca3af;
+  font-size: 0.85rem;
+  margin-right: 0.25rem;
+}
+
+.job-status {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.job-status-failed {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.job-status-success {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.job-status-manual {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.admin-jobs-toolbar {
+  margin-bottom: 1rem;
+}
+
+.filter-field {
+  min-width: 240px;
+  width: min(100%, 280px);
+}
+
+.admin-jobs-loading,
+.admin-jobs-empty {
+  padding: 2rem 0;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.jobs-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+.jobs-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  color: #e5e7eb;
+
+  th,
+  td {
+    padding: 0.65rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    vertical-align: middle;
+  }
+
+  th {
+    font-weight: 600;
+    color: #9ca3af;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background-color: rgba(0, 0, 0, 0.25);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+  }
+
+  .jobs-col-name {
+    width: 16%;
+  }
+
+  .jobs-col-status {
+    width: 14%;
+  }
+
+  .jobs-col-error {
+    width: auto;
+  }
+
+  .jobs-col-date {
+    width: 11%;
+  }
+
+  .jobs-col-run {
+    width: 6.5rem;
+  }
+}
+
+.col-name {
+  font-weight: 500;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.col-error {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
+
+.col-date {
+  color: #9ca3af;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.col-run {
+  width: 6rem;
+  white-space: nowrap;
+
+  button {
+    min-width: 5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+::ng-deep .filter-field.mat-mdc-form-field {
+  .mat-mdc-text-field-wrapper {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  .mat-mdc-select-value-text,
+  .mat-mdc-select-min-line {
+    color: #ffffff !important;
+  }
+
+  .mat-mdc-select-arrow svg {
+    fill: rgba(255, 255, 255, 0.9);
+  }
+
+  .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mat-mdc-notch-piece {
+    border-color: rgba(255, 255, 255, 0.35);
+  }
+
+  .mat-mdc-floating-label,
+  .mdc-floating-label {
+    color: rgba(255, 255, 255, 0.75) !important;
+  }
+
+  &.mat-focused .mat-mdc-floating-label,
+  &.mat-focused .mdc-floating-label--float-above {
+    color: rgba(255, 255, 255, 0.95) !important;
+  }
+}

@@ -19,6 +19,7 @@ export const API_URLS = {
   create_event:           UNITE_API_BASE_PATH + '/post/event',
   polls:                  UNITE_API_BASE_PATH + '/poll',
   area:                   UNITE_API_BASE_PATH + '/area',
+  area_admin_view:        UNITE_API_BASE_PATH + '/area/admin-view',
   get_managers_area:      UNITE_API_BASE_PATH + '/area',
   buildings:              UNITE_API_BASE_PATH + '/building',
   add_user_to_building:   UNITE_API_BASE_PATH + '/building/user',
@@ -33,6 +34,8 @@ export const API_URLS = {
   notifications:          UNITE_API_BASE_PATH + '/notification',
   notification_seen:      UNITE_API_BASE_PATH + '/notification',
   offering:               UNITE_API_BASE_PATH + '/offering',
+  jobs:                   UNITE_API_BASE_PATH + '/job',
+  jobs_rerun_all:         UNITE_API_BASE_PATH + '/job/rerun-all',
 
   conversations:          UNITE_CHATTING_UNITE_API_BASE_PATH + '/conversation',
   messages:               UNITE_CHATTING_UNITE_API_BASE_PATH + '/message',

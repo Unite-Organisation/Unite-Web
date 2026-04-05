@@ -33,3 +33,22 @@ export interface ResidentToAdd {
   lastName: string;
   userId: string;
 }
+
+export interface BuildingInfoResponse {
+  id: string;
+  name: string;
+  street: string;
+  number: string;
+  usersNumber: number;
+}
+
+export interface AreaInfoResponse {
+  id: string;
+  name: string;
+  country: string;
+  city: string;
+  areaType: AreaType;
+  createdAt: string;
+  usersNumber: number;
+  buildings: BuildingInfoResponse[];
+}

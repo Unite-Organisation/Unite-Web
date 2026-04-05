@@ -1,0 +1,38 @@
+<div class="admin-area-view">
+  <header class="admin-area-header">
+    <h1>Areas and buildings</h1>
+    <p class="admin-area-subtitle">List of areas and buildings with the number of residents</p>
+  </header>
+
+  <div *ngIf="isLoading" class="admin-area-loading"></div>
+
+  <div *ngIf="!isLoading && areas.length === 0" class="admin-area-empty">
+    No data to display.
+  </div>
+
+  <mat-accordion *ngIf="!isLoading && areas.length > 0" class="admin-area-accordion" multi>
+    <mat-expansion-panel *ngFor="let area of areas" class="admin-area-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <span class="area-name">{{ area.name }}</span>
+          <span class="area-meta">{{ area.city }}, {{ area.country }} · {{ area.areaType }}</span>
+        </mat-panel-title>
+        <mat-panel-description>
+          Area residents: {{ area.usersNumber }} · Created at: {{ formatDate(area.createdAt) }}
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <div class="buildings-block">
+        <h3 class="buildings-heading">Buildings ({{ area.buildings.length }})</h3>
+        <ul class="buildings-list" *ngIf="area.buildings.length > 0">
+          <li *ngFor="let b of area.buildings" class="building-row">
+            <span class="building-name">{{ b.name }}</span>
+            <span class="building-address">{{ b.street }} {{ b.number }}</span>
+            <span class="building-users">Residents: {{ b.usersNumber }}</span>
+          </li>
+        </ul>
+        <p *ngIf="area.buildings.length === 0" class="no-buildings">No buildings in this area.</p>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>
