@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -35,11 +35,21 @@ export class Register {
   private readonly authApi = inject(AuthApiService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
-  private readonly errorService = inject(ErrorService)
+  private readonly errorService = inject(ErrorService);
   private readonly authService = inject(AuthService);
 
   protected isSubmitting = false;
   readonly roles = ['RESIDENT', 'MANAGER', 'ADMIN'];
+  private readonly passwordsMatchValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
+    const password = group.get('password')?.value;
+    const confirmPassword = group.get('confirmPassword')?.value;
+
+    if (!password || !confirmPassword) {
+      return null;
+    }
+
+    return password === confirmPassword ? null : { passwordMismatch: true };
+  };
 
   readonly form: FormGroup = this.fb.group({
     firstName: this.fb.control('', { validators: [Validators.required, Validators.minLength(2)], nonNullable: true }),
@@ -47,11 +57,12 @@ export class Register {
     username: this.fb.control('', { validators: [Validators.required, Validators.minLength(4)], nonNullable: true }),
     email: this.fb.control('', { validators: [Validators.required, Validators.email], nonNullable: true }),
     password: this.fb.control('', { validators: [Validators.required, Validators.minLength(8)], nonNullable: true }),
+    confirmPassword: this.fb.control('', { validators: [Validators.required], nonNullable: true }),
     role: this.fb.control('RESIDENT', { validators: [Validators.required], nonNullable: true })
-  });
+  }, { validators: this.passwordsMatchValidator });
 
   readonly formValue = computed<UserRegisterRequest | null>(() =>
-    this.form.valid ? (this.form.value as UserRegisterRequest) : null
+    this.form.valid ? this.toRegisterPayload() : null
   );
 
   handleSubmit(): void {
@@ -60,7 +71,7 @@ export class Register {
       return;
     }
 
-    const payload = this.form.value as UserRegisterRequest;
+    const payload = this.toRegisterPayload();
     this.isSubmitting = true;
 
     this.authApi.register(payload)
@@ -85,9 +96,14 @@ export class Register {
           this.errorService.handleServerError(error);
         }
       });
-    }
+  }
 
-    switchToLogin(): void {
-      this.router.navigateByUrl('/login')
-    }
+  switchToLogin(): void {
+    this.router.navigateByUrl('/login');
+  }
+
+  private toRegisterPayload(): UserRegisterRequest {
+    const { firstName, lastName, username, email, password, role } = this.form.getRawValue();
+    return { firstName, lastName, username, email, password, role };
+  }
 }

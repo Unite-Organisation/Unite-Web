@@ -36,20 +36,34 @@ $toast-error-accent: #f44336;
 }
 
 /* Shared auth card layout (login/register) */
+.auth-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: radial-gradient(circle at top left, #2e3550 0%, #1d2335 45%, #111626 100%);
+}
+
 .auth-shell {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   max-width: 640px;
-  margin: 2rem auto;
-  padding: 0.2rem;
-  background-color: #ece5e5;
+  width: min(100%, 640px);
+  margin: 0;
+  padding: 1rem;
+  background: rgba(214, 45, 45, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
-  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.35);
 }
 
 .auth-card {
   padding: 1.5rem;
+  background: rgba(254, 239, 255, 0.98) !important;
+  color: #1f2538 !important;
+  border-radius: 14px !important;
 }
 
 .auth-form {
@@ -63,9 +77,26 @@ $toast-error-accent: #f44336;
 .auth-title {
   display: flex;
   justify-content: center;
-  font-size: 28px;
+  font-size: 20px;
   font-weight: bold;
-  margin-bottom: 32px;
+  margin-bottom: 8px;
+  color: #1f2538;
+}
+
+.auth-brand {
+  margin: 0;
+  text-align: center;
+  font-size: 35px;
+  color: #60a5fa;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.auth-subtitle {
+  margin: 0 0 0.75rem;
+  text-align: center;
+  color: #60a5fa;
+  font-size: 17px;
 }
 
 .auth-action-row {
@@ -76,13 +107,18 @@ $toast-error-accent: #f44336;
 
 .auth-action-link {
   cursor: pointer;
+  color: #60a5fa;
   text-decoration: none;
 
   &:hover {
-    color: #a70707;
+    color: #8faeff;
     opacity: 0.8;
     transition: all 0.3s ease-in-out;
   }
+}
+
+.my-custom-dropdown {
+  background-color: rgba(254, 239, 255, 0.98) !important;
 }
 
 html {
@@ -97,22 +133,12 @@ html {
 }
 
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
   color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
   background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
   margin: 0;
 }
-/* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

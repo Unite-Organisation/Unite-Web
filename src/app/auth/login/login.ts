@@ -15,10 +15,12 @@ import { ErrorService } from '../../core/error.sevice';
 import { HttpErrorResponse } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-login',
   imports: [
+    MatIconModule,
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
