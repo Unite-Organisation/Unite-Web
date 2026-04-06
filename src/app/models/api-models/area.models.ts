@@ -32,6 +32,8 @@ export interface ResidentToAdd {
   firstName: string;
   lastName: string;
   userId: string;
+  username: string;
+  email: string;
 }
 
 export interface BuildingInfoResponse {

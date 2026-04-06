@@ -86,13 +86,26 @@ mat-dialog-content {
     flex: 1;
     display: flex;
     align-items: center;
+    gap: 1rem;
+
+    span {
+      flex: 1; 
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      
+      color: rgba(0, 0, 0, 0.6);
+      font-size: 0.9rem;
+    }
+
+    .user-name {
+      flex: 1;
+      color: rgba(0, 0, 0, 0.87);
+      font-size: 1rem;
+      font-weight: 500;
+    }
   }
 
-  .user-name {
-    font-size: 1rem;
-    color: rgba(0, 0, 0, 0.87);
-    font-weight: 500;
-  }
 
   .check-icon {
     color: #1976d2;

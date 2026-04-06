@@ -30,6 +30,7 @@
                 (click)="selectConversation(conversation)">
                 <div class="chat-avatar">
                     <mat-icon>{{ conversation.isGroup ? 'group' : 'person' }}</mat-icon>
+                    <span *ngIf="conversation.active" class="status-indicator"></span>
                 </div>
                 <div class="chat-info">
                     <div class="chat-header">

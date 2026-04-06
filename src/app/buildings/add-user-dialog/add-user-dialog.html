@@ -27,6 +27,8 @@
           class="user-item">
           <div class="user-info">
             <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
+            <span>{{user.username}}</span>
+            <span>{{user.email}}</span>
           </div>
           <mat-icon *ngIf="isSelected(user.userId)" class="check-icon">check_circle</mat-icon>
         </div>
