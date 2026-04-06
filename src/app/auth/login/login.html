@@ -1,10 +1,10 @@
-<div class="auth-shell">
-  <mat-card class="auth-card">
+<div class="auth-page">
+  <div class="auth-shell">
+    <mat-card class="auth-card">
 
     <mat-card-content>
-      <mat-card-title class="auth-title">
-        Log in
-      </mat-card-title>
+      <p class="auth-brand">Unite</p>
+      <p class="auth-subtitle">Sign in to continue</p>
       <form [formGroup]="form" (ngSubmit)="handleSubmit()" class="auth-form">
         <mat-form-field appearance="outline">
           <mat-label>Username</mat-label>
@@ -39,5 +39,6 @@
         <ng-template #loggingInTpl>Logging in…</ng-template>
       </form>
     </mat-card-content>
-  </mat-card>
+    </mat-card>
+  </div>
 </div>
