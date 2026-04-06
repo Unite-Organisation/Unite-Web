@@ -4,6 +4,7 @@ export interface ConversationResponse {
     name: string;
     createdAt: string;
     updatedAt: string;
+    active: boolean;
 }
 
 export interface ConversationMessage {

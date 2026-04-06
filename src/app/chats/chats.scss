@@ -33,10 +33,6 @@
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 12px;
   overflow: hidden;
-  // Stała, ale „ściśnięta” szerokość, wyrównana do lewej
-  // max-width: 1000px;
-  // width: 100%;
-  // box-sizing: border-box;
 }
 
 // Sidebar
@@ -144,6 +140,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  position: relative;
 
   mat-icon {
     font-size: 1.5rem;
@@ -151,6 +148,18 @@
     height: 1.5rem;
     color: #818cf8;
   }
+}
+
+.status-indicator {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  height: 11px;
+  width: 11px;
+  background-color: #2ecc71;
+  border-radius: 50%;
+  border: 3px solid rgba(23, 19, 31, 0);
+  z-index: 2;
 }
 
 .chat-info {
