@@ -1,0 +1,62 @@
+<div class="tournament-card" [class.open]="tournament.status === TournamentStatus.OPEN"
+     [class.closed]="tournament.status === TournamentStatus.CLOSED"
+     [class.finished]="tournament.status === TournamentStatus.FINISHED"
+     [class.clickable]="true"
+     (click)="cardClick.emit()">
+  <div class="tournament-header">
+    <span class="type-badge">
+      <mat-icon>{{ typeIcon }}</mat-icon>
+      {{ typeLabel }}
+    </span>
+    <span class="status-badge">{{ statusLabel }}</span>
+  </div>
+
+  <h3>{{ tournament.name }}</h3>
+
+  <p class="tournament-description" *ngIf="tournament.description">
+    {{ tournament.description }}
+  </p>
+
+  <div class="tournament-meta">
+    <div class="meta-item">
+      <mat-icon>person</mat-icon>
+      <span>{{ tournament.authorDisplayName }}</span>
+    </div>
+    <div class="meta-item">
+      <mat-icon>groups</mat-icon>
+      <span>{{ participantsLabel }}</span>
+    </div>
+    <div class="meta-item">
+      <mat-icon>group_work</mat-icon>
+      <span>{{ teamSizeLabel }}</span>
+    </div>
+  </div>
+
+  <div class="participants-list" *ngIf="tournament.participants.length > 0">
+    <span class="participants-title">Participants:</span>
+    <span class="participant-name" *ngFor="let participant of tournament.participants">
+      {{ participant.displayName }}
+    </span>
+  </div>
+
+  <div class="tournament-actions" *ngIf="tournament.status === TournamentStatus.OPEN" (click)="$event.stopPropagation()">
+    <button
+      *ngIf="canJoin"
+      mat-flat-button
+      color="primary"
+      (click)="joinClick.emit(); $event.stopPropagation()"
+      [disabled]="isJoining">
+      <mat-spinner *ngIf="isJoining" diameter="18"></mat-spinner>
+      <span *ngIf="!isJoining">Weź udział</span>
+    </button>
+
+    <button
+      *ngIf="canAddParticipants"
+      mat-stroked-button
+      (click)="addParticipantsClick.emit(); $event.stopPropagation()">
+      Add participants
+    </button>
+
+    <span *ngIf="isParticipant && !canJoin" class="joined-badge">Already joined</span>
+  </div>
+</div>

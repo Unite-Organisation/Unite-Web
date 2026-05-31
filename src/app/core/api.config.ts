@@ -36,6 +36,8 @@ export const API_URLS = {
   offering:               UNITE_API_BASE_PATH + '/offering',
   jobs:                   UNITE_API_BASE_PATH + '/job',
   jobs_rerun_all:         UNITE_API_BASE_PATH + '/job/rerun-all',
+  tournament:             UNITE_API_BASE_PATH + '/tournament',
+  tournament_add_participant: UNITE_API_BASE_PATH + '/tournament/add-participant',
 
   conversations:          UNITE_CHATTING_UNITE_API_BASE_PATH + '/conversation',
   messages:               UNITE_CHATTING_UNITE_API_BASE_PATH + '/message',

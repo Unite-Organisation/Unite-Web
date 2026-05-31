@@ -38,6 +38,10 @@
         <mat-icon>how_to_vote</mat-icon>
         <span>Polls</span>
       </button>
+      <button mat-button routerLink="/home/tournaments" routerLinkActive="home-link-active" *ngIf="rolesService.isResident()">
+        <mat-icon>emoji_events</mat-icon>
+        <span>Tournaments</span>
+      </button>
       <button mat-button routerLink="/home/chats" routerLinkActive="home-link-active">
         <mat-icon>chat</mat-icon>
         <span>Chats</span>

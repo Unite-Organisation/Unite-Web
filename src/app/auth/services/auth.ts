@@ -71,12 +71,32 @@ export class AuthService {
   }
 
   public getCurrentUserId(): string | null {
+    const storedUserId = this.getStoredUserId();
+    if (storedUserId) {
+      return storedUserId;
+    }
+
     const decodedToken = this.getDecodedToken();
-    
+
     if (decodedToken && decodedToken['sub']) {
       return decodedToken['sub'];
     }
     return null;
+  }
+
+  public getStoredUserId(): string | null {
+    const metaRaw = localStorage.getItem(USER_META_INFO_KEY);
+    if (!metaRaw) {
+      return null;
+    }
+
+    try {
+      const meta = JSON.parse(metaRaw);
+      return meta.userId ?? null;
+    } catch (e) {
+      console.error('Failed to parse user meta info from localStorage', e);
+      return null;
+    }
   }
 
 }

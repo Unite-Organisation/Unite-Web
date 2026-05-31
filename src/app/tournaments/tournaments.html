@@ -1,0 +1,31 @@
+<div class="post-container">
+  <div class="button-container" *ngIf="canCreateTournament">
+    <add-button (buttonClick)="openCreateTournamentDialog()">
+      Create tournament
+    </add-button>
+  </div>
+
+  <div class="tournaments-grid" *ngIf="!isLoading && tournaments.length > 0">
+    <tournament-card
+      *ngFor="let tournament of tournaments"
+      [tournament]="tournament"
+      [canJoin]="canJoin(tournament)"
+      [canAddParticipants]="canAddParticipants(tournament)"
+      [isParticipant]="isParticipant(tournament)"
+      [isJoining]="isJoining(tournament.id)"
+      (cardClick)="openTournamentDetail(tournament)"
+      (joinClick)="joinTournament(tournament)"
+      (addParticipantsClick)="openAddParticipantsDialog(tournament)">
+    </tournament-card>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <p>Loading tournaments...</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoading && tournaments.length === 0">
+    <mat-icon>emoji_events</mat-icon>
+    <h2>No Tournaments</h2>
+    <p>There are no tournaments yet. Create one and invite residents to join.</p>
+  </div>
+</div>

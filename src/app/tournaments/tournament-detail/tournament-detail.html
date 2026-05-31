@@ -1,0 +1,32 @@
+<div class="tournament-detail">
+  <div class="detail-header">
+    <a mat-button routerLink="/home/tournaments" class="back-link">
+      <mat-icon>arrow_back</mat-icon>
+      Back to tournaments
+    </a>
+
+    <div class="title-block" *ngIf="tournament">
+      <mat-icon class="title-icon">emoji_events</mat-icon>
+      <div>
+        <h1>{{ tournament.name }}</h1>
+        <p>Tournament bracket</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Loading bracket...</p>
+  </div>
+
+  <div class="empty-bracket" *ngIf="!isLoading && tournament && !hasBracket">
+    <mat-icon>account_tree</mat-icon>
+    <h2>Bracket not available yet</h2>
+    <p>The bracket will appear here once the tournament author starts the tournament.</p>
+  </div>
+
+  <tournament-bracket
+    *ngIf="!isLoading && tournament && hasBracket"
+    [tournament]="tournament">
+  </tournament-bracket>
+</div>

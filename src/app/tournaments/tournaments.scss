@@ -1,0 +1,78 @@
+.post-container {
+  width: 100%;
+  max-width: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.button-container {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.tournaments-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+  box-sizing: border-box;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+
+  p {
+    font-size: 1.1rem;
+    color: #9ca3af;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+
+  mat-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    color: #4b5563;
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #d1d5db;
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    color: #9ca3af;
+    font-size: 1rem;
+    margin: 0;
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tournaments-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

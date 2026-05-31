@@ -18,6 +18,14 @@ export const routes: Routes = [
                 loadComponent: () => import('./polls/polls').then(m => m.Polls)
             },
             {
+                path: 'tournaments',
+                loadComponent: () => import('./tournaments/tournaments').then(m => m.Tournaments)
+            },
+            {
+                path: 'tournaments/:id',
+                loadComponent: () => import('./tournaments/tournament-detail/tournament-detail').then(m => m.TournamentDetail)
+            },
+            {
                 path: 'announcements',
                 loadComponent: () => import('./announcements/announcements').then(m => m.Announcements)
             },

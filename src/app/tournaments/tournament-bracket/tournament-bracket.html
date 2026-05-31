@@ -1,0 +1,58 @@
+<div class="bracket-viewport">
+  <div class="bracket" [style.min-height.px]="bracketHeight">
+    <div
+      class="round-column"
+      *ngFor="let round of rounds; let roundIndex = index; trackBy: trackRound"
+      [class.is-final]="roundIndex === rounds.length - 1">
+      <div class="round-header">
+        <span class="round-label">{{ round.roundName }}</span>
+        <span class="round-number">Round {{ round.roundNumber }}</span>
+      </div>
+
+      <div class="round-matches" [style.height.px]="bracketHeight">
+        <div
+          class="match-wrapper"
+          *ngFor="let match of round.matches; let matchIndex = index; trackBy: trackMatch"
+          [style.top.px]="getMatchTop(roundIndex, matchIndex)">
+          <div class="match-card" [class.live]="isLive(match)">
+            <div class="match-status">
+              <span class="status-badge" [class.live]="isLive(match)">
+                {{ getStatusLabel(match.status) }}
+              </span>
+            </div>
+
+            <div
+              class="team-row"
+              [class.winner]="isWinner(match, match.teamA)"
+              [class.empty]="!match.teamA">
+              <div class="team-info">
+                <span class="team-name">{{ getTeamLabel(match.teamA) }}</span>
+                <span class="team-members" *ngIf="getMemberNames(match.teamA)">
+                  {{ getMemberNames(match.teamA) }}
+                </span>
+              </div>
+              <mat-icon *ngIf="isWinner(match, match.teamA)" class="winner-icon">emoji_events</mat-icon>
+            </div>
+
+            <div class="team-divider"></div>
+
+            <div
+              class="team-row"
+              [class.winner]="isWinner(match, match.teamB)"
+              [class.empty]="!match.teamB">
+              <div class="team-info">
+                <span class="team-name">{{ getTeamLabel(match.teamB) }}</span>
+                <span class="team-members" *ngIf="getMemberNames(match.teamB)">
+                  {{ getMemberNames(match.teamB) }}
+                </span>
+              </div>
+              <mat-icon *ngIf="isWinner(match, match.teamB)" class="winner-icon">emoji_events</mat-icon>
+            </div>
+          </div>
+
+          <div class="connector" *ngIf="roundIndex < rounds.length - 1"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
