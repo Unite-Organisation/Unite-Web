@@ -4,7 +4,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
+import { FormFieldComponent } from '../../shared/components/form-field/form-field.component';
+import { ButtonComponent } from '../../shared/components/button/button.component';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { UserLoginRequest } from '../../models/auth-models/auth.models';
@@ -26,7 +27,8 @@ import { MatIconModule } from '@angular/material/icon';
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule
+    ButtonComponent,
+    FormFieldComponent
   ],
   standalone: true, 
   templateUrl: './login.html',
