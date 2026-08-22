@@ -1,0 +1,257 @@
+<div class="announcement-create-page">
+
+  <header class="page-header">
+    <button
+      type="button"
+      class="back-link"
+      (click)="cancel()"
+    >
+      ← Back to announcements
+    </button>
+
+    <p class="eyebrow">Announcements</p>
+
+    <h1>Create New Announcement</h1>
+
+    <p class="subtitle">
+      Publish an important update for residents in a selected building.
+    </p>
+  </header>
+
+
+  @if (isLoadingBuildings) {
+
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+
+      <p>
+        Loading buildings...
+      </p>
+    </div>
+
+  } @else {
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      class="announcement-form"
+    >
+
+      <!-- General -->
+
+      <section class="form-card">
+
+        <div class="form-card__header">
+          <div>
+            <p class="section-label">
+              General
+            </p>
+
+            <h2>
+              Announcement details
+            </h2>
+          </div>
+        </div>
+
+
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
+          <mat-label>
+            Announcement Name
+          </mat-label>
+
+          <input
+            matInput
+            formControlName="name"
+            placeholder="e.g. Water maintenance"
+          />
+
+          @if (
+            form.controls['name'].hasError('required') &&
+            form.controls['name'].touched
+          ) {
+            <mat-error>
+              Name is required
+            </mat-error>
+          }
+
+        </mat-form-field>
+
+
+        <mat-form-field
+          appearance="outline"
+          class="full-width description-field"
+        >
+          <mat-label>
+            Content
+          </mat-label>
+
+          <textarea
+            matInput
+            formControlName="content"
+            rows="6"
+            placeholder="Write the announcement..."
+          ></textarea>
+
+          @if (
+            form.controls['content'].hasError('required') &&
+            form.controls['content'].touched
+          ) {
+            <mat-error>
+              Content is required
+            </mat-error>
+          }
+
+        </mat-form-field>
+
+      </section>
+
+
+      <!-- Audience -->
+
+      <section class="form-card">
+
+        <div class="form-card__header">
+          <div>
+            <p class="section-label">
+              Audience
+            </p>
+
+            <h2>
+              Select building
+            </h2>
+          </div>
+        </div>
+
+
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
+          <mat-label>
+            Building
+          </mat-label>
+
+          <mat-select
+            formControlName="buildingId"
+          >
+
+            @for (
+              building of buildings;
+              track building.id
+            ) {
+              <mat-option
+                [value]="building.id"
+              >
+                {{ building.name }}
+                ({{ building.street }}
+                {{ building.number }},
+                {{ building.city }})
+              </mat-option>
+            }
+
+          </mat-select>
+
+          @if (
+            form.controls['buildingId'].hasError('required') &&
+            form.controls['buildingId'].touched
+          ) {
+            <mat-error>
+              Building is required
+            </mat-error>
+          }
+
+        </mat-form-field>
+
+      </section>
+
+
+      <!-- Date -->
+
+      <section class="form-card">
+
+        <div class="form-card__header">
+          <div>
+            <p class="section-label">
+              Schedule
+            </p>
+
+            <h2>
+              Related date
+            </h2>
+          </div>
+        </div>
+
+
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+        >
+          <mat-label>
+            Related Date
+          </mat-label>
+
+          <input
+            matInput
+            [matDatepicker]="picker"
+            formControlName="relatedDate"
+          />
+
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="picker"
+          ></mat-datepicker-toggle>
+
+          <mat-datepicker
+            #picker
+          ></mat-datepicker>
+
+          @if (
+            form.controls['relatedDate'].hasError('required') &&
+            form.controls['relatedDate'].touched
+          ) {
+            <mat-error>
+              Date is required
+            </mat-error>
+          }
+
+        </mat-form-field>
+
+      </section>
+
+
+      <!-- Actions -->
+
+      <div class="form-actions">
+
+        <app-button
+          variant="ghost"
+          size="md"
+          type="button"
+          (clicked)="cancel()"
+        >
+          Cancel
+        </app-button>
+
+        <app-button
+          variant="primary"
+          size="md"
+          type="submit"
+          [disabled]="form.invalid || isSubmitting"
+        >
+          @if (isSubmitting) {
+            Creating...
+          } @else {
+            Create Announcement
+          }
+        </app-button>
+
+      </div>
+
+    </form>
+
+  }
+
+</div>

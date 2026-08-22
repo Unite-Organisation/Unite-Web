@@ -22,6 +22,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./announcements/announcements').then(m => m.Announcements)
             },
             {
+                path: 'announcements/create',
+                loadComponent: () => import('./announcements/announcement-create/announcement-create').then(m => m.CreateAnnouncement)
+            },
+            {
                 path: 'events',
                 loadComponent: () => import('./events/events').then(m => m.Events)
             },

@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { BuildingResponse } from '../../models/api-models/area.models';
+import { ButtonComponent } from '../components/button/button.component';
 
 @Component({
   selector: 'plain-card',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, MatButtonModule, MatIconModule, ButtonComponent],
   templateUrl: './plain-card.html',
   styleUrl: './plain-card.scss'
 })
