@@ -1,0 +1,254 @@
+<div class="facility-create-page">
+
+  <header class="page-header">
+    <div>
+      <button
+        type="button"
+        class="back-link"
+        (click)="cancel()"
+      >
+        ← Back to facilities
+      </button>
+
+      <p class="eyebrow">Facilities</p>
+
+      <h1>Add New Facilities</h1>
+
+      <p class="subtitle">
+        Add one or more facilities to a selected building.
+      </p>
+    </div>
+  </header>
+
+
+  @if (isLoadingBuildings) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading buildings...</p>
+    </div>
+  } @else {
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      class="facility-form"
+    >
+
+      <!-- Building -->
+
+      <section class="form-card">
+
+        <div class="form-card__header">
+          <div>
+            <p class="section-label">Building</p>
+            <h2>Select building</h2>
+          </div>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Building</mat-label>
+
+          <mat-select formControlName="buildingId">
+            @for (building of buildings; track building.id) {
+              <mat-option [value]="building.id">
+                {{ building.name }}
+                ({{ building.street }} {{ building.number }},
+                {{ building.city }})
+              </mat-option>
+            }
+          </mat-select>
+
+          @if (form.controls['buildingId'].hasError('required')) {
+            <mat-error>
+              Building is required
+            </mat-error>
+          }
+        </mat-form-field>
+
+      </section>
+
+
+      <!-- Facilities -->
+
+      <section class="form-card">
+
+        <div class="form-card__header">
+
+          <div>
+            <p class="section-label">Facilities</p>
+            <h2>Facility details</h2>
+          </div>
+
+          <app-button
+            variant="outline"
+            size="sm"
+            type="button"
+            (clicked)="addFacility()"
+          >
+            + Add another
+          </app-button>
+
+        </div>
+
+
+        <div
+          formArrayName="facilities"
+          class="facilities-list"
+        >
+
+          @for (
+            facility of facilitiesFormArray.controls;
+            track facility;
+            let i = $index
+          ) {
+
+            <div
+              class="facility-item"
+              [formGroupName]="i"
+            >
+
+              <div class="facility-item__header">
+
+                <div>
+                  <span class="facility-number">
+                    Facility {{ i + 1 }}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  class="remove-button"
+                  (click)="removeFacility(i)"
+                  [disabled]="facilitiesFormArray.length === 1"
+                >
+                  Remove
+                </button>
+
+              </div>
+
+
+              <div class="facility-fields">
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Name</mat-label>
+
+                  <input
+                    matInput
+                    formControlName="name"
+                    placeholder="e.g. Ping Pong Table"
+                  />
+
+                  @if (facility.get('name')?.hasError('required')) {
+                    <mat-error>
+                      Name is required
+                    </mat-error>
+                  }
+                </mat-form-field>
+
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Type</mat-label>
+
+                  <mat-select formControlName="type">
+                    @for (facilityType of facilityTypes; track facilityType) {
+                      <mat-option [value]="facilityType">
+                        {{ facilityType }}
+                      </mat-option>
+                    }
+                  </mat-select>
+
+                  @if (facility.get('type')?.hasError('required')) {
+                    <mat-error>
+                      Type is required
+                    </mat-error>
+                  }
+                </mat-form-field>
+
+
+                <div class="form-row">
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Capacity</mat-label>
+
+                    <input
+                      matInput
+                      type="number"
+                      min="1"
+                      formControlName="capacity"
+                      placeholder="Optional"
+                    />
+                  </mat-form-field>
+
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Location</mat-label>
+
+                    <input
+                      matInput
+                      formControlName="location"
+                      placeholder="e.g. Basement, Floor 2"
+                    />
+                  </mat-form-field>
+
+                </div>
+
+
+                <div class="approval-row">
+
+                  <div>
+                    <span class="approval-title">
+                      Requires approval
+                    </span>
+
+                    <span class="approval-description">
+                      Reservations must be approved before they become active.
+                    </span>
+                  </div>
+
+                  <mat-slide-toggle formControlName="requiresApproval">
+                  </mat-slide-toggle>
+
+                </div>
+
+              </div>
+
+            </div>
+          }
+
+        </div>
+
+      </section>
+
+
+      <!-- Bottom actions -->
+
+      <div class="form-actions">
+
+        <app-button
+          variant="ghost"
+          size="md"
+          type="button"
+          (clicked)="cancel()"
+        >
+          Cancel
+        </app-button>
+
+        <app-button
+          variant="primary"
+          size="md"
+          type="submit"
+          [disabled]="form.invalid || isSubmitting"
+        >
+          @if (isSubmitting) {
+            Creating...
+          } @else {
+            Create Facilities
+          }
+        </app-button>
+
+      </div>
+
+    </form>
+  }
+
+</div>
