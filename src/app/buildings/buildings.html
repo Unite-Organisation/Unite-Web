@@ -1,25 +1,78 @@
-<div class="buildings-container">
-  <div class="buildings-header">
-    <h2>Buildings Management</h2>
-    <button mat-flat-button color="primary" (click)="openCreateAreaDialog()">
-      <mat-icon>add</mat-icon>
-      <span>Create Area</span>
-    </button>
-  </div>
+<div class="buildings-page">
 
-  <div class="buildings-content">
-    <div *ngIf="isLoading" class="loading">
+  <header class="buildings-header">
+    <div>
+      <p class="eyebrow">Administration</p>
+      <h1>Buildings Management</h1>
+      <p class="subtitle">
+        Manage areas, buildings and residents
+      </p>
+    </div>
+
+    <app-button
+      variant="primary"
+      size="md"
+      (clicked)="createAnArea()"
+    >
+      + Create Area
+    </app-button>
+  </header>
+
+
+  @if (isLoading) {
+    <div class="loading-state">
       Loading buildings...
     </div>
-    <div *ngIf="!isLoading && buildings.length === 0" class="no-buildings">
-      <p>No buildings found. Create an area with buildings to get started.</p>
-    </div>
-    <plain-card 
-      *ngFor="let building of buildings" 
-      [building]="building"
-      (addUsers)="onAddUsers($event)">
-    </plain-card>
-  </div>
+  }
+
+
+  @if (!isLoading && buildings.length === 0) {
+    <section class="empty-state">
+      <div class="empty-state__icon">⌂</div>
+
+      <h2>No buildings found</h2>
+
+      <p>
+        Create an area with buildings to get started.
+      </p>
+
+      <app-button
+        variant="outline"
+        size="sm"
+        (clicked)="openCreateAreaDialog()"
+      >
+        Create first area
+      </app-button>
+    </section>
+  }
+
+
+  @if (!isLoading && buildings.length > 0) {
+    <section class="buildings-section">
+
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Properties</p>
+          <h2>All buildings</h2>
+        </div>
+
+        <span class="building-count">
+          {{ buildings.length }}
+          {{ buildings.length === 1 ? 'building' : 'buildings' }}
+        </span>
+      </div>
+
+
+      <div class="buildings-grid">
+        @for (building of buildings; track building.id) {
+          <plain-card
+            [building]="building"
+            (addUsers)="onAddUsers($event)"
+          ></plain-card>
+        }
+      </div>
+
+    </section>
+  }
+
 </div>
-
-

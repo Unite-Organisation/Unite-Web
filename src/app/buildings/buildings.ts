@@ -12,11 +12,13 @@ import { ErrorService } from '../core/error.sevice';
 import { AreaCreateRequest, BuildingResponse } from '../models/api-models/area.models';
 import { PlainCard } from '../shared/plain-card/plain-card';
 import { AddUserDialog } from './add-user-dialog/add-user-dialog';
+import { ButtonComponent } from '../shared/components/button/button.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-buildings',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatDialogModule, PlainCard],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatDialogModule, PlainCard, ButtonComponent],
   templateUrl: './buildings.html',
   styleUrl: './buildings.scss'
 })
@@ -27,11 +29,18 @@ export class Buildings implements OnInit {
   private readonly errorService = inject(ErrorService);
   protected buildings: BuildingResponse[] = [];
   protected isLoading = false;
+  private readonly router = inject(Router);
+
 
   ngOnInit(): void {
     this.getBuildings();
   }
 
+  protected createAnArea(): void {
+    this.router.navigate([
+      '/home/buildings/create',
+    ]);
+  }
   openCreateAreaDialog(): void {
     const dialogRef = this.dialog.open(CreateAreaDialog, {
       width: '800px',

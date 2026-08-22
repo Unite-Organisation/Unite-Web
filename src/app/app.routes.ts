@@ -62,6 +62,10 @@ export const routes: Routes = [
                 loadComponent: () => import('./buildings/buildings').then(m => m.Buildings)
             },
             {
+                path: 'buildings/create',
+                loadComponent: () => import('./buildings/area-create/area-create').then(m => m.CreateArea)
+            },
+            {
                 path: 'area',
                 loadComponent: () => import('./admin/admin-panel-layout/admin-panel-layout').then(m => m.AdminPanelLayout),
                 canActivate: [adminGuard],
