@@ -11,11 +11,13 @@ import { PostCard } from '../shared/post-card/post-card';
 import { CreateEventDialog } from './create-event-dialog/create-event-dialog';
 import { RolesService } from '../auth/services/roles.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { ButtonComponent } from '../shared/components/button/button.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [CommonModule, AddButton, PostCard, MatDialogModule, MatIconModule],
+  imports: [CommonModule, AddButton, PostCard, MatDialogModule, MatIconModule, ButtonComponent],
   templateUrl: './events.html',
   styleUrl: './events.scss',
 })
@@ -24,30 +26,27 @@ export class Events implements OnInit {
   private readonly postService = inject(PostService);
   private readonly dialog = inject(MatDialog);
   private readonly rolesService = inject(RolesService);
+  private readonly router = inject(Router);
 
   isLoading = false;
   posts: Post[] = [];
+  selectedPost: Post | null = null;
+
+  selectPost(post: Post): void {
+    this.selectedPost = post;
+  }
 
   get canCreateEvent(): boolean {
     return this.rolesService.isManager() || this.rolesService.isResident();
   }
 
-  openCreateEventDialog(): void {
-    const dialogRef = this.dialog.open(CreateEventDialog, {
-      width: '700px',
-      maxWidth: '90vw',
-      maxHeight: '90vh'
-    });
-
-    dialogRef.afterClosed().subscribe((result: boolean | undefined) => {
-      if (result) {
-        this.loadPosts();
-      }
-    });
-  }
 
   ngOnInit(): void {
     this.loadPosts();
+  }
+
+  createEvent(): void {
+    this.router.navigate(['/home/events/create']);
   }
 
   private loadPosts(): void {
@@ -60,6 +59,9 @@ export class Events implements OnInit {
       next: (data) => {
         this.posts = data;
         this.isLoading = false;
+        this.selectedPost = this.posts.length > 0
+        ? this.posts[0]
+        : null;
       },
       error: (error: HttpErrorResponse) => {
         console.error('Failed to load events', error);
