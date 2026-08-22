@@ -18,11 +18,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ErrorService } from '../core/error.sevice';
 import { forkJoin } from 'rxjs';
 import { ChatSocketService } from '../chats/chat-socket.service';
+import { ButtonComponent } from '../shared/components/button/button.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [CommonModule, MatButtonModule, MatIconModule, RouterLink, RouterLinkActive, RouterOutlet, ButtonComponent],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
