@@ -1,61 +1,516 @@
 <div class="facilities-container">
-    <div class="button-container" *ngIf="canCreateFacility">
-        <add-button 
-            (buttonClick)="openCreateFacilityDialog()">
-            Add new facility
-        </add-button>
-    </div>
 
-    <div class="facilities-grid" *ngIf="!isLoading && facilities.length > 0">
-        <div class="facility-card" *ngFor="let facility of facilities">
-            <div class="facility-info">
-                <div class="facility-header">
-                    <h3>{{ facility.name }}</h3>
-                    <div class="facility-actions">
-                        <button *ngIf="hasIssues(facility.id)" 
-                                mat-icon-button 
-                                class="issue-button"
-                                (click)="openFacilityIssuesDialog(facility)"
-                                [title]="'View ' + getIssuesCount(facility.id) + ' issue(s)'">
-                            <mat-icon class="issue-icon">error</mat-icon>
-                            <span class="issue-badge" *ngIf="getIssuesCount(facility.id) > 1">
-                                {{ getIssuesCount(facility.id) }}
-                            </span>
-                        </button>
-                        <button *ngIf="canReserveFacility" mat-icon-button 
-                                class="reserve-button"
-                                (click)="openReservationDialog(facility)"
-                                title="Reserve facility">
-                            <mat-icon>event</mat-icon>
-                        </button>
-                    </div>
-                </div>
-                <div class="facility-details">
-                    <p class="facility-type">
-                        <strong>Type:</strong> {{ facility.type }}
-                    </p>
-                    <p class="facility-capacity" *ngIf="facility.capacity">
-                        <strong>Capacity:</strong> {{ facility.capacity }} people
-                    </p>
-                    <p class="facility-location" *ngIf="facility.location">
-                        <strong>Location:</strong> {{ facility.location }}
-                    </p>
-                    <p class="facility-approval" *ngIf="facility.requiresApproval">
-                        <span class="approval-badge">Requires Approval</span>
-                    </p>
-                </div>
-            </div>
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <h1>Facilities</h1>
+            <p>Choose a facility and make a reservation.</p>
         </div>
+
+        <app-button
+            variant="primary"
+            size="md"
+            (clicked)="createFacility()"
+        >
+            + Add facility
+        </app-button>
     </div>
 
+
+    <!-- Loading -->
     <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner diameter="40"></mat-spinner>
         <p>Loading facilities...</p>
     </div>
 
-    <div class="empty-state" *ngIf="!isLoading && facilities.length === 0">
-        <mat-icon>apartment</mat-icon>
-        <h2>No Facilities</h2>
-        <p>There are no facilities available at the moment. Facilities like gyms, meeting rooms, and common areas will appear here.</p>
-    </div>
-</div>
 
+    <ng-container *ngIf="!isLoading && facilities.length > 0">
+
+        <!-- ================================================= -->
+        <!-- FACILITY SELECTOR -->
+        <!-- ================================================= -->
+
+        <div class="facilities-scroll">
+
+            <button
+                type="button"
+                class="facility-selector-card"
+                *ngFor="let facility of facilities"
+                [class.selected]="selectedFacility?.id === facility.id"
+                (click)="selectFacility(facility)">
+
+                <div class="facility-selector-icon">
+                    <!--<mat-icon>
+                        {{ getFacilityIcon(facility.type) }}
+                    </mat-icon>-->
+                </div>
+
+                <h3>{{ facility.name }}</h3>
+
+                <span *ngIf="facility.capacity">
+                    Cap. {{ facility.capacity }}
+                </span>
+
+            </button>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- MAIN CONTENT -->
+        <!-- ================================================= -->
+
+        <div
+            class="facility-content"
+            *ngIf="selectedFacility">
+
+            <!-- LEFT -->
+            <div class="facility-sidebar">
+
+                <!-- Selected facility preview -->
+                <div class="facility-preview">
+
+                    <!--<div class="preview-icon">
+                        <mat-icon>
+                            {{ getFacilityIcon(selectedFacility.type) }}
+                        </mat-icon>
+                    </div>-->
+
+
+                    <h2>{{ selectedFacility.name }}</h2>
+
+                    <p class="preview-meta">
+                        <span *ngIf="selectedFacility.location">
+                            {{ selectedFacility.location }}
+                        </span>
+
+                        <span *ngIf="selectedFacility.location && selectedFacility.capacity">
+                            ·
+                        </span>
+
+                        <span *ngIf="selectedFacility.capacity">
+                            capacity {{ selectedFacility.capacity }}
+                        </span>
+                    </p>
+
+                    <p class="preview-description">
+                        {{ selectedFacility.type }}
+                    </p>
+
+                    <div class="facility-tags">
+
+                        <span class="facility-tag">
+                            {{ selectedFacility.type }}
+                        </span>
+
+                        <span
+                            class="facility-tag"
+                            *ngIf="selectedFacility.requiresApproval">
+                            Requires approval
+                        </span>
+
+                    </div>
+
+                    <button
+                        *ngIf="hasIssues(selectedFacility.id)"
+                        mat-button
+                        class="issues-button"
+                        (click)="openFacilityIssuesDialog(selectedFacility)">
+
+                        <mat-icon>error_outline</mat-icon>
+
+                        View issues
+
+                        <span>
+                            ({{ getIssuesCount(selectedFacility.id) }})
+                        </span>
+
+                    </button>
+
+                </div>
+
+
+                <!-- Existing / own bookings -->
+                <!--<div class="my-bookings-card">
+
+                    <h3>MY BOOKINGS</h3>
+
+                    <ng-container *ngIf="myReservations?.length > 0; else noBookings">
+
+                        <div
+                            class="my-booking"
+                            *ngFor="let reservation of myReservations">
+
+                            <strong>
+                                {{ formatDateTime(reservation.startTime) }}
+                            </strong>
+
+                            <span>
+                                {{ formatDateTime(reservation.endTime) }}
+                            </span>
+
+                        </div>
+
+                    </ng-container>
+
+                    <ng-template #noBookings>
+                        <p>
+                            No bookings yet — select a date and time →
+                        </p>
+                    </ng-template>
+
+                </div>-->
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- RIGHT: RESERVATION FORM -->
+            <!-- ================================================= -->
+
+            <div class="reservation-panel">
+
+                <div class="reservation-header">
+
+                    <div>
+                        <span class="section-label">
+                            RESERVATION
+                        </span>
+
+                        <h2>
+                            Reserve {{ selectedFacility.name }}
+                        </h2>
+
+                        <p>
+                            Choose a date and available time for your reservation.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <!-- loading availability -->
+                <div
+                    *ngIf="isLoadingAvailability"
+                    class="availability-loading">
+
+                    <mat-spinner diameter="40"></mat-spinner>
+
+                    <p>
+                        Loading availability...
+                    </p>
+
+                </div>
+
+
+                <form
+                    *ngIf="!isLoadingAvailability"
+                    [formGroup]="form"
+                    class="reservation-form">
+
+                    <!-- Date -->
+
+                    <div class="form-section">
+
+                        <label class="field-label">
+                            Date
+                        </label>
+
+                        <mat-form-field
+                            appearance="outline"
+                            class="full-width">
+
+                            <mat-label>Select date</mat-label>
+
+                            <input
+                                matInput
+                                [matDatepicker]="datePicker"
+                                formControlName="date"
+                                [matDatepickerFilter]="dateFilter">
+
+                            <mat-datepicker-toggle
+                                matIconSuffix
+                                [for]="datePicker">
+                            </mat-datepicker-toggle>
+
+                            <mat-datepicker
+                                #datePicker>
+                            </mat-datepicker>
+
+                            <mat-error
+                                *ngIf="form.controls['date'].hasError('required')">
+                                Date is required
+                            </mat-error>
+
+                        </mat-form-field>
+
+                    </div>
+
+
+                    <!-- Time -->
+
+                    <div class="form-section">
+
+                        <div class="section-title-row">
+
+                            <label class="field-label">
+                                Time
+                            </label>
+
+                            <span class="section-help">
+                                30-minute intervals
+                            </span>
+
+                        </div>
+
+                        <div class="time-row">
+
+                            <mat-form-field appearance="outline">
+
+                                <mat-label>Start time</mat-label>
+
+                                <mat-select formControlName="startTime">
+
+                                    <mat-option
+                                        *ngFor="let time of timeSlots"
+                                        [value]="time">
+
+                                        {{ formatTimeDisplay(time) }}
+
+                                    </mat-option>
+
+                                </mat-select>
+
+                                <mat-error
+                                    *ngIf="form.controls['startTime'].hasError('required')">
+                                    Start time is required
+                                </mat-error>
+
+                            </mat-form-field>
+
+
+                            <div class="time-arrow">
+                                →
+                            </div>
+
+
+                            <mat-form-field appearance="outline">
+
+                                <mat-label>End time</mat-label>
+
+                                <mat-select formControlName="endTime">
+
+                                    <mat-option
+                                        *ngFor="let time of getAvailableEndTimes()"
+                                        [value]="time">
+
+                                        {{ formatTimeDisplay(time) }}
+
+                                    </mat-option>
+
+                                </mat-select>
+
+                                <mat-error
+                                    *ngIf="form.controls['endTime'].hasError('required')">
+                                    End time is required
+                                </mat-error>
+
+                            </mat-form-field>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Errors -->
+
+                    <div
+                        class="form-errors"
+                        *ngIf="
+                            form.hasError('timeRangeInvalid') ||
+                            form.hasError('maxDurationExceeded') ||
+                            form.hasError('overlapsWithReservation')
+                        ">
+
+                        <div
+                            class="error-message"
+                            *ngIf="form.hasError('timeRangeInvalid')">
+
+                            <mat-icon>error_outline</mat-icon>
+                            End time must be after start time
+
+                        </div>
+
+                        <div
+                            class="error-message"
+                            *ngIf="form.hasError('maxDurationExceeded')">
+
+                            <mat-icon>error_outline</mat-icon>
+                            Maximum reservation duration is 12 hours
+
+                        </div>
+
+                        <div
+                            class="error-message"
+                            *ngIf="form.hasError('overlapsWithReservation')">
+
+                            <mat-icon>error_outline</mat-icon>
+                            Selected time overlaps with an existing reservation
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Purpose -->
+
+                    <div class="form-section">
+
+                        <label class="field-label">
+                            Purpose
+                        </label>
+
+                        <mat-form-field
+                            appearance="outline"
+                            class="full-width">
+
+                            <mat-label>
+                                What will you use the facility for?
+                            </mat-label>
+
+                            <textarea
+                                matInput
+                                formControlName="purpose"
+                                rows="4">
+                            </textarea>
+
+                            <mat-error
+                                *ngIf="form.controls['purpose'].hasError('required')">
+                                Purpose is required
+                            </mat-error>
+
+                        </mat-form-field>
+
+                    </div>
+
+
+                    <!-- Existing reservations -->
+
+                    <div
+                        class="existing-reservations"
+                        *ngIf="reservations.length > 0">
+
+                        <div class="existing-header">
+
+                            <div>
+                                <span class="section-label">
+                                    AVAILABILITY
+                                </span>
+
+                                <h3>
+                                    Existing reservations
+                                </h3>
+                            </div>
+
+                            <span class="reservation-count">
+                                {{ reservations.length }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="reservations-list">
+
+                            <div
+                                class="reservation-item"
+                                *ngFor="let reservation of reservations">
+
+                                <div class="reservation-time">
+
+                                    <mat-icon>
+                                        schedule
+                                    </mat-icon>
+
+                                    <div>
+                                        <strong>
+                                            {{ formatDateTime(reservation.startTime) }}
+                                        </strong>
+
+                                        <span>
+                                            –
+                                            {{ formatDateTime(reservation.endTime) }}
+                                        </span>
+                                    </div>
+
+                                </div>
+
+                                <span class="reservation-user">
+                                    {{ reservation.userFirstName }}
+                                    {{ reservation.userLastName }}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Submit -->
+
+                    <div class="reservation-actions">
+
+                        <button
+                            mat-flat-button
+                            class="reserve-button"
+                            type="button"
+                            (click)="submit()"
+                            [disabled]="
+                                form.invalid ||
+                                isSubmitting ||
+                                isLoadingAvailability
+                            ">
+
+                            <span *ngIf="!isSubmitting">
+                                <mat-icon>
+                                    event_available
+                                </mat-icon>
+
+                                Reserve facility
+                            </span>
+
+                            <mat-spinner
+                                *ngIf="isSubmitting"
+                                diameter="20">
+                            </mat-spinner>
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </ng-container>
+
+
+    <!-- Empty -->
+
+    <div
+        class="empty-state"
+        *ngIf="!isLoading && facilities.length === 0">
+
+        <mat-icon>apartment</mat-icon>
+
+        <h2>No Facilities</h2>
+
+        <p>
+            There are no facilities available at the moment.
+        </p>
+
+    </div>
+
+</div>

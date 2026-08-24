@@ -1,91 +1,120 @@
 <div class="home-layout">
-  <aside class="home-sidenav">
-    <div class="home-brand">
-      <mat-icon class="brand-icon">holiday_village</mat-icon>
-      <span>Unite</span>
+
+  <nav class="navbar">
+    <div class="navbar__inner">
+
+      <a
+        routerLink="/home"
+        class="navbar__brand"
+      >
+        <span class="navbar__brand-mark">U</span>
+        <span class="navbar__brand-name">Unite</span>
+      </a>
+
+      <div class="navbar__links">
+
+        @if (rolesService.isResident() || rolesService.isAdmin()) {
+          <a
+            routerLink="/home"
+            routerLinkActive="navbar__link--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="navbar__link"
+          >
+            Home
+          </a>
+        }
+
+        @if (rolesService.isAdmin()) {
+          <a
+            routerLink="/home/area"
+            routerLinkActive="navbar__link--active"
+            class="navbar__link"
+          >
+            Admin panel
+          </a>
+        }
+
+        <a
+          routerLink="/home/announcements"
+          routerLinkActive="navbar__link--active"
+          class="navbar__link"
+        >
+          Announcements
+        </a>
+
+        <a
+          routerLink="/home/events"
+          routerLinkActive="navbar__link--active"
+          class="navbar__link"
+        >
+          Events
+        </a>
+
+        <a
+          routerLink="/home/facilities"
+          routerLinkActive="navbar__link--active"
+          class="navbar__link"
+        >
+          Facilities
+        </a>
+
+        @if (rolesService.isManager()) {
+          <a
+            routerLink="/home/buildings"
+            routerLinkActive="navbar__link--active"
+            class="navbar__link"
+          >
+            Buildings
+          </a>
+        }
+
+      </div>
+
+      <div class="navbar__right">
+
+        <div class="navbar__role">
+          <span class="navbar__role-label">
+            Logged in as
+          </span>
+
+          @if (rolesService.isResident()) {
+            <span class="navbar__role-value">
+              Resident
+            </span>
+          }
+
+          @if (rolesService.isManager()) {
+            <span class="navbar__role-value">
+              Manager
+            </span>
+          }
+
+          @if (rolesService.isAdmin()) {
+            <span class="navbar__role-value">
+              Admin
+            </span>
+          }
+        </div>
+
+        <button
+          type="button"
+          class="navbar__logout"
+          (click)="logout()"
+        >
+          Log out
+        </button>
+
+      </div>
+
     </div>
+  </nav>
 
-    <nav class="home-nav">
-      <button mat-button routerLink="/home" *ngIf="rolesService.isResident() || rolesService.isAdmin()" routerLinkActive="home-link-active" [routerLinkActiveOptions]="{ exact: true } ">
-        <mat-icon>home</mat-icon>
-        <span>Home</span>
-      </button>
-      <button mat-button routerLink="/home/area" routerLinkActive="home-link-active" *ngIf="rolesService.isAdmin()" class="admin-panel-button">
-        <mat-icon>admin_panel_settings</mat-icon>
-        <span>Admin panel</span>
-      </button>
-      <button mat-button routerLink="/home/announcements" routerLinkActive="home-link-active">
-        <mat-icon>campaign</mat-icon>
-        <span>Announcements</span>
-      </button>
-      <button mat-button routerLink="/home/events" routerLinkActive="home-link-active">
-        <mat-icon>event</mat-icon>
-        <span>Events</span>
-      </button>
-      <button mat-button routerLink="/home/facilities" routerLinkActive="home-link-active">
-        <mat-icon>sports_esports</mat-icon>
-        <span>Facilities</span>
-      </button>
-      <button mat-button routerLink="/home/offerings" routerLinkActive="home-link-active">
-        <mat-icon>local_offer</mat-icon>
-        <span>Offerings</span>
-      </button>
-      <button mat-button routerLink="/home/issues" routerLinkActive="home-link-active">
-        <mat-icon>report_problem</mat-icon>
-        <span>Issues</span>
-      </button>
-      <button mat-button routerLink="/home/polls" routerLinkActive="home-link-active">
-        <mat-icon>how_to_vote</mat-icon>
-        <span>Polls</span>
-      </button>
-      <button mat-button routerLink="/home/chats" routerLinkActive="home-link-active">
-        <mat-icon>chat</mat-icon>
-        <span>Chats</span>
-      </button>
-      <button mat-button routerLink="/home/buildings" routerLinkActive="home-link-active" *ngIf="rolesService.isManager()">
-        <mat-icon>business</mat-icon>
-        <span>Buildings</span>
-      </button>
-    </nav>
-
-    <div class="role-info" *ngIf="rolesService.isResident()">
-      <h3>Logged in as Resident</h3>
-    </div>
-
-    <div class="role-info" *ngIf="rolesService.isManager()">
-      <h3>Logged in as Manager</h3>
-    </div>
-
-    <div class="role-info" *ngIf="rolesService.isAdmin()">
-      <h3>Logged in as Admin</h3>
-    </div>
-
-    <button mat-stroked-button color="primary" class="home-logout" (click)="logout()">
-      Logout
-    </button>
-  </aside>
 
   <main class="home-content">
-    <div class="content-header">
-      <div class="action-buttons">
-        <button mat-flat-button 
-                [color]="canReportIssue ? 'primary' : null"
-                [style.opacity]="canReportIssue && rolesService.isResident() ? 1 : 0.5"
-                (click)="openReportIssueDialog()">
-          <mat-icon>add</mat-icon>
-          <span>Report problem</span>
-        </button>
-        <button mat-icon-button clas="notification-button">
-          <mat-icon>notifications</mat-icon>
-        </button>
-      </div>
-      
-      <div class="user-info">
-        <mat-icon class="user-avatar" fontIcon="account_circle"></mat-icon>
-      </div>
-    </div>
     <div class="main-content">
       <router-outlet></router-outlet>
     </div>
+
   </main>
+
 </div>

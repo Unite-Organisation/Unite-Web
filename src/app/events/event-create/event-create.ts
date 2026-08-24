@@ -1,0 +1,317 @@
+import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, inject, OnInit } from '@angular/core';
+
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+
+import { Router } from '@angular/router';
+
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+
+import { finalize } from 'rxjs/operators';
+
+import { AreaApiService } from '../../buildings/services/area-api.service';
+import { BuildingResponse } from '../../models/api-models/area.models';
+
+import {
+  EventRequest,
+  PostType,
+} from '../../models/api-models/posts.models';
+
+import { PostService } from '../../posts/services/post.service';
+
+import { ToastService } from '../../core/toast.service';
+import { ErrorService } from '../../core/error.sevice';
+
+import { ButtonComponent } from '../../shared/components/button/button.component';
+
+@Component({
+  selector: 'app-create-event',
+
+  standalone: true,
+
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatProgressSpinnerModule,
+    MatSlideToggleModule,
+
+    ButtonComponent,
+  ],
+
+  providers: [
+    provideNativeDateAdapter(),
+  ],
+
+  templateUrl: './event-create.html',
+  styleUrl: './event-create.scss',
+})
+export class CreateEvent implements OnInit {
+
+  private readonly fb = inject(FormBuilder);
+
+  private readonly router = inject(Router);
+
+  private readonly areaApiService = inject(AreaApiService);
+
+  private readonly postService = inject(PostService);
+
+  private readonly toast = inject(ToastService);
+
+  private readonly errorService = inject(ErrorService);
+
+
+  protected isSubmitting = false;
+
+  protected isLoadingBuildings = false;
+
+  protected buildings: BuildingResponse[] = [];
+
+  protected isAreaWide = false;
+
+
+  readonly form: FormGroup = this.fb.group({
+
+    name: this.fb.control('', {
+      validators: [Validators.required],
+      nonNullable: true,
+    }),
+
+    buildingId: this.fb.control('', {
+      validators: [Validators.required],
+      nonNullable: true,
+    }),
+
+    content: this.fb.control('', {
+      validators: [Validators.required],
+      nonNullable: true,
+    }),
+
+    relatedDate: this.fb.control<Date | null>(
+      null,
+      {
+        validators: [Validators.required],
+      },
+    ),
+
+    startDate: this.fb.control<Date | null>(
+      null,
+      {
+        validators: [Validators.required],
+      },
+    ),
+
+    endDate: this.fb.control<Date | null>(
+      null,
+      {
+        validators: [Validators.required],
+      },
+    ),
+
+    location: this.fb.control('', {
+      nonNullable: true,
+    }),
+
+    onlineUrl: this.fb.control('', {
+      nonNullable: true,
+    }),
+
+    maxAttendees: this.fb.control<number | null>(
+      null,
+    ),
+
+  });
+
+
+  ngOnInit(): void {
+    this.loadBuildings();
+  }
+
+
+  private loadBuildings(): void {
+
+    this.isLoadingBuildings = true;
+
+    this.areaApiService
+      .getBuildings()
+      .pipe(
+        finalize(() => {
+          this.isLoadingBuildings = false;
+        }),
+      )
+      .subscribe({
+
+        next: (buildings) => {
+          this.buildings = buildings;
+        },
+
+        error: (error: HttpErrorResponse) => {
+
+          console.error(
+            'Failed to load buildings',
+            error,
+          );
+
+          this.errorService.handleServerError(
+            error,
+          );
+        },
+
+      });
+  }
+
+
+  protected onAreaWideToggle(
+    checked: boolean,
+  ): void {
+
+    this.isAreaWide = checked;
+
+    const buildingIdControl =
+      this.form.get('buildingId');
+
+
+    if (checked) {
+
+      buildingIdControl?.clearValidators();
+
+      buildingIdControl?.setValue('');
+
+    } else {
+
+      buildingIdControl?.setValidators([
+        Validators.required,
+      ]);
+
+    }
+
+    buildingIdControl?.updateValueAndValidity();
+  }
+
+
+  protected submit(): void {
+
+    if (this.form.invalid) {
+
+      this.form.markAllAsTouched();
+
+      return;
+    }
+
+
+    const formValue =
+      this.form.getRawValue();
+
+
+    const payload: EventRequest = {
+
+      name: formValue.name,
+
+      buildingId:
+        this.isAreaWide
+          ? null
+          : formValue.buildingId,
+
+      content: formValue.content,
+
+      relatedDate: this.formatDate(
+        formValue.relatedDate,
+      ),
+
+      postType: PostType.EVENT,
+
+      startDate: this.formatDate(
+        formValue.startDate,
+      ),
+
+      endDate: this.formatDate(
+        formValue.endDate,
+      ),
+
+      location:
+        formValue.location ?? '',
+
+      onlineUrl:
+        formValue.onlineUrl ?? '',
+
+      maxAttendees:
+        formValue.maxAttendees ?? 0,
+    };
+
+
+    this.isSubmitting = true;
+
+
+    this.postService
+      .createEvent(payload)
+      .pipe(
+        finalize(() => {
+          this.isSubmitting = false;
+        }),
+      )
+      .subscribe({
+
+        next: () => {
+
+          this.toast.success(
+            'Event created successfully',
+          );
+
+          this.router.navigate([
+            '/home/events',
+          ]);
+        },
+
+        error: (
+          error: HttpErrorResponse,
+        ) => {
+
+          console.error(
+            'Failed to create event',
+            error,
+          );
+
+          this.errorService.handleServerError(
+            error,
+          );
+        },
+
+      });
+  }
+
+
+  protected cancel(): void {
+
+    this.router.navigate([
+      '/home/events',
+    ]);
+  }
+
+
+  private formatDate(
+    date: Date | null,
+  ): string {
+
+    if (!date) {
+      return '';
+    }
+
+    return date.toISOString();
+  }
+}

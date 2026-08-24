@@ -22,12 +22,24 @@ export const routes: Routes = [
                 loadComponent: () => import('./announcements/announcements').then(m => m.Announcements)
             },
             {
+                path: 'announcements/create',
+                loadComponent: () => import('./announcements/announcement-create/announcement-create').then(m => m.CreateAnnouncement)
+            },
+            {
                 path: 'events',
                 loadComponent: () => import('./events/events').then(m => m.Events)
             },
             {
+                path: 'events/create',
+                loadComponent: () => import('./events/event-create/event-create').then(m => m.CreateEvent)
+            },
+            {
                 path: 'facilities',
                 loadComponent: () => import('./facilities/facilities').then(m => m.Facilities)
+            },
+            {
+                path: 'facilities/create',
+                loadComponent: () => import('./facilities/facility-create/facility-create').then(m => m.CreateFacility)
             },
             {
                 path: 'offerings',
@@ -48,6 +60,10 @@ export const routes: Routes = [
             {
                 path: 'buildings',
                 loadComponent: () => import('./buildings/buildings').then(m => m.Buildings)
+            },
+            {
+                path: 'buildings/create',
+                loadComponent: () => import('./buildings/area-create/area-create').then(m => m.CreateArea)
             },
             {
                 path: 'area',

@@ -1,0 +1,217 @@
+.auth-page {
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px 20px;
+
+  box-sizing: border-box;
+
+  background: var(--color-cream);
+
+  font-family: var(--font-body);
+}
+
+.auth-shell {
+  width: 100%;
+  max-width: 440px;
+}
+
+.auth-card {
+  padding: 40px;
+
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+
+  box-shadow: 0 8px 30px rgba(30, 26, 22, 0.06);
+}
+
+/* ─────────────────────────────────────────────
+   Header
+   ───────────────────────────────────────────── */
+
+.auth-card__header {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.auth-brand {
+  margin: 0;
+
+  color: var(--color-charcoal);
+
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.auth-subtitle {
+  margin: 8px 0 0;
+
+  color: var(--color-muted);
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ─────────────────────────────────────────────
+   Form
+   ───────────────────────────────────────────── */
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.form-field label {
+  color: var(--color-charcoal-mid);
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.required {
+  margin-left: 3px;
+
+  color: var(--color-terracotta);
+}
+
+.form-field input {
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 11px 14px;
+
+  color: var(--color-charcoal);
+  background: var(--color-white);
+
+  border: 1.5px solid var(--color-border);
+  border-radius: 3px;
+
+  outline: none;
+
+  font-family: var(--font-body);
+  font-size: 14px;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.form-field input::placeholder {
+  color: var(--color-muted);
+}
+
+.form-field input:hover:not(:disabled) {
+  border-color: var(--color-charcoal-mid);
+}
+
+.form-field input:focus {
+  border-color: var(--color-terracotta);
+
+  box-shadow:
+    0 0 0 2px rgba(192, 86, 58, 0.1);
+}
+
+.form-field input.ng-invalid.ng-touched {
+  border-color: var(--color-error);
+}
+
+.form-field input.ng-invalid.ng-touched:focus {
+  border-color: var(--color-error);
+
+  box-shadow:
+    0 0 0 2px rgba(185, 64, 64, 0.1);
+}
+
+.form-error {
+  color: var(--color-error);
+
+  font-size: 12px;
+}
+
+/* ─────────────────────────────────────────────
+   Login button
+   ───────────────────────────────────────────── */
+
+.auth-form app-button {
+  display: block;
+
+  margin-top: 4px;
+}
+
+.auth-form app-button::ng-deep .button {
+  width: 100%;
+}
+
+/* ─────────────────────────────────────────────
+   Register link
+   ───────────────────────────────────────────── */
+
+.auth-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  margin-top: 4px;
+
+  color: var(--color-muted);
+
+  font-size: 13px;
+}
+
+.auth-action-link {
+  padding: 0;
+
+  color: var(--color-terracotta);
+  background: transparent;
+
+  border: none;
+
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: color 0.15s ease;
+}
+
+.auth-action-link:hover {
+  color: var(--color-terracotta-dark);
+  text-decoration: underline;
+}
+
+/* ─────────────────────────────────────────────
+   Mobile
+   ───────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .auth-page {
+    align-items: flex-start;
+
+    padding: 24px 16px;
+  }
+
+  .auth-card {
+    padding: 28px 22px;
+  }
+
+  .auth-brand {
+    font-size: 36px;
+  }
+}
+

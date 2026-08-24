@@ -1,0 +1,26 @@
+<div
+  class="alert"
+  [class]="'alert--' + variant"
+  role="alert"
+>
+  <div class="alert__icon">
+    @switch (variant) {
+      @case ('success') { ✓ }
+      @case ('warning') { ! }
+      @case ('error') { × }
+      @default { i }
+    }
+  </div>
+
+  <div class="alert__content">
+    @if (title) {
+      <div class="alert__title">
+        {{ title }}
+      </div>
+    }
+
+    <div class="alert__message">
+      <ng-content />
+    </div>
+  </div>
+</div>

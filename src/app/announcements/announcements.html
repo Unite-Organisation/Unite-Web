@@ -1,19 +1,106 @@
-<div class="post-container">
-    <div class="button-container" *ngIf="canCreateAnnouncement">
-        <add-button 
-            (buttonClick)="openCreateAnnouncementDialog()">
-            Add new announcement
-        </add-button>
+<div class="announcements-page">
+
+  <!-- Header -->
+  <header class="announcements-header">
+    <div>
+      <p class="eyebrow">Hillside Halls</p>
+
+      <h1>Noticeboard</h1>
+
+      <p class="subtitle">
+        Announcements & community updates
+      </p>
     </div>
 
-    <div class="posts-list" *ngIf="posts.length > 0">
-        <post-card *ngFor="let post of posts" [post]="post"></post-card>
+    @if (canCreateAnnouncement) {
+      <app-button
+        variant="primary"
+        size="md"
+        (clicked)="createAnnouncement()"
+      >
+        + New announcement
+      </app-button>
+    }
+  </header>
+
+
+  @if (isLoading) {
+
+    <div class="loading-state">
+      Loading announcements...
     </div>
 
-    <div class="empty-state" *ngIf="posts.length === 0 && !isLoading">
-        <mat-icon>campaign</mat-icon>
-        <h2>No Announcements</h2>
-        <p>There are no announcements at the moment. Check back later for important community updates.</p>
-    </div>
+  } @else if (posts.length === 0) {
+
+    <!-- Empty state -->
+    <section class="empty-state">
+      <div class="empty-state__icon">
+        📢
+      </div>
+
+      <h2>No announcements</h2>
+
+      <p>
+        There are no announcements at the moment.
+        Check back later for important community updates.
+      </p>
+
+      @if (canCreateAnnouncement) {
+        <app-button
+          variant="outline"
+          size="sm"
+          (clicked)="createAnnouncement()"
+        >
+          Create the first announcement
+        </app-button>
+      }
+    </section>
+
+  } @else {
+
+    <!-- Featured / selected announcement -->
+    <section class="featured-announcement">
+
+      @if (selectedPost) {
+        <post-card
+            class="featured-announcement__card"
+            [post]="selectedPost"
+            [featured]="true"
+        ></post-card>
+      }
+
+    </section>
+
+
+    <!-- All announcements -->
+    <section class="announcements-list">
+
+      <div class="section-header">
+        <div>
+          
+          <h2>All announcements</h2>
+        </div>
+
+        <span class="announcement-count">
+          {{ posts.length }} announcements
+        </span>
+      </div>
+
+
+      <div class="posts-grid">
+
+        @for (post of posts; track post.id) {
+          <post-card
+            [post]="post"
+            [selected]="selectedPost?.id === post.id"
+            (cardClick)="selectPost(post)"
+          ></post-card>
+        }
+
+      </div>
+
+    </section>
+
+  }
+
 </div>
-

@@ -1,19 +1,103 @@
-<div class="post-container">
-    <div class="button-container" *ngIf="canCreateEvent">
-        <add-button 
-            (buttonClick)="openCreateEventDialog()">
-            Add new event
-        </add-button>
+<div class="events-page">
+
+  <header class="events-header">
+    <div>
+      <p class="eyebrow">Community</p>
+      <h1>Events</h1>
+      <p class="subtitle">
+        Upcoming gatherings, workshops and activities
+      </p>
     </div>
 
-    <div class="posts-list" *ngIf="posts.length > 0">
-        <post-card *ngFor="let post of posts" [post]="post"></post-card>
-    </div>
+    @if (canCreateEvent) {
+      <app-button
+        variant="primary"
+        size="md"
+        (clicked)="createEvent()"
+      >
+        + New event
+      </app-button>
+    }
+  </header>
 
-    <div class="empty-state" *ngIf="posts.length === 0 && !isLoading">
-        <mat-icon>event</mat-icon>
-        <h2>No Events</h2>
-        <p>There are no upcoming events at the moment. Check back later for community gatherings and activities.</p>
+
+  @if (isLoading) {
+    <div class="loading-state">
+      Loading events...
     </div>
+  }
+
+
+  @if (!isLoading && posts.length === 0) {
+    <section class="empty-state">
+
+      <div class="empty-state__icon">
+        📅
+      </div>
+
+      <h2>No events</h2>
+
+      <p>
+        There are no upcoming events at the moment.
+        Check back later for community gatherings and activities.
+      </p>
+
+      @if (canCreateEvent) {
+        <app-button
+          variant="outline"
+          size="sm"
+          (clicked)="createEvent()"
+        >
+          Create first event
+        </app-button>
+      }
+
+    </section>
+  }
+
+
+  @if (!isLoading && posts.length > 0) {
+
+    @if (selectedPost) {
+      <section class="featured-event">
+
+        <post-card
+          [post]="selectedPost"
+          [featured]="true"
+        ></post-card>
+
+      </section>
+    }
+
+
+    <section class="events-list">
+
+      <div class="section-header">
+        <div>
+          <h2>All events</h2>
+        </div>
+
+        <span class="event-count">
+          {{ posts.length }}
+          {{ posts.length === 1 ? 'event' : 'events' }}
+        </span>
+      </div>
+
+
+      <div class="events-grid">
+
+        @for (post of posts; track post.id) {
+          <post-card
+            [post]="post"
+            [selected]="selectedPost?.id === post.id"
+            (cardClick)="selectPost(post)"
+          ></post-card>
+        }
+
+      </div>
+
+    </section>
+
+  }
+
 </div>
-

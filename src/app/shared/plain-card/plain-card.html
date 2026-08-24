@@ -1,18 +1,65 @@
-<div class="plain-card">
-    <div class="card-info">
-        <h3>{{ building.name || 'Unknown' }}</h3>
-        <div class="card-details">
-            <small>
-                <strong>Address:</strong> {{ building.street || 'Unknown' }} {{ building.number || '' }}, 
-                {{ building.city || 'Unknown' }}, {{ building.country || 'Unknown' }}
-            </small>
-        </div>
+<article class="building-card">
+
+  <div class="building-card__header">
+    <span class="building-card__label">
+      Building
+    </span>
+  </div>
+
+  <div class="building-card__content">
+
+    <h3>
+      {{ building.name || 'Unknown' }}
+    </h3>
+
+    <div class="building-card__address">
+
+      <div class="building-card__address-line">
+        <span class="building-card__address-label">
+          Address
+        </span>
+
+        <span>
+          {{ building.street || 'Unknown' }}
+          {{ building.number || '' }}
+        </span>
+      </div>
+
+      <div class="building-card__address-line">
+        <span class="building-card__address-label">
+          City
+        </span>
+
+        <span>
+          {{ building.city || 'Unknown' }}
+        </span>
+      </div>
+
+      <div class="building-card__address-line">
+        <span class="building-card__address-label">
+          Country
+        </span>
+
+        <span>
+          {{ building.country || 'Unknown' }}
+        </span>
+      </div>
+
     </div>
-    <div class="card-actions">
-        <button mat-flat-button color="primary" (click)="onAddUsers()">
-            <mat-icon>person_add</mat-icon>
-            <span>Add Users</span>
-        </button>
-    </div>
-</div>
+
+  </div>
+
+  <div class="building-card__footer">
+
+    <app-button
+      variant="outline"
+      size="sm"
+      (clicked)="onAddUsers()"
+    >
+      + Add users
+    </app-button>
+
+  </div>
+
+</article>
 

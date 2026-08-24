@@ -17,6 +17,7 @@ import { AnnouncementRequest, PostType } from '../../models/api-models/posts.mod
 import { PostService } from '../../posts/services/post.service';
 import { ToastService } from '../../core/toast.service';
 import { ErrorService } from '../../core/error.sevice';
+import { ButtonComponent } from '../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-create-ann-dialog',
@@ -30,7 +31,8 @@ import { ErrorService } from '../../core/error.sevice';
     MatInputModule,
     MatSelectModule,
     MatDatepickerModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    ButtonComponent
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './create-ann-dialog.html',

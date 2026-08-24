@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Post, PostType } from '../../models/api-models/posts.models';
 
@@ -11,6 +11,18 @@ import { Post, PostType } from '../../models/api-models/posts.models';
 })
 export class PostCard {
   @Input({ required: true }) post!: Post;
+  
+  @Input() selected = false;
+
+  @Input() featured = false;
+
+  @Output() cardClick = new EventEmitter<void>();
+
+  onCardClick(): void {
+    if (!this.featured) {
+      this.cardClick.emit();
+    }
+  }
   
   defaultImageUrl = 'assets/default-post.jpg';
 
