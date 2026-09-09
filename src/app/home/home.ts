@@ -19,6 +19,7 @@ import { ErrorService } from '../core/error.sevice';
 import { forkJoin } from 'rxjs';
 import { ChatSocketService } from '../chats/chat-socket.service';
 import { ButtonComponent } from '../shared/components/button/button.component';
+import { BuildingContextService } from '../core/building-context.service';
 
 @Component({
   selector: 'app-home',
@@ -40,6 +41,7 @@ export class Home implements OnInit, OnDestroy {
   private readonly pollApiService = inject(PollApiService);
   private readonly errorService = inject(ErrorService);
   private readonly destroy$ = new Subject<void>();
+  private readonly buildingContext = inject(BuildingContextService);
 
   protected canReportIssue = false;
   private currentRoute = '';
@@ -184,6 +186,7 @@ export class Home implements OnInit, OnDestroy {
       .pipe(
         finalize(() => {
           this.authService.logout();
+          this.buildingContext.clearBuilding();
           this.router.navigateByUrl('/login');
         })
       )

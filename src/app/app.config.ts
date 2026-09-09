@@ -13,6 +13,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { AuthInterceptor } from './core/auth-interceptor';
 import { AuthService } from './auth/services/auth';
 import { AuthRefreshService } from './core/auth-refresh.service';
+import { buildingScopeInterceptor } from './core/building-scope.interceptor';
 
 function tryRestoreSessionFromRefreshCookie(): Promise<void> {
   const auth = inject(AuthService);
@@ -33,7 +34,8 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(
       withInterceptors([
-              AuthInterceptor
+              AuthInterceptor,
+              buildingScopeInterceptor
       ])
     ),
     provideAnimations(),

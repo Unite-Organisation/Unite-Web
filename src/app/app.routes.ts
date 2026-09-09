@@ -3,7 +3,14 @@ import { authGuard } from './core/auth.guard';
 import { adminGuard } from './core/admin.guard';
 
 export const routes: Routes = [
-
+    {
+        path: 'app',
+        canActivate: [authGuard],
+        children: [
+            {
+                path: 'select-building',
+                loadComponent: () => import('./select-building/select-building').then(m => m.SelectBuildingComponent),
+            },
     {
         path: 'home',
         loadComponent: () => import('./home/home').then(m => m.Home),
@@ -87,6 +94,8 @@ export const routes: Routes = [
             }
         ]
     },
+    ]
+    },
 
     {
         path: 'login',
@@ -100,13 +109,13 @@ export const routes: Routes = [
 
     {
         path: '',
-        redirectTo: '/home',
+        redirectTo: '/app/home',
         pathMatch: 'full'
     },
 
     {
         path: '**',
-        redirectTo: '/home'
+        redirectTo: '/app/home'
     }
 
 ];

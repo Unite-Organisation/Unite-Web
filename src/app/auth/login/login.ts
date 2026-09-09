@@ -17,6 +17,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
+import { UserMetaInfo } from '../../models/api-models/chat.models';
+import { BuildingContextService } from '../../core/building-context.service';
+import { RolesService } from '../services/roles.service';
 
 @Component({
   selector: 'app-login',
@@ -40,7 +43,8 @@ export class Login {
   private readonly toast = inject(ToastService);
   private readonly errorService = inject(ErrorService);
   private readonly router = inject(Router);
-
+  private readonly buildingContext = inject(BuildingContextService);
+  private readonly  rolesService = inject(RolesService);
   protected isSubmitting = false;
 
   readonly form: FormGroup = this.fb.group({
@@ -56,7 +60,8 @@ export class Login {
 
     const payload = this.form.value as UserLoginRequest;
     this.isSubmitting = true;
-
+    
+    var userMetaInfo: UserMetaInfo | null = null
     this.authApi.login(payload)
       .pipe(finalize(() => (this.isSubmitting = false)))
       .subscribe({
@@ -72,10 +77,29 @@ export class Login {
             .subscribe((metaInfo) => {
               if (metaInfo) {
                 localStorage.setItem('user-meta-info', JSON.stringify(metaInfo));
+                userMetaInfo = metaInfo
               }
             });
           this.toast.success('Logged in successfully');
-          this.router.navigateByUrl('/home/announcements');
+          if (userMetaInfo?.buildingId && this.rolesService.isResident()) {
+
+            this.buildingContext.setBuilding(
+              userMetaInfo?.buildingId,
+            );
+
+            this.router.navigate(['/home']);
+
+            return;
+          }
+          if (this.rolesService.isManager()) {
+
+            this.buildingContext.clearBuilding();
+
+            this.router.navigateByUrl('/app/select-building');
+
+            return;
+          }
+          
         },
         error: (error: HttpErrorResponse) => {
           console.error('Login failed', error);
