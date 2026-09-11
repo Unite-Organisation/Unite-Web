@@ -155,7 +155,7 @@ export class CreateArea {
 
   protected cancel(): void {
     this.router.navigate([
-      '/home/buildings',
+      '/app/home/buildings',
     ]);
   }
 
@@ -206,7 +206,7 @@ export class CreateArea {
           );
 
           this.router.navigate([
-            '/home/buildings',
+            '/app/home/buildings',
           ]);
         },
 

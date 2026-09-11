@@ -89,7 +89,7 @@ export class Register {
         next: (tokenResponse) => {
           this.authService.saveToken(tokenResponse.accessToken);
           this.toast.success('Account created successfully');
-          this.router.navigateByUrl('/home/announcements');
+          this.router.navigateByUrl('/app/home/announcements');
         },
         error: (error: HttpErrorResponse) => {
           console.error('Registration or login failed', error);

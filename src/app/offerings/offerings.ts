@@ -149,19 +149,19 @@ export class Offerings implements OnInit {
 
           if (existingConversation) {
             // Navigate to chats and select the existing conversation
-            this.router.navigate(['/home/chats'], {
+            this.router.navigate(['/app/home/chats'], {
               queryParams: { conversationId: existingConversation.id }
             });
           } else {
             // No conversation exists, show error toast
-            this.router.navigate(['/home/chats']);
+            this.router.navigate(['/app/home/chats']);
             this.toastService.error(`Start a chat with ${offering.providerData.firstName} to discuss the offering`);
           }
         },
         error: (error: HttpErrorResponse) => {
           console.error('Failed to load conversations', error);
           // On error, just navigate to chats
-          this.router.navigate(['/home/chats']);
+          this.router.navigate(['/app/home/chats']);
           this.toastService.error(`Start a chat with ${offering.providerData.firstName} to discuss the offering`);
         }
       });

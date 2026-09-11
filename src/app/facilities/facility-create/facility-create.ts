@@ -188,7 +188,7 @@ export class CreateFacility implements OnInit {
           );
 
           this.router.navigate([
-            '/home/facilities',
+            '/app/home/facilities',
           ]);
         },
 
@@ -207,7 +207,7 @@ export class CreateFacility implements OnInit {
 
   cancel(): void {
     this.router.navigate([
-      '/home/facilities',
+      '/app/home/facilities',
     ]);
   }
 }

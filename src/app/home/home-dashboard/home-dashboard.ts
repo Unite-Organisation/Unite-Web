@@ -80,11 +80,11 @@ export class HomeDashboard implements OnInit {
   }
 
   navigateToFacilities(): void {
-    this.router.navigate(['/home/facilities']);
+    this.router.navigate(['/app/home/facilities']);
   }
 
   navigateToAdminPanel(): void {
-    this.router.navigate(['/home/area']);
+    this.router.navigate(['/app/home/area']);
   }
 }
 

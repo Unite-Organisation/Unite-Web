@@ -38,7 +38,7 @@ export class Buildings implements OnInit {
 
   protected createAnArea(): void {
     this.router.navigate([
-      '/home/buildings/create',
+      '/app/home/buildings/create',
     ]);
   }
   openCreateAreaDialog(): void {

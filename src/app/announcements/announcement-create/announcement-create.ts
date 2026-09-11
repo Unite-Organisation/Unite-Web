@@ -161,7 +161,7 @@ export class CreateAnnouncement implements OnInit {
           );
 
           this.router.navigate([
-            '/home/announcements',
+            '/app/home/announcements',
           ]);
         },
 
@@ -182,7 +182,7 @@ export class CreateAnnouncement implements OnInit {
 
   protected cancel(): void {
     this.router.navigate([
-      '/home/announcements',
+      '/app/home/announcements',
     ]);
   }
 

@@ -69,11 +69,11 @@ export class Home implements OnInit, OnDestroy {
   }
 
   private updateReportButtonState(): void {
-    // Enable button on: /home (dashboard), /home/facilities, /home/polls
+    // Enable button on: /app/home (dashboard), /app/home/facilities, /app/home/polls
     this.canReportIssue = 
-      this.currentRoute === '/home' || 
-      this.currentRoute.startsWith('/home/facilities') ||
-      this.currentRoute.startsWith('/home/polls');
+      this.currentRoute === '/app/home' || 
+      this.currentRoute.startsWith('/app/home/facilities') ||
+      this.currentRoute.startsWith('/app/home/polls');
   }
 
   openReportIssueDialog(): void {
@@ -83,13 +83,13 @@ export class Home implements OnInit, OnDestroy {
     }
 
     // Determine dialog data based on current route
-    if (this.currentRoute === '/home') {
+    if (this.currentRoute === '/app/home') {
       // Home dashboard: can report AREA or BUILDING issues
       this.openHomeDashboardDialog();
-    } else if (this.currentRoute.startsWith('/home/facilities')) {
+    } else if (this.currentRoute.startsWith('/app/home/facilities')) {
       // Facilities: can report FACILITY issues
       this.openFacilityDialog();
-    } else if (this.currentRoute.startsWith('/home/polls')) {
+    } else if (this.currentRoute.startsWith('/app/home/polls')) {
       // Polls: can report POLL issues
       this.openPollDialog();
     }

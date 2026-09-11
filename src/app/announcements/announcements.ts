@@ -37,7 +37,7 @@ export class Announcements implements OnInit {
   }
 
   protected createAnnouncement(): void {
-    this.router.navigate(['/home/announcements/create']);
+    this.router.navigate(['/app/home/announcements/create']);
   }
 
   selectPost(post: Post): void {

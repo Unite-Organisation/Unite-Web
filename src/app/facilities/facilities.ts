@@ -148,7 +148,7 @@ export class Facilities implements OnInit {
   }
 
   createFacility(): void {
-    this.router.navigate(['/home/facilities/create']);
+    this.router.navigate(['/app/home/facilities/create']);
   }
 
   openReservationDialog(facility: FacilityResponse): void {

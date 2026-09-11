@@ -274,7 +274,7 @@ export class CreateEvent implements OnInit {
           );
 
           this.router.navigate([
-            '/home/events',
+            '/app/home/events',
           ]);
         },
 
@@ -299,7 +299,7 @@ export class CreateEvent implements OnInit {
   protected cancel(): void {
 
     this.router.navigate([
-      '/home/events',
+      '/app/home/events',
     ]);
   }
 

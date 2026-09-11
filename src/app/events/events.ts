@@ -46,7 +46,7 @@ export class Events implements OnInit {
   }
 
   createEvent(): void {
-    this.router.navigate(['/home/events/create']);
+    this.router.navigate(['/app/home/events/create']);
   }
 
   private loadPosts(): void {
