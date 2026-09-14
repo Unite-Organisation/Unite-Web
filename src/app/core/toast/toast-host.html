@@ -2,28 +2,28 @@
   @for (toast of toasts(); track toast.id) {
     <div
       class="toast"
-      [class.toast--success]="toast.severity === 'success'"
-      [class.toast--error]="toast.severity === 'error'"
-      [class.toast--warning]="toast.severity === 'warning'"
-      [class.toast--info]="toast.severity === 'info'"
+      [class]="'toast--' + toast.severity"
       [class.toast--leaving]="toast.leaving"
       [attr.role]="toast.severity === 'error' ? 'alert' : 'status'"
       [attr.aria-live]="toast.severity === 'error' ? 'assertive' : 'polite'"
       (mouseenter)="pause(toast)"
       (mouseleave)="resume(toast)"
     >
-      <mat-icon class="toast__icon">{{ iconFor(toast.severity) }}</mat-icon>
+      <div class="toast__icon" aria-hidden="true">{{ glyphFor(toast.severity) }}</div>
 
-      <span class="toast__message">{{ toast.message }}</span>
+      <div class="toast__content">
+        <div class="toast__label">{{ labelFor(toast.severity) }}</div>
+        <p class="toast__message">{{ toast.message }}</p>
 
-      @if (toast.actionLabel) {
-        <button mat-button class="toast__action" (click)="runAction(toast)">
-          {{ toast.actionLabel }}
-        </button>
-      }
+        @if (toast.actionLabel) {
+          <button type="button" class="toast__action" (click)="runAction(toast)">
+            {{ toast.actionLabel }}
+          </button>
+        }
+      </div>
 
       <button
-        mat-icon-button
+        type="button"
         class="toast__close"
         aria-label="Dismiss notification"
         (click)="dismiss(toast)"
