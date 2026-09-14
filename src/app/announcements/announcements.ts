@@ -3,7 +3,6 @@ import { Component, inject, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { ErrorService } from '../core/error.sevice';
 import { Post, PostType } from '../models/api-models/posts.models';
 import { PostService } from '../posts/services/post.service';
 import { AddButton } from '../shared/add-button/add-button';
@@ -21,7 +20,6 @@ import { Router } from '@angular/router';
   styleUrl: './announcements.scss',
 })
 export class Announcements implements OnInit {
-  private readonly errorService = inject(ErrorService);
   private readonly postService = inject(PostService);
   private readonly dialog = inject(MatDialog);
   private readonly rolesService = inject(RolesService);
@@ -81,7 +79,6 @@ export class Announcements implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         console.error('Failed to load announcements', error);
-        this.errorService.handleServerError(error);
         this.isLoading = false;
       }
     });

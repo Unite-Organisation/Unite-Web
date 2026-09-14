@@ -13,8 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs/operators';
 import { OfferingApiService } from './services/offering-api.service';
 import { OfferingResponse, OfferingCategory, PriceModifier } from '../models/api-models/offering.models';
-import { ErrorService } from '../core/error.sevice';
-import { ToastService } from '../core/toast.service';
+import { ToastService } from '../core/toast/toast.service';
 import { RolesService } from '../auth/services/roles.service';
 import { AddButton } from '../shared/add-button/add-button';
 import { CreateOfferingDialog } from './create-offering-dialog/create-offering-dialog';
@@ -41,7 +40,6 @@ import { PaginationParams } from '../models/common/common.models';
 })
 export class Offerings implements OnInit {
   private readonly offeringApiService = inject(OfferingApiService);
-  private readonly errorService = inject(ErrorService);
   private readonly toastService = inject(ToastService);
   protected readonly rolesService = inject(RolesService);
   private readonly dialog = inject(MatDialog);
@@ -78,7 +76,6 @@ export class Offerings implements OnInit {
         },
         error: (error: HttpErrorResponse) => {
           console.error('Failed to load offerings', error);
-          this.errorService.handleServerError(error);
         }
       });
   }
@@ -121,7 +118,6 @@ export class Offerings implements OnInit {
         },
         error: (error: HttpErrorResponse) => {
           console.error('Failed to cancel offering', error);
-          this.errorService.handleServerError(error);
         }
       });
   }

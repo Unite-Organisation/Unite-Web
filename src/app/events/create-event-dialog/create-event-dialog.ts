@@ -16,8 +16,8 @@ import { AreaApiService } from '../../buildings/services/area-api.service';
 import { BuildingResponse } from '../../models/api-models/area.models';
 import { EventRequest, PostType } from '../../models/api-models/posts.models';
 import { PostService } from '../../posts/services/post.service';
-import { ToastService } from '../../core/toast.service';
-import { ErrorService } from '../../core/error.sevice';
+import { ToastService } from '../../core/toast/toast.service';
+import { ServerValidationBinder } from '../../core/errors/server-validation';
 
 @Component({
   selector: 'app-create-event-dialog',
@@ -40,11 +40,11 @@ import { ErrorService } from '../../core/error.sevice';
 })
 export class CreateEventDialog implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly serverValidation = inject(ServerValidationBinder);
   private readonly dialogRef = inject(MatDialogRef<CreateEventDialog>);
   private readonly areaApiService = inject(AreaApiService);
   private readonly postService = inject(PostService);
   private readonly toast = inject(ToastService);
-  private readonly errorService = inject(ErrorService);
 
   protected isSubmitting = false;
   protected isLoadingBuildings = false;
@@ -77,7 +77,6 @@ export class CreateEventDialog implements OnInit {
         },
         error: (error: HttpErrorResponse) => {
           console.error('Failed to load buildings', error);
-          this.errorService.handleServerError(error);
         }
       });
   }
@@ -124,8 +123,10 @@ export class CreateEventDialog implements OnInit {
           this.dialogRef.close(true);
         },
         error: (error: HttpErrorResponse) => {
+          // VALIDATION_ERROR entries name rejected DTO fields; show them on
+          // the form itself. The generic notice comes from the interceptor.
+          this.serverValidation.apply(this.form, error);
           console.error('Failed to create event', error);
-          this.errorService.handleServerError(error);
         }
       });
   }

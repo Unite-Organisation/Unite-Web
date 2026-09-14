@@ -31,10 +31,10 @@ import {
 
 import { PostService } from '../../posts/services/post.service';
 
-import { ToastService } from '../../core/toast.service';
-import { ErrorService } from '../../core/error.sevice';
+import { ToastService } from '../../core/toast/toast.service';
 
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import { ServerValidationBinder } from '../../core/errors/server-validation';
 
 @Component({
   selector: 'app-create-event',
@@ -65,6 +65,7 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 export class CreateEvent implements OnInit {
 
   private readonly fb = inject(FormBuilder);
+  private readonly serverValidation = inject(ServerValidationBinder);
 
   private readonly router = inject(Router);
 
@@ -73,9 +74,6 @@ export class CreateEvent implements OnInit {
   private readonly postService = inject(PostService);
 
   private readonly toast = inject(ToastService);
-
-  private readonly errorService = inject(ErrorService);
-
 
   protected isSubmitting = false;
 
@@ -143,7 +141,6 @@ export class CreateEvent implements OnInit {
     this.loadBuildings();
   }
 
-
   private loadBuildings(): void {
 
     this.isLoadingBuildings = true;
@@ -167,15 +164,10 @@ export class CreateEvent implements OnInit {
             'Failed to load buildings',
             error,
           );
-
-          this.errorService.handleServerError(
-            error,
-          );
         },
 
       });
   }
-
 
   protected onAreaWideToggle(
     checked: boolean,
@@ -203,7 +195,6 @@ export class CreateEvent implements OnInit {
 
     buildingIdControl?.updateValueAndValidity();
   }
-
 
   protected submit(): void {
 
@@ -281,13 +272,12 @@ export class CreateEvent implements OnInit {
         error: (
           error: HttpErrorResponse,
         ) => {
+          // VALIDATION_ERROR entries name rejected DTO fields; show them on
+          // the form itself. The generic notice comes from the interceptor.
+          this.serverValidation.apply(this.form, error);
 
           console.error(
             'Failed to create event',
-            error,
-          );
-
-          this.errorService.handleServerError(
             error,
           );
         },
@@ -295,14 +285,12 @@ export class CreateEvent implements OnInit {
       });
   }
 
-
   protected cancel(): void {
 
     this.router.navigate([
       '/app/home/events',
     ]);
   }
-
 
   private formatDate(
     date: Date | null,

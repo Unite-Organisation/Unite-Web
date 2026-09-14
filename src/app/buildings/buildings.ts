@@ -7,8 +7,7 @@ import { finalize } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AreaApiService } from './services/area-api.service';
 import { CreateAreaDialog } from './create-area-dialog/create-area-dialog';
-import { ToastService } from '../core/toast.service';
-import { ErrorService } from '../core/error.sevice';
+import { ToastService } from '../core/toast/toast.service';
 import { AreaCreateRequest, BuildingResponse } from '../models/api-models/area.models';
 import { PlainCard } from '../shared/plain-card/plain-card';
 import { AddUserDialog } from './add-user-dialog/add-user-dialog';
@@ -26,7 +25,6 @@ export class Buildings implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly areaApiService = inject(AreaApiService);
   private readonly toast = inject(ToastService);
-  private readonly errorService = inject(ErrorService);
   protected buildings: BuildingResponse[] = [];
   protected isLoading = false;
   private readonly router = inject(Router);
@@ -65,7 +63,6 @@ export class Buildings implements OnInit {
         },
         error: (error: HttpErrorResponse) => {
           console.error('Failed to create area', error);
-          this.errorService.handleServerError(error);
         }
       });
   }
@@ -80,7 +77,6 @@ export class Buildings implements OnInit {
         },
         error: (error: HttpErrorResponse) => {
           console.error('Failed to load buildings', error);
-          this.errorService.handleServerError(error);
         }
       });
   }

@@ -13,6 +13,8 @@ import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/services/auth';
 import { AuthRefreshService } from './auth-refresh.service';
 import { API_URLS } from './api.config';
+import { AUTH_FAILURE_HANDLED } from './errors/error-context';
+import { ErrorNotifier } from './errors/error-notifier.service';
 
 /** Prevents infinite retry when the retried request still returns 401. */
 const AUTH_RETRY_HEADER = 'X-Auth-Retry';
@@ -42,6 +44,7 @@ export const AuthInterceptor: HttpInterceptorFn = (
   const authService = inject(AuthService);
   const refreshService = inject(AuthRefreshService);
   const router = inject(Router);
+  const notifier = inject(ErrorNotifier);
 
   let outgoing: HttpRequest<unknown> = req;
   if (req.url.startsWith(environment.unite_ApiUrl) && !req.withCredentials) {
@@ -83,7 +86,9 @@ export const AuthInterceptor: HttpInterceptorFn = (
           )
         ),
         catchError((refreshError) => {
+          req.context.set(AUTH_FAILURE_HANDLED, true);
           authService.logout();
+          notifier.notifySessionExpired();
           router.navigateByUrl('/login');
           return throwError(() => refreshError);
         })

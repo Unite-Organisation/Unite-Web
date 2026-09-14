@@ -10,8 +10,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ConversationService } from './chats.service';
 import { ConversationMessage, ConversationResponse, UserMetaInfo } from '../models/api-models/chat.models';
 import { PaginationParams } from '../models/common/common.models';
-import { ErrorService } from '../core/error.sevice';
-import { ToastService } from '../core/toast.service';
+import { ToastService } from '../core/toast/toast.service';
 import { finalize } from 'rxjs/operators';
 import { CreateGroupDialog } from './create-group-dialog/create-group-dialog';
 import { RolesService } from '../auth/services/roles.service';
@@ -30,7 +29,6 @@ export class Chats implements OnInit, OnDestroy {
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
 
   private readonly conversationService = inject(ConversationService);
-  private readonly errorService = inject(ErrorService);
   private readonly toast = inject(ToastService);
   private readonly dialog = inject(MatDialog);
   protected readonly rolesService = inject(RolesService);
@@ -109,7 +107,6 @@ export class Chats implements OnInit, OnDestroy {
         },
         error: (error: HttpErrorResponse) => {
           console.error('Failed to load conversations', error);
-          this.errorService.handleServerError(error);
         }
       });
   }
@@ -151,7 +148,6 @@ export class Chats implements OnInit, OnDestroy {
         },
         error: (error: HttpErrorResponse) => {
           console.error('Failed to load messages', error);
-          this.errorService.handleServerError(error);
         }
       });
   }

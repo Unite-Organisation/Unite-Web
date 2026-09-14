@@ -26,10 +26,10 @@ import {
 } from '../../models/api-models/facility.models';
 import { FacilityApiService } from '../services/facility-api.service';
 
-import { ToastService } from '../../core/toast.service';
-import { ErrorService } from '../../core/error.sevice';
+import { ToastService } from '../../core/toast/toast.service';
 
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import { ServerValidationBinder } from '../../core/errors/server-validation';
 
 @Component({
   selector: 'app-create-facility',
@@ -51,6 +51,7 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 })
 export class CreateFacility implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly serverValidation = inject(ServerValidationBinder);
 
   private readonly router = inject(Router);
 
@@ -59,8 +60,6 @@ export class CreateFacility implements OnInit {
   private readonly facilityApiService = inject(FacilityApiService);
 
   private readonly toast = inject(ToastService);
-
-  private readonly errorService = inject(ErrorService);
 
   protected isSubmitting = false;
 
@@ -102,8 +101,6 @@ export class CreateFacility implements OnInit {
 
         error: (error: HttpErrorResponse) => {
           console.error('Failed to load buildings', error);
-
-          this.errorService.handleServerError(error);
         },
       });
   }
@@ -193,12 +190,11 @@ export class CreateFacility implements OnInit {
         },
 
         error: (error: HttpErrorResponse) => {
+          // VALIDATION_ERROR entries name rejected DTO fields; show them on
+          // the form itself. The generic notice comes from the interceptor.
+          this.serverValidation.apply(this.form, error);
           console.error(
             'Failed to create facilities',
-            error,
-          );
-
-          this.errorService.handleServerError(
             error,
           );
         },

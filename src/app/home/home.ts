@@ -15,7 +15,6 @@ import { PollApiService } from '../polls/services/poll-api.service';
 import { ReportIssueDialog, ReportIssueDialogData } from '../issues/report-issue-dialog/report-issue-dialog';
 import { IssueObject } from '../models/api-models/issue.models';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorService } from '../core/error.sevice';
 import { forkJoin } from 'rxjs';
 import { ChatSocketService } from '../chats/chat-socket.service';
 import { ButtonComponent } from '../shared/components/button/button.component';
@@ -39,7 +38,6 @@ export class Home implements OnInit, OnDestroy {
   private readonly areaApiService = inject(AreaApiService);
   private readonly facilityApiService = inject(FacilityApiService);
   private readonly pollApiService = inject(PollApiService);
-  private readonly errorService = inject(ErrorService);
   private readonly destroy$ = new Subject<void>();
   private readonly buildingContext = inject(BuildingContextService);
 
@@ -120,7 +118,6 @@ export class Home implements OnInit, OnDestroy {
       },
       error: (error: HttpErrorResponse) => {
         console.error('Failed to load data for issue dialog', error);
-        this.errorService.handleServerError(error);
       }
     });
   }
@@ -145,7 +142,6 @@ export class Home implements OnInit, OnDestroy {
       },
       error: (error: HttpErrorResponse) => {
         console.error('Failed to load facilities for issue dialog', error);
-        this.errorService.handleServerError(error);
       }
     });
   }
@@ -173,7 +169,6 @@ export class Home implements OnInit, OnDestroy {
       },
       error: (error: HttpErrorResponse) => {
         console.error('Failed to load polls for issue dialog', error);
-        this.errorService.handleServerError(error);
       }
     });
   }

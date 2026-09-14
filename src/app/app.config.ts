@@ -14,6 +14,7 @@ import { AuthInterceptor } from './core/auth-interceptor';
 import { AuthService } from './auth/services/auth';
 import { AuthRefreshService } from './core/auth-refresh.service';
 import { buildingScopeInterceptor } from './core/building-scope.interceptor';
+import { errorToastInterceptor } from './core/errors/error-toast.interceptor';
 
 function tryRestoreSessionFromRefreshCookie(): Promise<void> {
   const auth = inject(AuthService);
@@ -34,8 +35,12 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(
       withInterceptors([
-              AuthInterceptor,
-              buildingScopeInterceptor
+        // errorToastInterceptor is outermost on purpose: it must observe the
+        // final outcome of a request, after AuthInterceptor has had its chance
+        // to refresh the token and retry.
+        errorToastInterceptor,
+        AuthInterceptor,
+        buildingScopeInterceptor,
       ])
     ),
     provideAnimations(),

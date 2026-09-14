@@ -11,8 +11,7 @@ import { finalize } from 'rxjs/operators';
 import { UserLoginRequest } from '../../models/auth-models/auth.models';
 import { AuthApiService } from '../services/auth-api.service';
 import { AuthService } from '../services/auth';
-import { ToastService } from '../../core/toast.service';
-import { ErrorService } from '../../core/error.sevice';
+import { ToastService } from '../../core/toast/toast.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -41,7 +40,6 @@ export class Login {
   private readonly authApi = inject(AuthApiService);
   private readonly authService = inject(AuthService);
   private readonly toast = inject(ToastService);
-  private readonly errorService = inject(ErrorService);
   private readonly router = inject(Router);
   private readonly buildingContext = inject(BuildingContextService);
   private readonly  rolesService = inject(RolesService);
@@ -86,7 +84,6 @@ export class Login {
         },
         error: (error: HttpErrorResponse) => {
           console.error('Login failed', error);
-          this.errorService.handleServerError(error);
         }
       });
   }

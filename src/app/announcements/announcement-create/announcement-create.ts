@@ -26,10 +26,10 @@ import {
 } from '../../models/api-models/posts.models';
 import { PostService } from '../../posts/services/post.service';
 
-import { ToastService } from '../../core/toast.service';
-import { ErrorService } from '../../core/error.sevice';
+import { ToastService } from '../../core/toast/toast.service';
 
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import { ServerValidationBinder } from '../../core/errors/server-validation';
 
 @Component({
   selector: 'app-create-announcement',
@@ -52,6 +52,7 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 })
 export class CreateAnnouncement implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly serverValidation = inject(ServerValidationBinder);
 
   private readonly router = inject(Router);
 
@@ -60,8 +61,6 @@ export class CreateAnnouncement implements OnInit {
   private readonly postService = inject(PostService);
 
   private readonly toast = inject(ToastService);
-
-  private readonly errorService = inject(ErrorService);
 
   protected isSubmitting = false;
 
@@ -114,10 +113,6 @@ export class CreateAnnouncement implements OnInit {
             'Failed to load buildings',
             error,
           );
-
-          this.errorService.handleServerError(
-            error,
-          );
         },
       });
   }
@@ -168,12 +163,11 @@ export class CreateAnnouncement implements OnInit {
         error: (
           error: HttpErrorResponse,
         ) => {
+          // VALIDATION_ERROR entries name rejected DTO fields; show them on
+          // the form itself. The generic notice comes from the interceptor.
+          this.serverValidation.apply(this.form, error);
           console.error(
             'Failed to create announcement',
-            error,
-          );
-
-          this.errorService.handleServerError(
             error,
           );
         },
