@@ -23,10 +23,12 @@ export enum PostType {
 
 export interface AnnouncementRequest {
   name: string;
-  buildingId: string;
   content: string;
   relatedDate: string;
   postType: PostType;
+  visibleFrom: string;
+  visibleTo: string;
+  fileKeys: string[] | null;
 }
 
 export interface EventRequest {

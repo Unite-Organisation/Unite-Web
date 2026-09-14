@@ -24,15 +24,6 @@ export interface CreateEventPayload {
   maxAttendees: number;
 }
 
-export interface CreateAnnouncementPayload {
-  name: string;
-  areaId: string;
-  buildingId: string;
-  content: string;
-  relatedDate: string;
-  postType: PostType;
-}
-
 @Injectable({
   providedIn: 'root'
 })
