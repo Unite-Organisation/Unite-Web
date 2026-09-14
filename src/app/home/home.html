@@ -96,6 +96,26 @@
           }
         </div>
 
+        @if (rolesService.isManager()) {
+          <div class="navbar__role">
+            <span class="navbar__role-label">
+              Building
+            </span>
+
+            <span class="navbar__role-value">
+              {{ buildingContext.selectedBuildingName() ?? '—' }}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            class="navbar__logout"
+            (click)="changeBuilding()"
+          >
+            Change building
+          </button>
+        }
+
         <button
           type="button"
           class="navbar__logout"

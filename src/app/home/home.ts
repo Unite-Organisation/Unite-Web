@@ -19,6 +19,7 @@ import { forkJoin } from 'rxjs';
 import { ChatSocketService } from '../chats/chat-socket.service';
 import { ButtonComponent } from '../shared/components/button/button.component';
 import { BuildingContextService } from '../core/building-context.service';
+import {ToastService} from '../core/toast/toast.service';
 
 @Component({
   selector: 'app-home',
@@ -39,7 +40,8 @@ export class Home implements OnInit, OnDestroy {
   private readonly facilityApiService = inject(FacilityApiService);
   private readonly pollApiService = inject(PollApiService);
   private readonly destroy$ = new Subject<void>();
-  private readonly buildingContext = inject(BuildingContextService);
+  protected readonly buildingContext = inject(BuildingContextService);
+  private readonly toastService = inject(ToastService);
 
   protected canReportIssue = false;
   private currentRoute = '';
@@ -68,8 +70,8 @@ export class Home implements OnInit, OnDestroy {
 
   private updateReportButtonState(): void {
     // Enable button on: /app/home (dashboard), /app/home/facilities, /app/home/polls
-    this.canReportIssue = 
-      this.currentRoute === '/app/home' || 
+    this.canReportIssue =
+      this.currentRoute === '/app/home' ||
       this.currentRoute.startsWith('/app/home/facilities') ||
       this.currentRoute.startsWith('/app/home/polls');
   }
@@ -173,6 +175,11 @@ export class Home implements OnInit, OnDestroy {
     });
   }
 
+  changeBuilding(): void {
+    this.buildingContext.clearBuilding();
+    this.router.navigateByUrl('/app/select-building');
+  }
+
   logout(): void {
     console.info('User logged out - token removed');
     this.chatSocketService.disconnect();
@@ -183,6 +190,7 @@ export class Home implements OnInit, OnDestroy {
           this.authService.logout();
           this.buildingContext.clearBuilding();
           this.router.navigateByUrl('/login');
+          this.toastService.info("Logged out");
         })
       )
       .subscribe({
