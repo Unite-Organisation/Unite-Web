@@ -18,8 +18,8 @@ import { AreaApiService } from '../../buildings/services/area-api.service';
 import { BuildingResponse } from '../../models/api-models/area.models';
 import { PollRequest } from '../../models/api-models/poll.models';
 import { PollApiService } from '../services/poll-api.service';
-import { ToastService } from '../../core/toast.service';
-import { ErrorService } from '../../core/error.sevice';
+import { ToastService } from '../../core/toast/toast.service';
+import { ServerValidationBinder } from '../../core/errors/server-validation';
 
 @Component({
   selector: 'app-create-poll-dialog',
@@ -44,11 +44,11 @@ import { ErrorService } from '../../core/error.sevice';
 })
 export class CreatePollDialog implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly serverValidation = inject(ServerValidationBinder);
   private readonly dialogRef = inject(MatDialogRef<CreatePollDialog>);
   private readonly areaApiService = inject(AreaApiService);
   private readonly pollApiService = inject(PollApiService);
   private readonly toast = inject(ToastService);
-  private readonly errorService = inject(ErrorService);
 
   protected isSubmitting = false;
   protected isLoadingBuildings = false;
@@ -86,7 +86,6 @@ export class CreatePollDialog implements OnInit {
         },
         error: (error: HttpErrorResponse) => {
           console.error('Failed to load buildings', error);
-          this.errorService.handleServerError(error);
         }
       });
   }
@@ -154,8 +153,10 @@ export class CreatePollDialog implements OnInit {
           this.dialogRef.close(true);
         },
         error: (error: HttpErrorResponse) => {
+          // VALIDATION_ERROR entries name rejected DTO fields; show them on
+          // the form itself. The generic notice comes from the interceptor.
+          this.serverValidation.apply(this.form, error);
           console.error('Failed to create poll', error);
-          this.errorService.handleServerError(error);
         }
       });
   }

@@ -13,8 +13,8 @@ import { finalize } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FacilityResponse, FacilityReservation, ReservationRequest } from '../../models/api-models/facility.models';
 import { FacilityApiService } from '../services/facility-api.service';
-import { ToastService } from '../../core/toast.service';
-import { ErrorService } from '../../core/error.sevice';
+import { ToastService } from '../../core/toast/toast.service';
+import { ServerValidationBinder } from '../../core/errors/server-validation';
 
 @Component({
   selector: 'app-reserve-facility-dialog',
@@ -36,10 +36,10 @@ import { ErrorService } from '../../core/error.sevice';
 })
 export class ReserveFacilityDialog implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly serverValidation = inject(ServerValidationBinder);
   private readonly dialogRef = inject(MatDialogRef<ReserveFacilityDialog>);
   private readonly facilityApiService = inject(FacilityApiService);
   private readonly toast = inject(ToastService);
-  private readonly errorService = inject(ErrorService);
   protected readonly facility = inject<FacilityResponse>(MAT_DIALOG_DATA);
 
   protected isSubmitting = false;
@@ -90,7 +90,6 @@ export class ReserveFacilityDialog implements OnInit {
         },
         error: (error: HttpErrorResponse) => {
           console.error('Failed to load availability', error);
-          this.errorService.handleServerError(error);
         }
       });
   }
@@ -172,10 +171,12 @@ export class ReserveFacilityDialog implements OnInit {
             this.dialogRef.close(true);
           } else {
             this.toast.error('Failed to reserve facility. Please check for conflicts.');
-            this.errorService.handleServerError({ error: 'Reservation failed', status: 400 } as HttpErrorResponse);
           }
         },
         error: (error: HttpErrorResponse) => {
+          // VALIDATION_ERROR entries name rejected DTO fields; show them on
+          // the form itself. The generic notice comes from the interceptor.
+          this.serverValidation.apply(this.form, error);
           console.error('Failed to reserve facility', error);
           // If backend returns reservations in error response, update the list
           if (error.error && error.error.reservations) {
@@ -183,7 +184,6 @@ export class ReserveFacilityDialog implements OnInit {
             this.reservedDates = this.reservations.map(r => new Date(r.startTime));
             this.form.updateValueAndValidity();
           }
-          this.errorService.handleServerError(error);
         }
       });
   }

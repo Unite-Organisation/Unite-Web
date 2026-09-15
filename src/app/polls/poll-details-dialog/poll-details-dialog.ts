@@ -10,8 +10,7 @@ import { finalize } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { PollResponse, PollTarget, PollResult } from '../../models/api-models/poll.models';
 import { PollApiService } from '../services/poll-api.service';
-import { ToastService } from '../../core/toast.service';
-import { ErrorService } from '../../core/error.sevice';
+import { ToastService } from '../../core/toast/toast.service';
 import { VoteConfirmationDialog, VoteConfirmationData } from '../vote-confirmation-dialog/vote-confirmation-dialog';
 
 @Component({
@@ -34,7 +33,6 @@ export class PollDetailsDialog implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly pollApiService = inject(PollApiService);
   private readonly toast = inject(ToastService);
-  private readonly errorService = inject(ErrorService);
   protected readonly poll = inject<PollResponse>(MAT_DIALOG_DATA);
 
   selectedOptionId: string | null = null;
@@ -95,7 +93,6 @@ export class PollDetailsDialog implements OnInit {
         },
         error: (error: HttpErrorResponse) => {
           console.error('Failed to load poll results', error);
-          this.errorService.handleServerError(error);
         }
       });
   }
@@ -162,7 +159,6 @@ export class PollDetailsDialog implements OnInit {
         },
         error: (error: HttpErrorResponse) => {
           console.error('Failed to submit vote', error);
-          this.errorService.handleServerError(error);
         }
       });
   }

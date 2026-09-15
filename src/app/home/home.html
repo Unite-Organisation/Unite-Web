@@ -4,7 +4,7 @@
     <div class="navbar__inner">
 
       <a
-        routerLink="/home"
+        routerLink="/app/home"
         class="navbar__brand"
       >
         <span class="navbar__brand-mark">U</span>
@@ -15,7 +15,7 @@
 
         @if (rolesService.isResident() || rolesService.isAdmin()) {
           <a
-            routerLink="/home"
+            routerLink="/app/home"
             routerLinkActive="navbar__link--active"
             [routerLinkActiveOptions]="{ exact: true }"
             class="navbar__link"
@@ -26,7 +26,7 @@
 
         @if (rolesService.isAdmin()) {
           <a
-            routerLink="/home/area"
+            routerLink="/app/home/area"
             routerLinkActive="navbar__link--active"
             class="navbar__link"
           >
@@ -95,6 +95,26 @@
             </span>
           }
         </div>
+
+        @if (rolesService.isManager()) {
+          <div class="navbar__role">
+            <span class="navbar__role-label">
+              Building
+            </span>
+
+            <span class="navbar__role-value">
+              {{ buildingContext.selectedBuildingName() ?? '—' }}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            class="navbar__logout"
+            (click)="changeBuilding()"
+          >
+            Change building
+          </button>
+        }
 
         <button
           type="button"

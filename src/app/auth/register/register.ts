@@ -9,11 +9,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { UserLoginRequest, UserRegisterRequest } from '../../models/auth-models/auth.models';
 import { AuthApiService } from '../services/auth-api.service';
 import { finalize, switchMap } from 'rxjs/operators';
-import { ToastService } from '../../core/toast.service';
+import { ToastService } from '../../core/toast/toast.service';
 import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorService } from '../../core/error.sevice';
 import { AuthService } from '../services/auth';
+import { ServerValidationBinder } from '../../core/errors/server-validation';
 
 @Component({
   selector: 'app-register',
@@ -32,10 +32,10 @@ import { AuthService } from '../services/auth';
 })
 export class Register {
   private readonly fb = inject(FormBuilder);
+  private readonly serverValidation = inject(ServerValidationBinder);
   private readonly authApi = inject(AuthApiService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
-  private readonly errorService = inject(ErrorService);
   private readonly authService = inject(AuthService);
 
   protected isSubmitting = false;
@@ -89,11 +89,13 @@ export class Register {
         next: (tokenResponse) => {
           this.authService.saveToken(tokenResponse.accessToken);
           this.toast.success('Account created successfully');
-          this.router.navigateByUrl('/home/announcements');
+          this.router.navigateByUrl('/app/home/announcements');
         },
         error: (error: HttpErrorResponse) => {
+          // VALIDATION_ERROR entries name rejected DTO fields; show them on
+          // the form itself. The generic notice comes from the interceptor.
+          this.serverValidation.apply(this.form, error);
           console.error('Registration or login failed', error);
-          this.errorService.handleServerError(error);
         }
       });
   }

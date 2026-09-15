@@ -18,20 +18,6 @@ mat-dialog-content {
   flex: 1;
 }
 
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  gap: 1rem;
-
-  p {
-    color: rgba(0, 0, 0, 0.6);
-    margin: 0;
-  }
-}
-
 .event-form {
   display: flex;
   flex-direction: column;
@@ -53,10 +39,6 @@ mat-dialog-content {
   gap: 1rem;
 }
 
-.area-toggle-section {
-  padding: 0.5rem 0;
-  margin-bottom: 0.5rem;
-}
 
 mat-dialog-actions {
   padding: 1rem 1.5rem;

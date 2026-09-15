@@ -15,8 +15,8 @@ import { AreaApiService } from '../../buildings/services/area-api.service';
 import { BuildingResponse } from '../../models/api-models/area.models';
 import { FacilityRequest, FacilityType } from '../../models/api-models/facility.models';
 import { FacilityApiService } from '../services/facility-api.service';
-import { ToastService } from '../../core/toast.service';
-import { ErrorService } from '../../core/error.sevice';
+import { ToastService } from '../../core/toast/toast.service';
+import { ServerValidationBinder } from '../../core/errors/server-validation';
 
 @Component({
   selector: 'app-create-facility-dialog',
@@ -38,11 +38,11 @@ import { ErrorService } from '../../core/error.sevice';
 })
 export class CreateFacilityDialog implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly serverValidation = inject(ServerValidationBinder);
   private readonly dialogRef = inject(MatDialogRef<CreateFacilityDialog>);
   private readonly areaApiService = inject(AreaApiService);
   private readonly facilityApiService = inject(FacilityApiService);
   private readonly toast = inject(ToastService);
-  private readonly errorService = inject(ErrorService);
 
   protected isSubmitting = false;
   protected isLoadingBuildings = false;
@@ -68,7 +68,6 @@ export class CreateFacilityDialog implements OnInit {
         },
         error: (error: HttpErrorResponse) => {
           console.error('Failed to load buildings', error);
-          this.errorService.handleServerError(error);
         }
       });
   }
@@ -126,8 +125,10 @@ export class CreateFacilityDialog implements OnInit {
           this.dialogRef.close(true);
         },
         error: (error: HttpErrorResponse) => {
+          // VALIDATION_ERROR entries name rejected DTO fields; show them on
+          // the form itself. The generic notice comes from the interceptor.
+          this.serverValidation.apply(this.form, error);
           console.error('Failed to create facilities', error);
-          this.errorService.handleServerError(error);
         }
       });
   }

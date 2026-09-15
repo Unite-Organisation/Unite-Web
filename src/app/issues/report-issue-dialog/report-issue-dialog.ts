@@ -13,11 +13,11 @@ import { finalize } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { IssueRequest, IssueObject, IssuePriority } from '../../models/api-models/issue.models';
 import { IssueApiService } from '../services/issue-api.service';
-import { ToastService } from '../../core/toast.service';
-import { ErrorService } from '../../core/error.sevice';
+import { ToastService } from '../../core/toast/toast.service';
 import { BuildingResponse } from '../../models/api-models/area.models';
 import { FacilityResponse } from '../../models/api-models/facility.models';
 import { PollResponse } from '../../models/api-models/poll.models';
+import { ServerValidationBinder } from '../../core/errors/server-validation';
 
 export interface ReportIssueDialogData {
   issueObject?: IssueObject; // Pre-selected issue object type
@@ -52,11 +52,11 @@ export interface ReportIssueDialogData {
 })
 export class ReportIssueDialog implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly serverValidation = inject(ServerValidationBinder);
   private readonly dialogRef = inject(MatDialogRef<ReportIssueDialog>);
   protected readonly data = inject<ReportIssueDialogData>(MAT_DIALOG_DATA);
   private readonly issueApiService = inject(IssueApiService);
   private readonly toast = inject(ToastService);
-  private readonly errorService = inject(ErrorService);
 
   protected isSubmitting = false;
   protected readonly priorities = Object.values(IssuePriority);
@@ -181,8 +181,10 @@ export class ReportIssueDialog implements OnInit {
           this.dialogRef.close(true);
         },
         error: (error: HttpErrorResponse) => {
+          // VALIDATION_ERROR entries name rejected DTO fields; show them on
+          // the form itself. The generic notice comes from the interceptor.
+          this.serverValidation.apply(this.form, error);
           console.error('Failed to create issue', error);
-          this.errorService.handleServerError(error);
         }
       });
   }

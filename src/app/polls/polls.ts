@@ -8,7 +8,6 @@ import { CreatePollDialog } from './create-poll-dialog/create-poll-dialog';
 import { RolesService } from '../auth/services/roles.service';
 import { PollApiService } from './services/poll-api.service';
 import { PollResponse } from '../models/api-models/poll.models';
-import { ErrorService } from '../core/error.sevice';
 import { PollCard } from './poll-card/poll-card';
 import { PollDetailsDialog } from './poll-details-dialog/poll-details-dialog';
 import { IssueApiService } from '../issues/services/issue-api.service';
@@ -28,7 +27,6 @@ export class Polls implements OnInit {
   private readonly rolesService = inject(RolesService);
   private readonly pollApiService = inject(PollApiService);
   private readonly issueApiService = inject(IssueApiService);
-  private readonly errorService = inject(ErrorService);
 
   isLoading = false;
   polls: PollResponse[] = [];
@@ -95,7 +93,6 @@ export class Polls implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         console.error('Failed to load polls', error);
-        this.errorService.handleServerError(error);
         this.isLoading = false;
       }
     });

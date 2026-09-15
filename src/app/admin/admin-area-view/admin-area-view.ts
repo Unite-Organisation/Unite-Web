@@ -4,7 +4,6 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AreaApiService } from '../../buildings/services/area-api.service';
 import { AreaInfoResponse } from '../../models/api-models/area.models';
-import { ErrorService } from '../../core/error.sevice';
 
 @Component({
   selector: 'app-admin-area-view',
@@ -15,7 +14,6 @@ import { ErrorService } from '../../core/error.sevice';
 })
 export class AdminAreaView implements OnInit {
   private readonly areaApi = inject(AreaApiService);
-  private readonly errorService = inject(ErrorService);
 
   areas: AreaInfoResponse[] = [];
   isLoading = false;
@@ -32,7 +30,6 @@ export class AdminAreaView implements OnInit {
         this.isLoading = false;
       },
       error: (err: HttpErrorResponse) => {
-        this.errorService.handleServerError(err);
         this.isLoading = false;
       }
     });

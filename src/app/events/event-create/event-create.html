@@ -14,308 +14,333 @@
     <h1>Create New Event</h1>
 
     <p class="subtitle">
-      Add a new community event and choose who it is available to.
+      Add a new community event for residents of the current building.
     </p>
   </header>
 
 
-  @if (isLoadingBuildings) {
+  <form
+    [formGroup]="form"
+    (ngSubmit)="submit()"
+    class="event-form"
+  >
 
-    <div class="loading-state">
-      <mat-spinner diameter="40"></mat-spinner>
-      <p>Loading buildings...</p>
-    </div>
+    <!-- Basic information -->
 
-  } @else {
+    <section class="form-card">
 
-    <form
-      [formGroup]="form"
-      (ngSubmit)="submit()"
-      class="event-form"
-    >
-
-      <!-- Basic information -->
-
-      <section class="form-card">
-
-        <div class="form-card__header">
-          <div>
-            <p class="section-label">General</p>
-            <h2>Event information</h2>
-          </div>
+      <div class="form-card__header">
+        <div>
+          <p class="section-label">General</p>
+          <h2>Event information</h2>
         </div>
+      </div>
 
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Event Name</mat-label>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Event Name</mat-label>
 
-          <input
-            matInput
-            formControlName="name"
-            placeholder="e.g. Community BBQ"
-          />
+        <input
+          matInput
+          formControlName="name"
+          placeholder="e.g. Community BBQ"
+        />
 
-          @if (form.controls['name'].hasError('required')) {
-            <mat-error>
-              Name is required
-            </mat-error>
-          }
-        </mat-form-field>
-
-
-        <mat-form-field appearance="outline" class="full-width description-field">
-          <mat-label>Description</mat-label>
-
-          <textarea
-            matInput
-            formControlName="content"
-            rows="5"
-            placeholder="Describe the event..."
-          ></textarea>
-
-          @if (form.controls['content'].hasError('required')) {
-            <mat-error>
-              Description is required
-            </mat-error>
-          }
-        </mat-form-field>
-
-      </section>
-
-
-      <!-- Audience -->
-
-      <section class="form-card">
-
-        <div class="form-card__header">
-          <div>
-            <p class="section-label">Audience</p>
-            <h2>Who is this event for?</h2>
-          </div>
-        </div>
-
-
-        <div class="area-toggle">
-          <div>
-            <span class="toggle-title">
-              Area-wide event
-            </span>
-
-            <span class="toggle-description">
-              Make this event available to the entire neighborhood.
-            </span>
-          </div>
-
-          <mat-slide-toggle
-            [checked]="isAreaWide"
-            (change)="onAreaWideToggle($event.checked)"
-          ></mat-slide-toggle>
-        </div>
-
-
-        @if (!isAreaWide) {
-          <mat-form-field appearance="outline" class="full-width building-field">
-            <mat-label>Building</mat-label>
-
-            <mat-select formControlName="buildingId">
-
-              @for (building of buildings; track building.id) {
-                <mat-option [value]="building.id">
-                  {{ building.name }}
-                  ({{ building.street }} {{ building.number }},
-                  {{ building.city }})
-                </mat-option>
-              }
-
-            </mat-select>
-
-            @if (form.controls['buildingId'].hasError('required')) {
-              <mat-error>
-                Building is required
-              </mat-error>
-            }
-
-          </mat-form-field>
+        @if (form.controls['name'].hasError('required')) {
+          <mat-error>
+            Name is required
+          </mat-error>
         }
+      </mat-form-field>
 
-      </section>
+
+      <mat-form-field appearance="outline" class="full-width description-field">
+        <mat-label>Description</mat-label>
+
+        <textarea
+          matInput
+          formControlName="content"
+          rows="5"
+          placeholder="Describe the event..."
+        ></textarea>
+
+        @if (form.controls['content'].hasError('required')) {
+          <mat-error>
+            Description is required
+          </mat-error>
+        }
+      </mat-form-field>
+
+    </section>
 
 
-      <!-- Date -->
+    <!-- Date -->
 
-      <section class="form-card">
+    <section class="form-card">
 
-        <div class="form-card__header">
-          <div>
-            <p class="section-label">Schedule</p>
-            <h2>Date and time</h2>
-          </div>
+      <div class="form-card__header">
+        <div>
+          <p class="section-label">Schedule</p>
+          <h2>Date and time</h2>
         </div>
+      </div>
 
 
-        <div class="form-row">
+      <div class="form-row">
 
-          <mat-form-field appearance="outline">
-            <mat-label>Start Date</mat-label>
-
-            <input
-              matInput
-              [matDatepicker]="startPicker"
-              formControlName="startDate"
-            />
-
-            <mat-datepicker-toggle
-              matIconSuffix
-              [for]="startPicker"
-            ></mat-datepicker-toggle>
-
-            <mat-datepicker #startPicker></mat-datepicker>
-
-            @if (form.controls['startDate'].hasError('required')) {
-              <mat-error>
-                Start date is required
-              </mat-error>
-            }
-
-          </mat-form-field>
-
-
-          <mat-form-field appearance="outline">
-            <mat-label>End Date</mat-label>
-
-            <input
-              matInput
-              [matDatepicker]="endPicker"
-              formControlName="endDate"
-            />
-
-            <mat-datepicker-toggle
-              matIconSuffix
-              [for]="endPicker"
-            ></mat-datepicker-toggle>
-
-            <mat-datepicker #endPicker></mat-datepicker>
-
-            @if (form.controls['endDate'].hasError('required')) {
-              <mat-error>
-                End date is required
-              </mat-error>
-            }
-
-          </mat-form-field>
-
-        </div>
-
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Related Date</mat-label>
+        <mat-form-field appearance="outline">
+          <mat-label>Start Date</mat-label>
 
           <input
             matInput
-            [matDatepicker]="relatedPicker"
-            formControlName="relatedDate"
+            [matDatepicker]="startPicker"
+            formControlName="startDate"
           />
 
           <mat-datepicker-toggle
             matIconSuffix
-            [for]="relatedPicker"
+            [for]="startPicker"
           ></mat-datepicker-toggle>
 
-          <mat-datepicker #relatedPicker></mat-datepicker>
+          <mat-datepicker #startPicker></mat-datepicker>
 
-          @if (form.controls['relatedDate'].hasError('required')) {
+          @if (form.controls['startDate'].hasError('required')) {
             <mat-error>
-              Related date is required
+              Start date is required
             </mat-error>
           }
 
         </mat-form-field>
 
-      </section>
 
-
-      <!-- Location -->
-
-      <section class="form-card">
-
-        <div class="form-card__header">
-          <div>
-            <p class="section-label">Location</p>
-            <h2>Where will it take place?</h2>
-          </div>
-        </div>
-
-
-        <div class="form-row">
-
-          <mat-form-field appearance="outline">
-            <mat-label>Location</mat-label>
-
-            <input
-              matInput
-              formControlName="location"
-              placeholder="e.g. Community Hall"
-            />
-          </mat-form-field>
-
-
-          <mat-form-field appearance="outline">
-            <mat-label>Online URL</mat-label>
-
-            <input
-              matInput
-              formControlName="onlineUrl"
-              placeholder="e.g. https://zoom.us/..."
-            />
-          </mat-form-field>
-
-        </div>
-
-
-        <mat-form-field appearance="outline" class="attendees-field">
-          <mat-label>Max Attendees</mat-label>
+        <mat-form-field appearance="outline">
+          <mat-label>End Date</mat-label>
 
           <input
             matInput
-            type="number"
-            formControlName="maxAttendees"
-            min="0"
+            [matDatepicker]="endPicker"
+            formControlName="endDate"
           />
-        </mat-form-field>
 
-      </section>
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="endPicker"
+          ></mat-datepicker-toggle>
 
+          <mat-datepicker #endPicker></mat-datepicker>
 
-      <!-- Actions -->
-
-      <div class="form-actions">
-
-        <app-button
-          variant="ghost"
-          size="md"
-          type="button"
-          (clicked)="cancel()"
-        >
-          Cancel
-        </app-button>
-
-        <app-button
-          variant="primary"
-          size="md"
-          type="submit"
-          [disabled]="form.invalid || isSubmitting"
-        >
-          @if (isSubmitting) {
-            Creating...
-          } @else {
-            Create Event
+          @if (form.controls['endDate'].hasError('required')) {
+            <mat-error>
+              End date is required
+            </mat-error>
           }
-        </app-button>
+
+        </mat-form-field>
 
       </div>
 
-    </form>
 
-  }
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Related Date</mat-label>
+
+        <input
+          matInput
+          [matDatepicker]="relatedPicker"
+          formControlName="relatedDate"
+        />
+
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="relatedPicker"
+        ></mat-datepicker-toggle>
+
+        <mat-datepicker #relatedPicker></mat-datepicker>
+
+        @if (form.controls['relatedDate'].hasError('required')) {
+          <mat-error>
+            Related date is required
+          </mat-error>
+        }
+
+      </mat-form-field>
+
+    </section>
+
+
+    <!-- Visibility -->
+
+    <section class="form-card">
+
+      <div class="form-card__header">
+        <div>
+          <p class="section-label">Visibility</p>
+          <h2>Visible to residents</h2>
+        </div>
+      </div>
+
+
+      <div class="form-row">
+
+        <mat-form-field appearance="outline">
+          <mat-label>Visible From</mat-label>
+
+          <input
+            matInput
+            [matDatepicker]="visibleFromPicker"
+            [max]="form.controls['visibleTo'].value"
+            formControlName="visibleFrom"
+          />
+
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="visibleFromPicker"
+          ></mat-datepicker-toggle>
+
+          <mat-datepicker #visibleFromPicker></mat-datepicker>
+
+          @if (form.controls['visibleFrom'].hasError('required')) {
+            <mat-error>
+              Visible from is required
+            </mat-error>
+          }
+
+          @if (form.controls['visibleFrom'].hasError('matDatepickerMax')) {
+            <mat-error>
+              Must not be after the visible to date
+            </mat-error>
+          }
+
+        </mat-form-field>
+
+
+        <mat-form-field appearance="outline">
+          <mat-label>Visible To</mat-label>
+
+          <input
+            matInput
+            [matDatepicker]="visibleToPicker"
+            [min]="form.controls['visibleFrom'].value"
+            formControlName="visibleTo"
+          />
+
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="visibleToPicker"
+          ></mat-datepicker-toggle>
+
+          <mat-datepicker #visibleToPicker></mat-datepicker>
+
+          @if (form.controls['visibleTo'].hasError('required')) {
+            <mat-error>
+              Visible to is required
+            </mat-error>
+          }
+
+          @if (form.controls['visibleTo'].hasError('matDatepickerMin')) {
+            <mat-error>
+              Must not be before the visible from date
+            </mat-error>
+          }
+
+        </mat-form-field>
+
+      </div>
+
+    </section>
+
+
+    <!-- Location -->
+
+    <section class="form-card">
+
+      <div class="form-card__header">
+        <div>
+          <p class="section-label">Location</p>
+          <h2>Where will it take place?</h2>
+        </div>
+      </div>
+
+
+      <div class="form-row">
+
+        <mat-form-field appearance="outline">
+          <mat-label>Location</mat-label>
+
+          <input
+            matInput
+            formControlName="location"
+            placeholder="e.g. Community Hall"
+          />
+        </mat-form-field>
+
+
+        <mat-form-field appearance="outline">
+          <mat-label>Online URL</mat-label>
+
+          <input
+            matInput
+            formControlName="onlineUrl"
+            placeholder="e.g. https://zoom.us/..."
+          />
+        </mat-form-field>
+
+      </div>
+
+
+      <mat-form-field appearance="outline" class="attendees-field">
+        <mat-label>Max Attendees</mat-label>
+
+        <input
+          matInput
+          type="number"
+          formControlName="maxAttendees"
+          min="1"
+        />
+
+        @if (form.controls['maxAttendees'].hasError('required')) {
+          <mat-error>
+            Max attendees is required
+          </mat-error>
+        }
+
+        @if (form.controls['maxAttendees'].hasError('min')) {
+          <mat-error>
+            Max attendees must be at least 1
+          </mat-error>
+        }
+      </mat-form-field>
+
+    </section>
+
+
+    <!-- Actions -->
+
+    <div class="form-actions">
+
+      <app-button
+        variant="ghost"
+        size="md"
+        type="button"
+        (clicked)="cancel()"
+      >
+        Cancel
+      </app-button>
+
+      <app-button
+        variant="primary"
+        size="md"
+        type="submit"
+        [disabled]="form.invalid || isSubmitting"
+      >
+        @if (isSubmitting) {
+          Creating...
+        } @else {
+          Create Event
+        }
+      </app-button>
+
+    </div>
+
+  </form>
 
 </div>

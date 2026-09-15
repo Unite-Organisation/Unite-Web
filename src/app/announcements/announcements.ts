@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, viewChild } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
-import { ErrorService } from '../core/error.sevice';
 import { Post, PostType } from '../models/api-models/posts.models';
 import { PostService } from '../posts/services/post.service';
 import { AddButton } from '../shared/add-button/add-button';
@@ -21,7 +20,6 @@ import { Router } from '@angular/router';
   styleUrl: './announcements.scss',
 })
 export class Announcements implements OnInit {
-  private readonly errorService = inject(ErrorService);
   private readonly postService = inject(PostService);
   private readonly dialog = inject(MatDialog);
   private readonly rolesService = inject(RolesService);
@@ -32,16 +30,46 @@ export class Announcements implements OnInit {
   posts: Post[] = [];
   selectedPost: Post | null = null;
 
+  private readonly featuredCard = viewChild('featuredCard', { read: ElementRef });
+
   get canCreateAnnouncement(): boolean {
     return this.rolesService.isManager() || this.rolesService.isAdmin();
   }
 
   protected createAnnouncement(): void {
-    this.router.navigate(['/home/announcements/create']);
+    this.router.navigate(['/app/home/announcements/create']);
   }
 
   selectPost(post: Post): void {
+    if (this.selectedPost?.id === post.id) {
+      return;
+    }
+
     this.selectedPost = post;
+    this.bounceFeaturedCard();
+  }
+
+  private bounceFeaturedCard(): void {
+    const element = this.featuredCard()?.nativeElement as HTMLElement | undefined;
+
+    if (!element || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    element.getAnimations().forEach(animation => animation.cancel());
+
+    element.animate(
+      [
+        { transform: 'scale(1)', opacity: 1 },
+        { transform: 'scale(0.985)', opacity: 0.85, offset: 0.3 },
+        { transform: 'scale(1.006)', opacity: 1, offset: 0.65 },
+        { transform: 'scale(1)', opacity: 1 },
+      ],
+      {
+        duration: 450,
+        easing: 'cubic-bezier(0.33, 1, 0.68, 1)',
+      },
+    );
   }
 
   openCreateAnnouncementDialog(): void {
@@ -81,7 +109,6 @@ export class Announcements implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         console.error('Failed to load announcements', error);
-        this.errorService.handleServerError(error);
         this.isLoading = false;
       }
     });
