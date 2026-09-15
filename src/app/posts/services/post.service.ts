@@ -10,20 +10,6 @@ export interface PostsQueryParams {
   postType: PostType;
 }
 
-export interface CreateEventPayload {
-  name: string;
-  areaId: string;
-  buildingId: string;
-  content: string;
-  relatedDate: string;
-  postType: PostType;
-  startDate: string;
-  endDate: string;
-  location: string;
-  onlineUrl: string;
-  maxAttendees: number;
-}
-
 @Injectable({
   providedIn: 'root'
 })

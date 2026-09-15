@@ -14,7 +14,7 @@ import { PostService } from '../../posts/services/post.service';
 import { ToastService } from '../../core/toast/toast.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { ServerValidationBinder } from '../../core/errors/server-validation';
-import { endOfDay, startOfDay, toLocalDateTime } from '../announcement-dates';
+import { endOfDay, startOfDay, toLocalDateTime } from '../../posts/post-dates';
 
 @Component({
   selector: 'app-create-ann-dialog',

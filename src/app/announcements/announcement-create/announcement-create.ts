@@ -31,7 +31,7 @@ import {
   endOfDay,
   startOfDay,
   toLocalDateTime,
-} from '../announcement-dates';
+} from '../../posts/post-dates';
 
 @Component({
   selector: 'app-create-announcement',

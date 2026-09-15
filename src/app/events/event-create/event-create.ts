@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import {
   FormBuilder,
@@ -13,16 +13,10 @@ import { Router } from '@angular/router';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { finalize } from 'rxjs/operators';
-
-import { AreaApiService } from '../../buildings/services/area-api.service';
-import { BuildingResponse } from '../../models/api-models/area.models';
 
 import {
   EventRequest,
@@ -36,6 +30,12 @@ import { ToastService } from '../../core/toast/toast.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { ServerValidationBinder } from '../../core/errors/server-validation';
 
+import {
+  endOfDay,
+  startOfDay,
+  toLocalDateTime,
+} from '../../posts/post-dates';
+
 @Component({
   selector: 'app-create-event',
 
@@ -47,10 +47,7 @@ import { ServerValidationBinder } from '../../core/errors/server-validation';
 
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
     MatDatepickerModule,
-    MatProgressSpinnerModule,
-    MatSlideToggleModule,
 
     ButtonComponent,
   ],
@@ -62,14 +59,12 @@ import { ServerValidationBinder } from '../../core/errors/server-validation';
   templateUrl: './event-create.html',
   styleUrl: './event-create.scss',
 })
-export class CreateEvent implements OnInit {
+export class CreateEvent {
 
   private readonly fb = inject(FormBuilder);
   private readonly serverValidation = inject(ServerValidationBinder);
 
   private readonly router = inject(Router);
-
-  private readonly areaApiService = inject(AreaApiService);
 
   private readonly postService = inject(PostService);
 
@@ -77,21 +72,10 @@ export class CreateEvent implements OnInit {
 
   protected isSubmitting = false;
 
-  protected isLoadingBuildings = false;
-
-  protected buildings: BuildingResponse[] = [];
-
-  protected isAreaWide = false;
-
 
   readonly form: FormGroup = this.fb.group({
 
     name: this.fb.control('', {
-      validators: [Validators.required],
-      nonNullable: true,
-    }),
-
-    buildingId: this.fb.control('', {
       validators: [Validators.required],
       nonNullable: true,
     }),
@@ -102,6 +86,20 @@ export class CreateEvent implements OnInit {
     }),
 
     relatedDate: this.fb.control<Date | null>(
+      null,
+      {
+        validators: [Validators.required],
+      },
+    ),
+
+    visibleFrom: this.fb.control<Date | null>(
+      null,
+      {
+        validators: [Validators.required],
+      },
+    ),
+
+    visibleTo: this.fb.control<Date | null>(
       null,
       {
         validators: [Validators.required],
@@ -132,69 +130,13 @@ export class CreateEvent implements OnInit {
 
     maxAttendees: this.fb.control<number | null>(
       null,
+      {
+        validators: [Validators.required, Validators.min(1)],
+      },
     ),
 
   });
 
-
-  ngOnInit(): void {
-    this.loadBuildings();
-  }
-
-  private loadBuildings(): void {
-
-    this.isLoadingBuildings = true;
-
-    this.areaApiService
-      .getBuildings()
-      .pipe(
-        finalize(() => {
-          this.isLoadingBuildings = false;
-        }),
-      )
-      .subscribe({
-
-        next: (buildings) => {
-          this.buildings = buildings;
-        },
-
-        error: (error: HttpErrorResponse) => {
-
-          console.error(
-            'Failed to load buildings',
-            error,
-          );
-        },
-
-      });
-  }
-
-  protected onAreaWideToggle(
-    checked: boolean,
-  ): void {
-
-    this.isAreaWide = checked;
-
-    const buildingIdControl =
-      this.form.get('buildingId');
-
-
-    if (checked) {
-
-      buildingIdControl?.clearValidators();
-
-      buildingIdControl?.setValue('');
-
-    } else {
-
-      buildingIdControl?.setValidators([
-        Validators.required,
-      ]);
-
-    }
-
-    buildingIdControl?.updateValueAndValidity();
-  }
 
   protected submit(): void {
 
@@ -214,11 +156,6 @@ export class CreateEvent implements OnInit {
 
       name: formValue.name,
 
-      buildingId:
-        this.isAreaWide
-          ? null
-          : formValue.buildingId,
-
       content: formValue.content,
 
       relatedDate: this.formatDate(
@@ -226,6 +163,14 @@ export class CreateEvent implements OnInit {
       ),
 
       postType: PostType.EVENT,
+
+      visibleFrom: toLocalDateTime(
+        startOfDay(formValue.visibleFrom),
+      ),
+
+      visibleTo: toLocalDateTime(
+        endOfDay(formValue.visibleTo),
+      ),
 
       startDate: this.formatDate(
         formValue.startDate,
@@ -241,8 +186,10 @@ export class CreateEvent implements OnInit {
       onlineUrl:
         formValue.onlineUrl ?? '',
 
-      maxAttendees:
-        formValue.maxAttendees ?? 0,
+      maxAttendees: formValue.maxAttendees,
+
+      // Attachments are not supported in the form yet.
+      fileKeys: null,
     };
 
 
