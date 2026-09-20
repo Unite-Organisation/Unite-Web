@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_URLS } from '../../core/api.config';
 import { IssueRequest, IssueResponse, NotificationResponse, IssueProcessingStatus, IssueSimpleResponse } from '../../models/api-models/issue.models';
+import { skipErrorToast } from '../../core/errors/error-context';
 
 @Injectable({
   providedIn: 'root'
@@ -24,14 +25,22 @@ export class IssueApiService {
     return this.http.get<IssueResponse[]>(API_URLS.area_issues, { params });
   }
 
+  /** Badge decoration on the facilities list — a failure must stay quiet. */
   getFacilityIssues(facilityId: string): Observable<IssueResponse[]> {
     const params = new HttpParams().set('facilityId', facilityId);
-    return this.http.get<IssueResponse[]>(API_URLS.facility_issues, { params });
+    return this.http.get<IssueResponse[]>(API_URLS.facility_issues, {
+      params,
+      context: skipErrorToast(),
+    });
   }
 
+  /** Badge decoration on the polls list — a failure must stay quiet. */
   getPollIssues(pollId: string): Observable<IssueResponse[]> {
     const params = new HttpParams().set('pollId', pollId);
-    return this.http.get<IssueResponse[]>(API_URLS.poll_issues, { params });
+    return this.http.get<IssueResponse[]>(API_URLS.poll_issues, {
+      params,
+      context: skipErrorToast(),
+    });
   }
 
   // Manager notification methods

@@ -5,7 +5,6 @@ import { Router } from '@angular/router';
 import { AuthApiService } from '../../auth/services/auth-api.service';
 import { PersonalData } from '../../models/api-models/personal-info.models';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorService } from '../../core/error.sevice';
 import { HomeService } from '../services/home.service';
 import { IssueApiService } from '../../issues/services/issue-api.service';
 import { IssueResponse } from '../../models/api-models/issue.models';
@@ -23,7 +22,6 @@ import { RolesService } from '../../auth/services/roles.service';
 })
 export class HomeDashboard implements OnInit {
   private readonly homeService = inject(HomeService);
-  private readonly errorService = inject(ErrorService);
   private readonly router = inject(Router);
   private readonly issueApiService = inject(IssueApiService);
   protected readonly rolesService = inject(RolesService);
@@ -54,7 +52,6 @@ export class HomeDashboard implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         console.error('Failed to load personal data', error);
-        this.errorService.handleServerError(error);
         this.isLoading = false;
       }
     });
@@ -73,18 +70,17 @@ export class HomeDashboard implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         console.error('Failed to load issues', error);
-        this.errorService.handleServerError(error);
         this.isLoadingIssues = false;
       }
     });
   }
 
   navigateToFacilities(): void {
-    this.router.navigate(['/home/facilities']);
+    this.router.navigate(['/app/home/facilities']);
   }
 
   navigateToAdminPanel(): void {
-    this.router.navigate(['/home/area']);
+    this.router.navigate(['/app/home/area']);
   }
 }
 

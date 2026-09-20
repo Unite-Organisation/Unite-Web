@@ -15,11 +15,11 @@ import { PollApiService } from '../polls/services/poll-api.service';
 import { ReportIssueDialog, ReportIssueDialogData } from '../issues/report-issue-dialog/report-issue-dialog';
 import { IssueObject } from '../models/api-models/issue.models';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorService } from '../core/error.sevice';
 import { forkJoin } from 'rxjs';
 import { ChatSocketService } from '../chats/chat-socket.service';
 import { ButtonComponent } from '../shared/components/button/button.component';
 import { BuildingContextService } from '../core/building-context.service';
+import {ToastService} from '../core/toast/toast.service';
 
 @Component({
   selector: 'app-home',
@@ -39,9 +39,9 @@ export class Home implements OnInit, OnDestroy {
   private readonly areaApiService = inject(AreaApiService);
   private readonly facilityApiService = inject(FacilityApiService);
   private readonly pollApiService = inject(PollApiService);
-  private readonly errorService = inject(ErrorService);
   private readonly destroy$ = new Subject<void>();
-  private readonly buildingContext = inject(BuildingContextService);
+  protected readonly buildingContext = inject(BuildingContextService);
+  private readonly toastService = inject(ToastService);
 
   protected canReportIssue = false;
   private currentRoute = '';
@@ -69,11 +69,11 @@ export class Home implements OnInit, OnDestroy {
   }
 
   private updateReportButtonState(): void {
-    // Enable button on: /home (dashboard), /home/facilities, /home/polls
-    this.canReportIssue = 
-      this.currentRoute === '/home' || 
-      this.currentRoute.startsWith('/home/facilities') ||
-      this.currentRoute.startsWith('/home/polls');
+    // Enable button on: /app/home (dashboard), /app/home/facilities, /app/home/polls
+    this.canReportIssue =
+      this.currentRoute === '/app/home' ||
+      this.currentRoute.startsWith('/app/home/facilities') ||
+      this.currentRoute.startsWith('/app/home/polls');
   }
 
   openReportIssueDialog(): void {
@@ -83,13 +83,13 @@ export class Home implements OnInit, OnDestroy {
     }
 
     // Determine dialog data based on current route
-    if (this.currentRoute === '/home') {
+    if (this.currentRoute === '/app/home') {
       // Home dashboard: can report AREA or BUILDING issues
       this.openHomeDashboardDialog();
-    } else if (this.currentRoute.startsWith('/home/facilities')) {
+    } else if (this.currentRoute.startsWith('/app/home/facilities')) {
       // Facilities: can report FACILITY issues
       this.openFacilityDialog();
-    } else if (this.currentRoute.startsWith('/home/polls')) {
+    } else if (this.currentRoute.startsWith('/app/home/polls')) {
       // Polls: can report POLL issues
       this.openPollDialog();
     }
@@ -120,7 +120,6 @@ export class Home implements OnInit, OnDestroy {
       },
       error: (error: HttpErrorResponse) => {
         console.error('Failed to load data for issue dialog', error);
-        this.errorService.handleServerError(error);
       }
     });
   }
@@ -145,7 +144,6 @@ export class Home implements OnInit, OnDestroy {
       },
       error: (error: HttpErrorResponse) => {
         console.error('Failed to load facilities for issue dialog', error);
-        this.errorService.handleServerError(error);
       }
     });
   }
@@ -173,9 +171,13 @@ export class Home implements OnInit, OnDestroy {
       },
       error: (error: HttpErrorResponse) => {
         console.error('Failed to load polls for issue dialog', error);
-        this.errorService.handleServerError(error);
       }
     });
+  }
+
+  changeBuilding(): void {
+    this.buildingContext.clearBuilding();
+    this.router.navigateByUrl('/app/select-building');
   }
 
   logout(): void {
@@ -188,6 +190,7 @@ export class Home implements OnInit, OnDestroy {
           this.authService.logout();
           this.buildingContext.clearBuilding();
           this.router.navigateByUrl('/login');
+          this.toastService.info("Logged out");
         })
       )
       .subscribe({

@@ -22,6 +22,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../auth/services/auth';
 import { ChatSocketService } from '../chats/chat-socket.service';
 import { AuthApiService } from '../auth/services/auth-api.service';
+import {ToastService} from '../core/toast/toast.service';
 
 
 @Component({
@@ -89,6 +90,7 @@ export class SelectBuildingComponent
 
     this.buildingContext.setBuilding(
       building.id,
+      building.name,
     );
 
     this.router.navigate([

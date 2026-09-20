@@ -1,0 +1,35 @@
+<div class="toast-stack">
+  @for (toast of toasts(); track toast.id) {
+    <div
+      class="toast"
+      [class]="'toast--' + toast.severity"
+      [class.toast--leaving]="toast.leaving"
+      [attr.role]="toast.severity === 'error' ? 'alert' : 'status'"
+      [attr.aria-live]="toast.severity === 'error' ? 'assertive' : 'polite'"
+      (mouseenter)="pause(toast)"
+      (mouseleave)="resume(toast)"
+    >
+      <div class="toast__icon" aria-hidden="true">{{ glyphFor(toast.severity) }}</div>
+
+      <div class="toast__content">
+        <div class="toast__label">{{ labelFor(toast.severity) }}</div>
+        <p class="toast__message">{{ toast.message }}</p>
+
+        @if (toast.actionLabel) {
+          <button type="button" class="toast__action" (click)="runAction(toast)">
+            {{ toast.actionLabel }}
+          </button>
+        }
+      </div>
+
+      <button
+        type="button"
+        class="toast__close"
+        aria-label="Dismiss notification"
+        (click)="dismiss(toast)"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  }
+</div>

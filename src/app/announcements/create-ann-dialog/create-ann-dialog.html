@@ -3,13 +3,7 @@
 
   <mat-dialog-content>
 
-    <div *ngIf="isLoadingBuildings" class="loading-container">
-      <mat-spinner diameter="40"></mat-spinner>
-      <p>Loading buildings...</p>
-    </div>
-
     <form
-      *ngIf="!isLoadingBuildings"
       [formGroup]="form"
       class="announcement-form"
     >
@@ -25,26 +19,6 @@
 
         <mat-error *ngIf="form.controls['name'].hasError('required')">
           Name is required
-        </mat-error>
-      </mat-form-field>
-
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Building</mat-label>
-
-        <mat-select formControlName="buildingId">
-          <mat-option
-            *ngFor="let building of buildings"
-            [value]="building.id"
-          >
-            {{ building.name }}
-            ({{ building.street }} {{ building.number }},
-            {{ building.city }})
-          </mat-option>
-        </mat-select>
-
-        <mat-error *ngIf="form.controls['buildingId'].hasError('required')">
-          Building is required
         </mat-error>
       </mat-form-field>
 
@@ -86,6 +60,58 @@
         </mat-error>
       </mat-form-field>
 
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Visible From</mat-label>
+
+        <input
+          matInput
+          [matDatepicker]="visibleFromPicker"
+          [max]="form.controls['visibleTo'].value"
+          formControlName="visibleFrom"
+        />
+
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="visibleFromPicker"
+        ></mat-datepicker-toggle>
+
+        <mat-datepicker #visibleFromPicker></mat-datepicker>
+
+        <mat-error *ngIf="form.controls['visibleFrom'].hasError('required')">
+          Visible from is required
+        </mat-error>
+        <mat-error *ngIf="form.controls['visibleFrom'].hasError('matDatepickerMax')">
+          Must not be after the visible to date
+        </mat-error>
+      </mat-form-field>
+
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Visible To</mat-label>
+
+        <input
+          matInput
+          [matDatepicker]="visibleToPicker"
+          [min]="form.controls['visibleFrom'].value"
+          formControlName="visibleTo"
+        />
+
+        <mat-datepicker-toggle
+          matIconSuffix
+          [for]="visibleToPicker"
+        ></mat-datepicker-toggle>
+
+        <mat-datepicker #visibleToPicker></mat-datepicker>
+
+        <mat-error *ngIf="form.controls['visibleTo'].hasError('required')">
+          Visible to is required
+        </mat-error>
+        <mat-error *ngIf="form.controls['visibleTo'].hasError('matDatepickerMin')">
+          Must not be before the visible from date
+        </mat-error>
+      </mat-form-field>
+
     </form>
 
   </mat-dialog-content>
@@ -106,7 +132,7 @@
       variant="primary"
       size="md"
       type="button"
-      [disabled]="form.invalid || isSubmitting || isLoadingBuildings"
+      [disabled]="form.invalid || isSubmitting"
       (clicked)="submit()"
     >
       <ng-container *ngIf="!isSubmitting; else submittingTpl">
