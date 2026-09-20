@@ -1,0 +1,81 @@
+<div class="building-select-page">
+
+
+  <button
+    type="button"
+    class="logout-button"
+    (click)="logout()"
+  >
+    <span>Log out</span>
+  </button>
+
+  <header class="page-header">
+
+    <p class="eyebrow">
+      Unite
+    </p>
+
+    <h1>
+      Choose your building
+    </h1>
+
+    <p class="subtitle">
+      Select the building you want to manage.
+      You can change it later.
+    </p>
+
+  </header>
+
+
+  @if (isLoading) {
+
+    <div class="loading-state">
+      Loading buildings...
+    </div>
+
+  } @else {
+
+    <div class="buildings-grid">
+
+      @for (
+        building of buildings;
+        track building.id
+      ) {
+
+        <button
+          type="button"
+          class="building-card"
+          (click)="selectBuilding(building)"
+        >
+
+          <span class="building-card__label">
+            Building
+          </span>
+
+          <h2>
+            {{ building.name }}
+          </h2>
+
+          <p>
+            {{ building.street }}
+            {{ building.number }}
+          </p>
+
+          <p class="building-card__city">
+            {{ building.city }},
+            {{ building.country }}
+          </p>
+
+          <span class="building-card__action">
+            Select building →
+          </span>
+
+        </button>
+
+      }
+
+    </div>
+
+  }
+
+</div>

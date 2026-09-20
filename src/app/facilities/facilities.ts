@@ -4,7 +4,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { ErrorService } from '../core/error.sevice';
 import { AddButton } from '../shared/add-button/add-button';
 import { RolesService } from '../auth/services/roles.service';
 import { FacilityApiService } from './services/facility-api.service';
@@ -18,7 +17,7 @@ import { forkJoin } from 'rxjs';
 import { ButtonComponent } from '../shared/components/button/button.component';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { FormGroup } from '@angular/forms';
-import { ToastService } from '../core/toast.service';
+import { ToastService } from '../core/toast/toast.service';
 import { Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { FacilityReservation, ReservationRequest } from '../models/api-models/facility.models';
@@ -29,6 +28,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { Router } from '@angular/router';
+import { ServerValidationBinder } from '../core/errors/server-validation';
 
 
 @Component({
@@ -45,8 +45,8 @@ import { Router } from '@angular/router';
   styleUrl: './facilities.scss',
 })
 export class Facilities implements OnInit {
-  private readonly errorService = inject(ErrorService);
   private readonly facilityApiService = inject(FacilityApiService);
+  private readonly serverValidation = inject(ServerValidationBinder);
   private readonly issueApiService = inject(IssueApiService);
   private readonly rolesService = inject(RolesService);
   private readonly dialog = inject(MatDialog);
@@ -148,7 +148,7 @@ export class Facilities implements OnInit {
   }
 
   createFacility(): void {
-    this.router.navigate(['/home/facilities/create']);
+    this.router.navigate(['/app/home/facilities/create']);
   }
 
   openReservationDialog(facility: FacilityResponse): void {
@@ -178,7 +178,6 @@ export class Facilities implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         console.error('Failed to load facilities', error);
-        this.errorService.handleServerError(error);
         this.isLoading = false;
       }
     });
@@ -269,7 +268,6 @@ export class Facilities implements OnInit {
         error: (error: HttpErrorResponse) => {
           console.error('Failed to load availability', error);
 
-          this.errorService.handleServerError(error);
         }
       });
   }
@@ -353,10 +351,12 @@ export class Facilities implements OnInit {
             this.loadAvailability();
           } else {
             this.toast.error('Failed to reserve facility. Please check for conflicts.');
-            this.errorService.handleServerError({ error: 'Reservation failed', status: 400 } as HttpErrorResponse);
           }
         },
         error: (error: HttpErrorResponse) => {
+          // VALIDATION_ERROR entries name rejected DTO fields; show them on
+          // the form itself. The generic notice comes from the interceptor.
+          this.serverValidation.apply(this.form, error);
           console.error('Failed to reserve facility', error);
           // If backend returns reservations in error response, update the list
           if (error.error && error.error.reservations) {
@@ -364,7 +364,6 @@ export class Facilities implements OnInit {
             this.reservedDates = this.reservations.map(r => new Date(r.startTime));
             this.form.updateValueAndValidity();
           }
-          this.errorService.handleServerError(error);
         }
       });
   }

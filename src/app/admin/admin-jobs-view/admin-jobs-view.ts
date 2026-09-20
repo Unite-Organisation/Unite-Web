@@ -5,12 +5,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
-import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
 import { JobApiService } from '../services/job-api.service';
 import { JobResponse, JobStatus } from '../../models/api-models/job.models';
-import { ErrorService } from '../../core/error.sevice';
-import { ToastService } from '../../core/toast.service';
+import { ToastService } from '../../core/toast/toast.service';
 
 type StatusFilter = 'ALL' | JobStatus;
 
@@ -30,7 +28,6 @@ type StatusFilter = 'ALL' | JobStatus;
 })
 export class AdminJobsView implements OnInit {
   private readonly jobApi = inject(JobApiService);
-  private readonly errorService = inject(ErrorService);
   private readonly toast = inject(ToastService);
 
   protected readonly JobStatus = JobStatus;
@@ -63,8 +60,7 @@ export class AdminJobsView implements OnInit {
         this.jobs = data;
         this.isLoading = false;
       },
-      error: (err: HttpErrorResponse) => {
-        this.errorService.handleServerError(err);
+      error: () => {
         this.isLoading = false;
       }
     });
@@ -80,8 +76,8 @@ export class AdminJobsView implements OnInit {
           this.toast.success(`Job rerun finished: ${newStatus}`);
           this.load();
         },
-        error: (err: HttpErrorResponse) => {
-          this.errorService.handleServerError(err);
+        error: () => {
+          // Reported to the user by errorToastInterceptor.
         }
       });
   }
@@ -96,8 +92,8 @@ export class AdminJobsView implements OnInit {
           this.toast.success('Rerun all failed jobs started');
           this.load();
         },
-        error: (err: HttpErrorResponse) => {
-          this.errorService.handleServerError(err);
+        error: () => {
+          // Reported to the user by errorToastInterceptor.
         }
       });
   }

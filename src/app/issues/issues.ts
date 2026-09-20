@@ -7,8 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { IssueApiService } from './services/issue-api.service';
 import { NotificationResponse, IssueProcessingStatus, IssuePriority, IssueObject, IssueSimpleResponse } from '../models/api-models/issue.models';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ErrorService } from '../core/error.sevice';
-import { ToastService } from '../core/toast.service';
+import { ToastService } from '../core/toast/toast.service';
 import { RolesService } from '../auth/services/roles.service';
 
 @Component({
@@ -26,7 +25,6 @@ import { RolesService } from '../auth/services/roles.service';
 })
 export class Issues implements OnInit {
   private readonly issueApiService = inject(IssueApiService);
-  private readonly errorService = inject(ErrorService);
   private readonly toastService = inject(ToastService);
   protected readonly rolesService = inject(RolesService);
 
@@ -58,7 +56,6 @@ export class Issues implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         console.error('Failed to load notifications', error);
-        this.errorService.handleServerError(error);
         this.isLoading = false;
       }
     });
@@ -75,7 +72,6 @@ export class Issues implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         console.error('Failed to mark notification as seen', error);
-        this.errorService.handleServerError(error);
         this.processingIds.delete(notification.notificationId);
       }
     });
@@ -97,7 +93,6 @@ export class Issues implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         console.error('Failed to update issue status', error);
-        this.errorService.handleServerError(error);
         this.processingIds.delete(notification.notificationId);
       }
     });
@@ -114,7 +109,6 @@ export class Issues implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         console.error('Failed to load user issues', error);
-        this.errorService.handleServerError(error);
         this.isLoading = false;
       }
     });

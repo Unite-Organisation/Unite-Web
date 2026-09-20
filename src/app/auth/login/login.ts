@@ -11,12 +11,14 @@ import { finalize } from 'rxjs/operators';
 import { UserLoginRequest } from '../../models/auth-models/auth.models';
 import { AuthApiService } from '../services/auth-api.service';
 import { AuthService } from '../services/auth';
-import { ToastService } from '../../core/toast.service';
-import { ErrorService } from '../../core/error.sevice';
+import { ToastService } from '../../core/toast/toast.service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { catchError } from 'rxjs/operators';
+import { catchError, switchMap, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
+import { UserMetaInfo } from '../../models/api-models/chat.models';
+import { BuildingContextService } from '../../core/building-context.service';
+import { RolesService } from '../services/roles.service';
 
 @Component({
   selector: 'app-login',
@@ -30,7 +32,7 @@ import { MatIconModule } from '@angular/material/icon';
     ButtonComponent,
     FormFieldComponent
   ],
-  standalone: true, 
+  standalone: true,
   templateUrl: './login.html',
 })
 export class Login {
@@ -38,9 +40,9 @@ export class Login {
   private readonly authApi = inject(AuthApiService);
   private readonly authService = inject(AuthService);
   private readonly toast = inject(ToastService);
-  private readonly errorService = inject(ErrorService);
   private readonly router = inject(Router);
-
+  private readonly buildingContext = inject(BuildingContextService);
+  private readonly  rolesService = inject(RolesService);
   protected isSubmitting = false;
 
   readonly form: FormGroup = this.fb.group({
@@ -58,30 +60,46 @@ export class Login {
     this.isSubmitting = true;
 
     this.authApi.login(payload)
-      .pipe(finalize(() => (this.isSubmitting = false)))
-      .subscribe({
-        next: (tokenResponse) => {
+      .pipe(
+        tap((tokenResponse) => {
           this.authService.saveToken(tokenResponse.accessToken);
-          this.authApi.getUserMetaInfo()
-            .pipe(
-              catchError((error) => {
-                console.error('Failed to load user meta info', error);
-                return of(null);
-              })
-            )
-            .subscribe((metaInfo) => {
-              if (metaInfo) {
-                localStorage.setItem('user-meta-info', JSON.stringify(metaInfo));
-              }
-            });
+        }),
+        switchMap(() => this.authApi.getUserMetaInfo()
+          .pipe(
+            catchError((error) => {
+              console.error('Failed to load user meta info', error);
+              return of(null);
+            })
+          )
+        ),
+        finalize(() => (this.isSubmitting = false))
+      )
+      .subscribe({
+        next: (metaInfo) => {
+          if (metaInfo) {
+            localStorage.setItem('user-meta-info', JSON.stringify(metaInfo));
+          }
           this.toast.success('Logged in successfully');
-          this.router.navigateByUrl('/home/announcements');
+          this.redirectAfterLogin(metaInfo);
         },
         error: (error: HttpErrorResponse) => {
           console.error('Login failed', error);
-          this.errorService.handleServerError(error);
         }
       });
+  }
+
+  private redirectAfterLogin(metaInfo: UserMetaInfo | null): void {
+    if (this.rolesService.isManager()) {
+      this.buildingContext.clearBuilding();
+      this.router.navigateByUrl('/app/select-building');
+      return;
+    }
+
+    if (metaInfo?.buildingId) {
+      this.buildingContext.setBuilding(metaInfo.buildingId);
+    }
+
+    this.router.navigateByUrl('/app/home');
   }
 
   switchToRegister(): void {

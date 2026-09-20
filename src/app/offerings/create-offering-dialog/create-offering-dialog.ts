@@ -14,8 +14,8 @@ import { finalize } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { OfferingApiService } from '../services/offering-api.service';
 import { OfferingRequest, OfferingCategory } from '../../models/api-models/offering.models';
-import { ToastService } from '../../core/toast.service';
-import { ErrorService } from '../../core/error.sevice';
+import { ToastService } from '../../core/toast/toast.service';
+import { ServerValidationBinder } from '../../core/errors/server-validation';
 
 @Component({
   selector: 'app-create-offering-dialog',
@@ -38,10 +38,10 @@ import { ErrorService } from '../../core/error.sevice';
 })
 export class CreateOfferingDialog {
   private readonly fb = inject(FormBuilder);
+  private readonly serverValidation = inject(ServerValidationBinder);
   private readonly dialogRef = inject(MatDialogRef<CreateOfferingDialog>);
   private readonly offeringApiService = inject(OfferingApiService);
   private readonly toast = inject(ToastService);
-  private readonly errorService = inject(ErrorService);
 
   protected isSubmitting = false;
   protected readonly categories = Object.values(OfferingCategory);
@@ -112,8 +112,10 @@ export class CreateOfferingDialog {
           this.dialogRef.close(true);
         },
         error: (error: HttpErrorResponse) => {
+          // VALIDATION_ERROR entries name rejected DTO fields; show them on
+          // the form itself. The generic notice comes from the interceptor.
+          this.serverValidation.apply(this.form, error);
           console.error('Failed to create offering', error);
-          this.errorService.handleServerError(error);
         }
       });
   }

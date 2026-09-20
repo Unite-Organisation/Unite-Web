@@ -25,8 +25,7 @@ import {
 } from '../../models/api-models/area.models';
 
 import { AreaApiService } from '../services/area-api.service';
-import { ToastService } from '../../core/toast.service';
-import { ErrorService } from '../../core/error.sevice';
+import { ToastService } from '../../core/toast/toast.service';
 
 import { ButtonComponent } from '../../shared/components/button/button.component';
 
@@ -57,8 +56,6 @@ export class CreateArea {
   private readonly areaApiService = inject(AreaApiService);
 
   private readonly toast = inject(ToastService);
-
-  private readonly errorService = inject(ErrorService);
 
   protected readonly areaTypes =
     Object.values(AreaType);
@@ -155,7 +152,7 @@ export class CreateArea {
 
   protected cancel(): void {
     this.router.navigate([
-      '/home/buildings',
+      '/app/home/buildings',
     ]);
   }
 
@@ -206,7 +203,7 @@ export class CreateArea {
           );
 
           this.router.navigate([
-            '/home/buildings',
+            '/app/home/buildings',
           ]);
         },
 
@@ -217,9 +214,6 @@ export class CreateArea {
             'Failed to create area',
             error,
           );
-
-          this.errorService
-            .handleServerError(error);
         },
       });
   }
