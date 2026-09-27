@@ -150,15 +150,85 @@
 
       @if (!isChoosingDate()) {
         <section class="pe-card">
-          <h2 class="pe-section-title">Who's coming</h2>
+          <button
+            type="button"
+            class="who"
+            [attr.aria-expanded]="membersOpen()"
+            (click)="toggleMembers()"
+          >
+            <span class="who__left">
+              <span class="pe-section-title who__title">Who's coming</span>
 
-          <p class="count">
-            <strong>{{ ev.goingCount }}</strong>
-            {{ ev.goingCount === 1 ? 'person is in' : 'people are in' }}
-            @if (ev.maxAttendees) {
-              <span class="count__limit">of {{ ev.maxAttendees }} spots</span>
-            }
-          </p>
+              <span class="count">
+                <strong>{{ ev.goingCount }}</strong>
+                {{ ev.goingCount === 1 ? 'person is in' : 'people are in' }}
+                @if (ev.maxAttendees) {
+                  <span class="count__limit">of {{ ev.maxAttendees }} spots</span>
+                }
+              </span>
+            </span>
+
+            <span class="who__chevron" [class.who__chevron--open]="membersOpen()">⌄</span>
+          </button>
+
+          @if (membersOpen()) {
+            <div class="who__body">
+              @if (ev.status === status.GROUP_FORMED) {
+                <p class="who__note">
+                  Still settling — final once the event starts.
+                </p>
+              }
+
+              @if (membersLoading() && members() === null) {
+                <p class="who__note">Loading…</p>
+              }
+
+              @if (members() !== null) {
+                <ul class="people">
+                  @for (person of going(); track person.displayName) {
+                    <li class="person">
+                      <span class="person__name">{{ person.displayName }}</span>
+
+                      @if (person.isHost) {
+                        <span class="person__tag">Host</span>
+                      }
+                      @if (isYou(person.displayName)) {
+                        <span class="person__tag person__tag--you">You</span>
+                      }
+                    </li>
+                  }
+                </ul>
+
+                @if (waiting().length > 0) {
+                  <p class="people__heading">Waiting for a spot</p>
+
+                  <ul class="people">
+                    @for (person of waiting(); track person.displayName) {
+                      <li class="person person--waiting">
+                        <span class="person__name">{{ person.displayName }}</span>
+
+                        @if (isYou(person.displayName)) {
+                          <span class="person__tag person__tag--you">You</span>
+                        }
+                      </li>
+                    }
+                  </ul>
+                }
+
+                @if (unavailableCount() > 0) {
+                  <p class="who__note">
+                    {{ unavailableCount() }}
+                    {{ unavailableCount() === 1 ? 'person' : 'people' }}
+                    couldn't make this date.
+                  </p>
+                }
+
+                @if (going().length === 0 && waiting().length === 0) {
+                  <p class="who__note">Nobody yet. Be the first.</p>
+                }
+              }
+            </div>
+          }
         </section>
       }
 

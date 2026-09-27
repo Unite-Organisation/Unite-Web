@@ -10,6 +10,7 @@ import { ErrorCode } from '../../../core/errors/error-code';
 import { ToastService } from '../../../core/toast/toast.service';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import {
+  EventMemberRow,
   EventMemberRole,
   EventMemberStatus,
   EventSlotResponse,
@@ -67,6 +68,24 @@ export class PublicEventPage implements OnInit {
 
   /** Came in through "already joined?" rather than by colliding with a name. */
   protected readonly returningWithCode = signal(false);
+
+  protected readonly membersOpen = signal(false);
+  /** null until someone asks - the names are a detail most people never open. */
+  protected readonly members = signal<EventMemberRow[] | null>(null);
+  protected readonly membersLoading = signal(false);
+
+  protected readonly going = computed(() =>
+    (this.members() ?? []).filter((member) => member.status === EventMemberStatus.GOING)
+  );
+  protected readonly waiting = computed(() =>
+    (this.members() ?? []).filter((member) => member.status === EventMemberStatus.WAITLIST)
+  );
+  /** People whose dates lost. Counted, not named - nobody needs a list of who missed out. */
+  protected readonly unavailableCount = computed(
+    () =>
+      (this.members() ?? []).filter((member) => member.status === EventMemberStatus.NOT_AVAILABLE)
+        .length
+  );
 
   /** Arrived through the one-date link the host shares after the deadline. */
   private directSlotId: string | null = null;
@@ -429,8 +448,37 @@ export class PublicEventPage implements OnInit {
       });
   }
 
+  toggleMembers(): void {
+    const opening = !this.membersOpen();
+    this.membersOpen.set(opening);
+
+    if (opening && this.members() === null) {
+      this.loadMembers();
+    }
+  }
+
+  isYou(name: string): boolean {
+    return this.me()?.displayName === name;
+  }
+
+  private loadMembers(): void {
+    this.membersLoading.set(true);
+
+    this.events
+      .members(this.slug)
+      .pipe(finalize(() => this.membersLoading.set(false)))
+      .subscribe({
+        next: (rows) => this.members.set(rows),
+      });
+  }
+
   private afterAction(): void {
     this.load(true);
+
+    // anything worth reloading the event for moves the list too
+    if (this.members() !== null) {
+      this.loadMembers();
+    }
   }
 
   // ───────────────────────────────────────── sharing
