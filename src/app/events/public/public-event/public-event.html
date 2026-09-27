@@ -1,0 +1,382 @@
+<div class="pe-page">
+  <div class="pe-shell">
+
+    @if (loading()) {
+      <div class="pe-card skeleton">
+        <span class="skeleton__line skeleton__line--short"></span>
+        <span class="skeleton__line skeleton__line--title"></span>
+        <span class="skeleton__line"></span>
+      </div>
+    }
+
+    @if (notFound()) {
+      <section class="pe-card pe-center">
+        <h1 class="pe-title">Nothing here</h1>
+        <p class="pe-subtitle">
+          This link doesn't lead to an event any more.
+        </p>
+        <div class="pe-full">
+          <app-button variant="outline" size="md" (clicked)="createYourOwn()">
+            Set up your own
+          </app-button>
+        </div>
+      </section>
+    }
+
+    @if (event(); as ev) {
+
+      @if (returnCode()) {
+        <section class="code-card">
+          <p class="code-card__label">Your code to come back</p>
+          <p class="code-card__code">{{ returnCode() }}</p>
+          <p class="code-card__hint">
+            Write it down. On a new phone it's how you prove this is you.
+          </p>
+          <button type="button" class="code-card__ok" (click)="dismissReturnCode()">Got it</button>
+        </section>
+      }
+
+
+      <!-- ─────────── What and when ─────────── -->
+
+      <section class="pe-card hero">
+        <p class="pe-eyebrow">
+          @switch (ev.status) {
+            @case (status.COLLECTING_VOTES) { Picking a date }
+            @case (status.ONE_SLOT_LEFT) { One date left }
+            @case (status.GROUP_FORMED) { It's happening }
+            @default { You're invited }
+          }
+        </p>
+
+        <h1 class="pe-title">{{ ev.name }}</h1>
+
+        @if (ev.startDate) {
+          <p class="hero__when">{{ whenLabel(ev.startDate) }}</p>
+        } @else if (chosenSlot(); as chosen) {
+          <p class="hero__when">{{ whenLabel(chosen.startDate) }}</p>
+        } @else {
+          <p class="hero__when hero__when--open">Date not settled yet</p>
+        }
+
+        @if (ev.locationName) {
+          <p class="hero__meta">{{ ev.locationName }}</p>
+        }
+
+        @if (ev.onlineUrl) {
+          <a class="hero__link" [href]="ev.onlineUrl" target="_blank" rel="noopener">
+            Join online
+          </a>
+        }
+
+        @if (ev.description) {
+          <p class="hero__description">{{ ev.description }}</p>
+        }
+
+        @if (me(); as member) {
+          <p class="hero__you" [class.hero__you--out]="member.status === 'NOT_GOING'">
+            {{ statusLabel() }}
+          </p>
+        }
+      </section>
+
+
+      <!-- ─────────── The group formed ─────────── -->
+
+      @if (ev.status === status.GROUP_FORMED) {
+        <section class="pe-card banner banner--good">
+          <p class="banner__title">Enough people — it's on</p>
+          <p class="banner__text">
+            Anyone who can't make it can still drop out. After that the date is final.
+          </p>
+        </section>
+      }
+
+      @if (ev.status === status.ONE_SLOT_LEFT) {
+        <section class="pe-card banner">
+          <p class="banner__title">The deadline passed</p>
+          <p class="banner__text">
+            Not enough people settled on a date, so the best one was kept. It still needs a few more.
+          </p>
+        </section>
+      }
+
+
+      <!-- ─────────── Dates ─────────── -->
+
+      @if (ev.slots.length > 0) {
+        <section class="pe-card">
+          <div class="dates-head">
+            <h2 class="pe-section-title">
+              @if (isChoosingDate()) { Which date works } @else { The date }
+            </h2>
+
+            @if (isChoosingDate() && ev.votingDeadline) {
+              <span class="dates-head__deadline">closes {{ deadlineLabel() }}</span>
+            }
+          </div>
+
+          @if (ev.minAttendees) {
+            <p class="dates-head__goal">
+              A date needs <strong>{{ ev.minAttendees }}</strong> people to go ahead
+            </p>
+          }
+
+          @for (slot of ev.slots; track slot.id) {
+            <app-date-tile
+              [slot]="slot"
+              [minAttendees]="ev.minAttendees"
+              [selection]="picks()[slot.id] ?? null"
+              [chosen]="slot.id === ev.selectedSlotId"
+            />
+          }
+        </section>
+      }
+
+
+      <!-- ─────────── Who's in ─────────── -->
+
+      @if (!isChoosingDate()) {
+        <section class="pe-card">
+          <h2 class="pe-section-title">Who's coming</h2>
+
+          <p class="count">
+            <strong>{{ ev.goingCount }}</strong>
+            {{ ev.goingCount === 1 ? 'person is in' : 'people are in' }}
+            @if (ev.maxAttendees) {
+              <span class="count__limit">of {{ ev.maxAttendees }} spots</span>
+            }
+          </p>
+        </section>
+      }
+
+
+      <!-- ─────────── Host ─────────── -->
+
+      @if (ev.status !== status.CONFIRMED || isHost()) {
+        <section class="pe-card">
+          <h2 class="pe-section-title">
+            @if (isHost()) { Your link } @else { Bring someone along }
+          </h2>
+
+          <p class="pe-hint share-hint">
+            @if (isHost() && ev.status === status.ONE_SLOT_LEFT) {
+              Send this one and people join the remaining date straight away.
+            } @else {
+              Anyone with it can join — no account needed.
+            }
+          </p>
+
+          <div class="pe-full">
+            <app-button
+              variant="outline"
+              size="md"
+              (clicked)="share(ev.status === status.ONE_SLOT_LEFT ? directUrl : shareUrl)"
+            >
+              Share the link
+            </app-button>
+          </div>
+        </section>
+      }
+
+
+      <!-- ─────────── Actions ─────────── -->
+
+      <div class="pe-actions">
+        @if (!isMember()) {
+          <app-button
+            variant="primary"
+            size="lg"
+            [disabled]="working()"
+            (clicked)="openJoin()"
+          >
+            @if (isChoosingDate()) { Pick your dates } @else { Count me in }
+          </app-button>
+        } @else {
+          <div class="pe-actions__pair">
+            @if (canStartNow()) {
+              <app-button variant="primary" size="lg" [disabled]="working()" (clicked)="startNow()">
+                Start it now
+              </app-button>
+            } @else if (canChangeDates()) {
+              <app-button variant="outline" size="lg" [disabled]="working()" (clicked)="openJoin()">
+                Change dates
+              </app-button>
+            }
+
+            @if (canRejoin()) {
+              <app-button variant="primary" size="lg" [disabled]="working()" (clicked)="comeBack()">
+                I'm back in
+              </app-button>
+            } @else if (canLeave()) {
+              <app-button variant="ghost" size="lg" [disabled]="working()" (clicked)="leave()">
+                Can't make it
+              </app-button>
+            }
+          </div>
+        }
+      </div>
+
+
+      <!-- ─────────── Join sheet ─────────── -->
+
+      @if (joinOpen()) {
+        <div class="sheet-backdrop" (click)="closeJoin()"></div>
+
+        <section class="sheet" role="dialog" aria-modal="true">
+          <div class="sheet__grip"></div>
+
+          @switch (joinStep()) {
+            @case ('works') {
+              <h2 class="sheet__title">Which of these work for you?</h2>
+              <p class="sheet__hint">Tap every date you could actually make.</p>
+
+              <div class="sheet__body">
+                @for (slot of openSlots(); track slot.id) {
+                  <app-date-tile
+                    [slot]="slot"
+                    [minAttendees]="ev.minAttendees"
+                    [selection]="picks()[slot.id] ?? null"
+                    [selectable]="true"
+                    [showCounts]="false"
+                    (picked)="togglePick(slot)"
+                  />
+                }
+              </div>
+
+              <div class="sheet__actions">
+                <app-button
+                  variant="primary"
+                  size="lg"
+                  [disabled]="pickedCount() === 0"
+                  (clicked)="goToSecondStep()"
+                >
+                  Continue
+                </app-button>
+              </div>
+            }
+
+            @case ('if-needed') {
+              <h2 class="sheet__title">Any of these at a push?</h2>
+              <p class="sheet__hint">
+                Only if it's what gets the group together. Skip if none.
+              </p>
+
+              <div class="sheet__body">
+                @for (slot of undecidedSlots(); track slot.id) {
+                  <app-date-tile
+                    [slot]="slot"
+                    [minAttendees]="ev.minAttendees"
+                    [selection]="picks()[slot.id] ?? null"
+                    [selectable]="true"
+                    [showCounts]="false"
+                    (picked)="togglePick(slot)"
+                  />
+                }
+              </div>
+
+              <div class="sheet__actions">
+                <app-button variant="primary" size="lg" (clicked)="goToName()">
+                  Continue
+                </app-button>
+                <button type="button" class="pe-quiet-link sheet__back" (click)="backAStep()">
+                  ← Back
+                </button>
+              </div>
+            }
+
+            @case ('name') {
+              <h2 class="sheet__title">
+                @if (isMember()) { Save your dates } @else { Almost there }
+              </h2>
+
+              @if (isGuest && !isMember()) {
+                <div class="pe-field sheet__field">
+                  <label for="joinName">
+                    Your name
+                    <span class="pe-required">*</span>
+                  </label>
+
+                  <input
+                    id="joinName"
+                    type="text"
+                    autocomplete="name"
+                    enterkeyhint="done"
+                    placeholder="Anna"
+                    [value]="displayName()"
+                    (input)="displayName.set($any($event.target).value)"
+                  />
+
+                  @if (nameError()) {
+                    <span class="pe-error">{{ nameError() }}</span>
+                  }
+                </div>
+
+                @if (askingForCode()) {
+                  <div class="pe-field sheet__field">
+                    <label for="joinCode">Your 4-digit code</label>
+
+                    <input
+                      id="joinCode"
+                      type="text"
+                      inputmode="numeric"
+                      maxlength="4"
+                      autocomplete="one-time-code"
+                      placeholder="0000"
+                      [value]="codeInput()"
+                      (input)="codeInput.set($any($event.target).value)"
+                    />
+
+                    <span class="pe-hint">
+                      You got it when you first joined. No code? Pick a different name.
+                    </span>
+
+                    <button type="button" class="pe-quiet-link" (click)="useAnotherName()">
+                      Use another name
+                    </button>
+                  </div>
+                }
+              }
+
+              @if (pickedCount() > 0) {
+                <p class="sheet__summary">
+                  {{ pickedCount() }}
+                  {{ pickedCount() === 1 ? 'date' : 'dates' }} selected
+                </p>
+              }
+
+              <div class="sheet__actions">
+                @if (isMember()) {
+                  <app-button
+                    variant="primary"
+                    size="lg"
+                    [disabled]="working() || pickedCount() === 0"
+                    (clicked)="saveDates()"
+                  >
+                    @if (working()) { Saving… } @else { Save }
+                  </app-button>
+                } @else {
+                  <app-button
+                    variant="primary"
+                    size="lg"
+                    [disabled]="working()"
+                    (clicked)="confirmJoin()"
+                  >
+                    @if (working()) { Joining… } @else { Join }
+                  </app-button>
+                }
+
+                @if (isChoosingDate()) {
+                  <button type="button" class="pe-quiet-link sheet__back" (click)="backAStep()">
+                    ← Back
+                  </button>
+                }
+              </div>
+            }
+          }
+        </section>
+      }
+    }
+
+  </div>
+</div>

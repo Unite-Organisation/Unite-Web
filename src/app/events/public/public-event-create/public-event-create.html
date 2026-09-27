@@ -1,0 +1,274 @@
+<div class="pe-page">
+  <div class="pe-shell">
+
+    <header class="create-header">
+      <button type="button" class="pe-quiet-link" (click)="cancel()">← Back</button>
+
+      <p class="pe-eyebrow">New event</p>
+      <h1 class="pe-title">Set something up</h1>
+      <p class="pe-subtitle">
+        Anyone you send the link to can join — no account needed.
+      </p>
+    </header>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+      <!-- ─────────── What ─────────── -->
+
+      <section class="pe-card">
+        <div class="pe-field">
+          <label for="name">
+            What is it?
+            <span class="pe-required">*</span>
+          </label>
+
+          <input
+            id="name"
+            type="text"
+            formControlName="name"
+            placeholder="Volleyball at the beach"
+            autocomplete="off"
+            enterkeyhint="next"
+          />
+
+          @if (form.controls['name'].touched && form.controls['name'].hasError('required')) {
+            <span class="pe-error">Give it a name</span>
+          }
+        </div>
+
+        <div class="pe-field">
+          <label for="description">Anything else people should know?</label>
+
+          <textarea
+            id="description"
+            formControlName="description"
+            rows="3"
+            placeholder="Bring a ball. We play until it gets dark."
+          ></textarea>
+        </div>
+      </section>
+
+
+      <!-- ─────────── When ─────────── -->
+
+      <section class="pe-card">
+        <h2 class="pe-section-title">When?</h2>
+
+        <div class="mode-choice">
+          <button
+            type="button"
+            class="mode-option"
+            [class.mode-option--active]="!letsTheGroupPick"
+            (click)="chooseMode(mode.FIXED)"
+          >
+            <span class="mode-option__title">I have a date</span>
+            <span class="mode-option__hint">You know when. People just sign up.</span>
+          </button>
+
+          <button
+            type="button"
+            class="mode-option"
+            [class.mode-option--active]="letsTheGroupPick"
+            (click)="chooseMode(mode.POLL)"
+          >
+            <span class="mode-option__title">Let the group pick</span>
+            <span class="mode-option__hint">
+              Propose a few dates. Whichever suits enough people wins.
+            </span>
+          </button>
+        </div>
+
+        @if (!letsTheGroupPick) {
+          <div class="pe-field">
+            <label for="startDate">
+              Starts
+              <span class="pe-required">*</span>
+            </label>
+            <input id="startDate" type="datetime-local" formControlName="startDate" />
+          </div>
+
+          <div class="pe-field">
+            <label for="endDate">Ends <span class="pe-hint-inline">optional</span></label>
+            <input id="endDate" type="datetime-local" formControlName="endDate" />
+          </div>
+        }
+
+        @if (letsTheGroupPick) {
+          <div class="pe-field">
+            <label for="minAttendees">
+              How many people make it happen?
+              <span class="pe-required">*</span>
+            </label>
+
+            <input
+              id="minAttendees"
+              type="number"
+              inputmode="numeric"
+              min="1"
+              formControlName="minAttendees"
+            />
+
+            <span class="pe-hint">
+              Below this the event does not go ahead.
+            </span>
+          </div>
+
+          <div class="pe-field">
+            <label for="votingDeadline">
+              Decide by
+              <span class="pe-required">*</span>
+            </label>
+
+            <input id="votingDeadline" type="datetime-local" formControlName="votingDeadline" />
+
+            <span class="pe-hint">
+              If nobody has settled on a date by then, the best one is kept and the rest drop off.
+            </span>
+          </div>
+
+          <div class="dates">
+            <div class="dates__header">
+              <span class="dates__label">Dates to choose from</span>
+              <span class="dates__count">{{ slots.length }}/{{ maxDates }}</span>
+            </div>
+
+            <div formArrayName="slots">
+              @for (slot of slots.controls; track $index) {
+                <div class="date-row">
+                  <input
+                    type="datetime-local"
+                    [formControlName]="$index"
+                    [attr.aria-label]="'Date ' + ($index + 1)"
+                  />
+
+                  @if (slots.length > minDates) {
+                    <button
+                      type="button"
+                      class="date-row__remove"
+                      [attr.aria-label]="'Remove date ' + ($index + 1)"
+                      (click)="removeDate($index)"
+                    >
+                      ×
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            @if (slots.length < maxDates) {
+              <button type="button" class="dates__add" (click)="addDate()">
+                + Add another date
+              </button>
+            }
+
+            @if (datesError()) {
+              <span class="pe-error">{{ datesError() }}</span>
+            }
+          </div>
+        }
+      </section>
+
+
+      <!-- ─────────── Who ─────────── -->
+
+      @if (isGuest) {
+        <section class="pe-card">
+          <div class="pe-field">
+            <label for="displayName">
+              Your name
+              <span class="pe-required">*</span>
+            </label>
+
+            <input
+              id="displayName"
+              type="text"
+              formControlName="displayName"
+              placeholder="Kuba"
+              autocomplete="name"
+            />
+
+            <span class="pe-hint">
+              This is how people will see you in the event.
+            </span>
+
+            @if (
+              form.controls['displayName'].touched &&
+              form.controls['displayName'].hasError('required')
+            ) {
+              <span class="pe-error">Tell people who is hosting</span>
+            }
+          </div>
+        </section>
+      }
+
+
+      <!-- ─────────── Optional ─────────── -->
+
+      <section class="pe-card">
+        <button type="button" class="details-toggle" (click)="toggleDetails()">
+          <span>Place, link, limit</span>
+          <span class="details-toggle__chevron" [class.details-toggle__chevron--open]="showDetails()">
+            ⌄
+          </span>
+        </button>
+
+        @if (showDetails()) {
+          <div class="details-body">
+            <div class="pe-field">
+              <label for="location">Where</label>
+              <input
+                id="location"
+                type="text"
+                formControlName="location"
+                placeholder="Beach court by the pier"
+              />
+            </div>
+
+            <div class="pe-field">
+              <label for="onlineUrl">Link</label>
+              <input
+                id="onlineUrl"
+                type="url"
+                inputmode="url"
+                formControlName="onlineUrl"
+                placeholder="https://..."
+              />
+            </div>
+
+            <div class="pe-field">
+              <label for="maxAttendees">Room for</label>
+              <input
+                id="maxAttendees"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                formControlName="maxAttendees"
+                placeholder="No limit"
+              />
+            </div>
+
+            <label class="switch">
+              <input type="checkbox" formControlName="waitlistEnabled" />
+              <span class="switch__text">
+                Keep a waitlist once it is full
+              </span>
+            </label>
+          </div>
+        }
+      </section>
+
+
+      <div class="pe-actions">
+        <app-button
+          variant="primary"
+          size="lg"
+          type="submit"
+          [disabled]="isSubmitting()"
+        >
+          @if (isSubmitting()) { Creating… } @else { Create event }
+        </app-button>
+      </div>
+
+    </form>
+  </div>
+</div>

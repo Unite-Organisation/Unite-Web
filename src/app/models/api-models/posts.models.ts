@@ -31,17 +31,13 @@ export interface AnnouncementRequest {
   fileKeys: string[] | null;
 }
 
-export interface EventRequest {
-  name: string;
-  content: string;
-  relatedDate: string;
-  postType: PostType;
+/**
+ * An event is its own thing now, created through the public endpoints. Putting it in a building
+ * feed is a post pointing at it, so all this carries is which event and for how long.
+ */
+export interface EventPublishRequest {
+  slug: string;
   visibleFrom: string;
   visibleTo: string;
-  startDate: string;
-  endDate: string;
-  location: string;
-  onlineUrl: string;
-  maxAttendees: number;
   fileKeys: string[] | null;
 }

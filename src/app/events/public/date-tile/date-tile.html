@@ -1,0 +1,55 @@
+<button
+  type="button"
+  class="tile"
+  [class]="stateClass"
+  [class.tile--selectable]="selectable && !disabled"
+  [class.tile--closed]="!slot.open && !chosen"
+  [disabled]="!selectable || disabled"
+  [attr.aria-pressed]="selectable ? selection !== null : null"
+  (click)="handleClick()"
+>
+  <div class="tile__top">
+    <div class="tile__when">
+      <span class="tile__day">{{ day }}</span>
+      <span class="tile__time">
+        {{ time }}@if (endTime) {<span class="tile__end"> – {{ endTime }}</span>}
+      </span>
+    </div>
+
+    <div class="tile__mark">
+      @if (chosen) {
+        <span class="tile__chip tile__chip--chosen">Picked</span>
+      } @else if (selection === preference.PREFERRED) {
+        <span class="tile__chip tile__chip--yes">Works</span>
+      } @else if (selection === preference.IF_NEEDED) {
+        <span class="tile__chip tile__chip--maybe">If needed</span>
+      } @else if (showCounts) {
+        <span class="tile__chance">{{ slot.chance }}%</span>
+      }
+    </div>
+  </div>
+
+  @if (showCounts) {
+    <div class="tile__bar" [attr.aria-hidden]="true">
+      <span class="tile__bar-fill" [style.width.%]="fill"></span>
+    </div>
+
+    <div class="tile__counts">
+      <span class="tile__count">
+        <strong>{{ slot.preferredCount }}</strong> can make it
+      </span>
+
+      @if (slot.ifNeededCount > 0) {
+        <span class="tile__count tile__count--soft">
+          +{{ slot.ifNeededCount }} if needed
+        </span>
+      }
+
+      @if (minAttendees) {
+        <span class="tile__count tile__count--goal">
+          {{ people }}/{{ minAttendees }}
+        </span>
+      }
+    </div>
+  }
+</button>
