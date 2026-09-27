@@ -74,9 +74,21 @@
         }
 
         @if (me(); as member) {
-          <p class="hero__you" [class.hero__you--out]="member.status === 'NOT_GOING'">
-            {{ statusLabel() }}
-          </p>
+          <div class="hero__footer">
+            <p class="hero__you" [class.hero__you--out]="member.status === 'NOT_GOING'">
+              {{ statusLabel() }}
+              <span class="hero__as">as {{ member.displayName }}</span>
+            </p>
+
+            <button
+              type="button"
+              class="hero__signout"
+              [disabled]="working()"
+              (click)="signOut()"
+            >
+              Not you? Sign out
+            </button>
+          </div>
         }
       </section>
 
@@ -192,6 +204,12 @@
           >
             @if (isChoosingDate()) { Pick your dates } @else { Count me in }
           </app-button>
+
+          @if (isGuest) {
+            <button type="button" class="pe-quiet-link actions__return" (click)="openReturn()">
+              Already joined? Use your code
+            </button>
+          }
         } @else {
           <div class="pe-actions__pair">
             @if (canStartNow()) {
@@ -287,8 +305,20 @@
 
             @case ('name') {
               <h2 class="sheet__title">
-                @if (isMember()) { Save your dates } @else { Almost there }
+                @if (returningWithCode()) {
+                  Welcome back
+                } @else if (isMember()) {
+                  Save your dates
+                } @else {
+                  Almost there
+                }
               </h2>
+
+              @if (returningWithCode()) {
+                <p class="sheet__hint">
+                  The name you joined with, and the code you got back then.
+                </p>
+              }
 
               @if (isGuest && !isMember()) {
                 <div class="pe-field sheet__field">
@@ -327,13 +357,19 @@
                       (input)="codeInput.set($any($event.target).value)"
                     />
 
-                    <span class="pe-hint">
-                      You got it when you first joined. No code? Pick a different name.
-                    </span>
+                    @if (returningWithCode()) {
+                      <span class="pe-hint">
+                        You got it the first time you joined.
+                      </span>
+                    } @else {
+                      <span class="pe-hint">
+                        You got it when you first joined. No code? Pick a different name.
+                      </span>
 
-                    <button type="button" class="pe-quiet-link" (click)="useAnotherName()">
-                      Use another name
-                    </button>
+                      <button type="button" class="pe-quiet-link" (click)="useAnotherName()">
+                        Use another name
+                      </button>
+                    }
                   </div>
                 }
               }
@@ -366,7 +402,7 @@
                   </app-button>
                 }
 
-                @if (isChoosingDate()) {
+                @if (isChoosingDate() && !returningWithCode()) {
                   <button type="button" class="pe-quiet-link sheet__back" (click)="backAStep()">
                     ← Back
                   </button>

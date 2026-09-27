@@ -65,6 +65,9 @@ export class PublicEventPage implements OnInit {
   protected readonly askingForCode = signal(false);
   protected readonly codeInput = signal('');
 
+  /** Came in through "already joined?" rather than by colliding with a name. */
+  protected readonly returningWithCode = signal(false);
+
   /** Arrived through the one-date link the host shares after the deadline. */
   private directSlotId: string | null = null;
   protected slug = '';
@@ -211,7 +214,37 @@ export class PublicEventPage implements OnInit {
     this.joinOpen.set(false);
     this.nameError.set(null);
     this.askingForCode.set(false);
+    this.returningWithCode.set(false);
     this.codeInput.set('');
+  }
+
+  /** For someone who joined from another phone and has their code rather than the session. */
+  openReturn(): void {
+    this.picks.set({});
+    this.displayName.set('');
+    this.codeInput.set('');
+    this.nameError.set(null);
+    this.returningWithCode.set(true);
+    this.askingForCode.set(true);
+    this.joinStep.set('name');
+    this.joinOpen.set(true);
+  }
+
+  signOut(): void {
+    this.working.set(true);
+
+    this.events
+      .signOut(this.slug)
+      .pipe(finalize(() => this.working.set(false)))
+      .subscribe({
+        next: () => {
+          // whoever picks the phone up next is not this person
+          this.picks.set({});
+          this.displayName.set('');
+          this.toast.success('Signed out of this event');
+          this.afterAction();
+        },
+      });
   }
 
   togglePick(slot: EventSlotResponse): void {
@@ -247,8 +280,13 @@ export class PublicEventPage implements OnInit {
     this.joinStep.set('works');
   }
 
-  private votes(): SlotVote[] {
-    return Object.entries(this.picks()).map(([slotId, preference]) => ({ slotId, preference }));
+  private votes(): SlotVote[] | null {
+    const entries = Object.entries(this.picks());
+    if (!entries.length) {
+      // null leaves the answers alone; an empty list would read as "I picked nothing"
+      return null;
+    }
+    return entries.map(([slotId, preference]) => ({ slotId, preference }));
   }
 
   confirmJoin(): void {
@@ -333,6 +371,7 @@ export class PublicEventPage implements OnInit {
 
   useAnotherName(): void {
     this.askingForCode.set(false);
+    this.returningWithCode.set(false);
     this.codeInput.set('');
     this.nameError.set(null);
   }
@@ -343,7 +382,7 @@ export class PublicEventPage implements OnInit {
     this.working.set(true);
 
     this.events
-      .changeVotes(this.slug, this.votes())
+      .changeVotes(this.slug, this.votes() ?? [])
       .pipe(finalize(() => this.working.set(false)))
       .subscribe({
         next: (event) => {

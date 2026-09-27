@@ -51,6 +51,11 @@ export class PublicEventService {
     );
   }
 
+  /** Ends the session only - the membership, the answers and the seat stay put. */
+  signOut(slug: string): Observable<void> {
+    return this.http.delete<void>(`${API_URLS.public_event}/${slug}/session`);
+  }
+
   changeVotes(slug: string, votes: SlotVote[]): Observable<PublicEvent> {
     return this.http.put<PublicEvent>(`${API_URLS.public_event}/${slug}/votes`, { votes });
   }
