@@ -4,7 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { ErrorService } from '../core/error.sevice';
-import { Post, PostType } from '../models/api-models/posts.models';
+import { Post, PostFilter, PostType } from '../models/api-models/posts.models';
 import { PostService } from '../posts/services/post.service';
 import { AddButton } from '../shared/add-button/add-button';
 import { PostCard } from '../shared/post-card/post-card';
@@ -12,11 +12,12 @@ import { CreateAnnDialog } from './create-ann-dialog/create-ann-dialog';
 import { RolesService } from '../auth/services/roles.service';
 import { ButtonComponent } from '../shared/components/button/button.component';
 import { Router } from '@angular/router';
+import { PostFilterComponent } from '../shared/components/post-filter/post-filter.component';
 
 @Component({
   selector: 'app-announcements',
   standalone: true,
-  imports: [CommonModule, AddButton, PostCard, MatDialogModule, MatIconModule, ButtonComponent],
+  imports: [CommonModule, AddButton, PostCard, MatDialogModule, MatIconModule, ButtonComponent, PostFilterComponent],
   templateUrl: './announcements.html',
   styleUrl: './announcements.scss',
 })
@@ -65,12 +66,27 @@ export class Announcements implements OnInit {
     : null;
   }
 
-  private loadPosts(): void {
+  protected onFilterChange(
+    filter: PostFilter,
+  ): void {
+    this.loadPosts(filter);
+  }
+
+  onFiltersReset(): void {
+    this.loadPosts({});
+  }
+
+  private loadPosts(filter: PostFilter = {}): void {
     this.isLoading = true;
     this.postService.getPosts({
       pageSize: 10,
       page: 1,
       postType: PostType.ANNOUNCEMENT,
+      visibleFrom: filter.visibleFrom,
+      visibleFromModifier: filter.visibleFromModifier,
+      visibleTo: filter.visibleTo,
+      visibleToModifier: filter.visibleToModifier,
+      createdBy: filter.createdBy
     }).subscribe({
       next: (data) => {
         this.posts = data;

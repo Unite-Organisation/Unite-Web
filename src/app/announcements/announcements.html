@@ -23,6 +23,14 @@
     }
   </header>
 
+  <!-- Filters -->
+  <section class="filters-section">
+    <app-post-filter
+      [showCreatedBy]="false"
+      (filterChange)="onFilterChange($event)"
+      (reset)="onFiltersReset()"
+    />
+  </section>
 
   @if (isLoading) {
 

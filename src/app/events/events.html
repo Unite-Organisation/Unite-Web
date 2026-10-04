@@ -20,6 +20,15 @@
     }
   </header>
 
+  <!-- Filters -->
+  <section class="filters-section">
+    <app-post-filter
+      [showCreatedBy]="true"
+      (filterChange)="onFilterChange($event)"
+      (reset)="onFiltersReset()"
+    />
+  </section>
+
 
   @if (isLoading) {
     <div class="loading-state">

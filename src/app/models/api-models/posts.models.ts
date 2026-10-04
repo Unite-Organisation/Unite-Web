@@ -1,3 +1,4 @@
+
 export interface Post {
   id: string;
   name: string;
@@ -19,6 +20,27 @@ export interface Post {
 export enum PostType {
   ANNOUNCEMENT = 'ANNOUNCEMENT',
   EVENT = 'EVENT',
+}
+
+export enum PostVisibilityModifier {
+  LESS_OR_EQUAL_THAN = 'LESS_OR_EQUAL_THAN',
+  GREATER_OR_EQUAL_THAN = 'GREATER_OR_EQUAL_THAN',
+  EQUAL = 'EQUAL'
+}
+
+export interface PostFilter {
+  visibleFrom?: string;
+  visibleFromModifier?: PostVisibilityModifier;
+
+  visibleTo?: string;
+  visibleToModifier?: PostVisibilityModifier;
+
+  createdBy?: string;
+}
+
+export interface DateFilterOption {
+  label: string;
+  modifier: PostVisibilityModifier | null;
 }
 
 export interface AnnouncementRequest {

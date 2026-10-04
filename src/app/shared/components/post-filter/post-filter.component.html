@@ -1,0 +1,175 @@
+<div class="post-filter">
+
+  <div
+    class="filter-header"
+    [class.filter-header--expanded]="isExpanded"
+  >
+    <button
+      type="button"
+      class="filter-toggle"
+      (click)="toggleFilters()"
+      [attr.aria-expanded]="isExpanded"
+    >
+      <div>
+        <p class="section-label">Filters</p>
+        <h3>Filter</h3>
+      </div>
+
+      <mat-icon class="expand-icon">
+        {{ isExpanded ? 'expand_less' : 'expand_more' }}
+      </mat-icon>
+    </button>
+
+    <button
+      type="button"
+      class="reset-button"
+      (click)="resetFilters()"
+    >
+      Reset
+    </button>
+  </div>
+
+@if (isExpanded) {
+  <form
+    [formGroup]="form"
+    (ngSubmit)="applyFilters()"
+    class="filter-form"
+  >
+
+    <!-- Visible from -->
+
+    <div class="date-filter">
+
+      <label>Visible from</label>
+
+      <div class="date-filter__fields">
+
+        <mat-form-field appearance="outline">
+          <mat-label>Modifier</mat-label>
+
+          <mat-select
+            formControlName="visibleFromModifier"
+          >
+            <mat-option [value]="null">
+              No filter
+            </mat-option>
+
+            @for (modifier of modifiers; track modifier.value) {
+              <mat-option [value]="modifier.value">
+                {{ modifier.label }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+
+        <mat-form-field appearance="outline">
+          <mat-label>Date</mat-label>
+
+          <input
+            matInput
+            [matDatepicker]="fromPicker"
+            formControlName="visibleFrom"
+            placeholder="Choose a date"
+          />
+
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="fromPicker"
+          />
+
+          <mat-datepicker #fromPicker />
+        </mat-form-field>
+
+      </div>
+
+    </div>
+
+
+    <!-- Visible to -->
+
+    <div class="date-filter">
+
+      <label>Visible to</label>
+
+      <div class="date-filter__fields">
+
+        <mat-form-field appearance="outline">
+          <mat-label>Modifier</mat-label>
+
+          <mat-select
+            formControlName="visibleToModifier"
+          >
+            <mat-option [value]="null">
+              No filter
+            </mat-option>
+
+            @for (modifier of modifiers; track modifier.value) {
+              <mat-option [value]="modifier.value">
+                {{ modifier.label }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+
+        <mat-form-field appearance="outline">
+          <mat-label>Date</mat-label>
+
+          <input
+            matInput
+            [matDatepicker]="toPicker"
+            formControlName="visibleTo"
+          />
+
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="toPicker"
+          />
+
+          <mat-datepicker #toPicker />
+        </mat-form-field>
+
+      </div>
+
+    </div>
+
+
+    <!-- Created by -->
+    @if (showCreatedBy) {
+    <div class="created-by-filter">
+
+      <label>Created by</label>
+
+      <mat-form-field appearance="outline">
+        <mat-select formControlName="createdBy">
+
+          <mat-option value="ALL">
+            All events
+          </mat-option>
+
+          <mat-option value="MINE">
+            My events
+          </mat-option>
+
+        </mat-select>
+      </mat-form-field>
+
+    </div>
+    }
+
+
+    <div class="filter-actions">
+
+      <button
+        type="submit"
+        class="apply-button"
+      >
+        Apply filters
+      </button>
+
+    </div>
+
+  </form>
+}
+</div>
