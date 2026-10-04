@@ -6,16 +6,6 @@ import { inject } from '@angular/core';
 
 import { BuildingContextService } from './building-context.service';
 
-
-const BUILDING_SCOPED_ENDPOINTS = [
-  '/post',
-  '/post/announcement',
-  '/post/event',
-  '/interaction',
-  '/facility',
-];
-
-
 export const buildingScopeInterceptor: HttpInterceptorFn = (
   req,
   next,
@@ -23,19 +13,6 @@ export const buildingScopeInterceptor: HttpInterceptorFn = (
 
   const buildingContext =
     inject(BuildingContextService);
-
-
-  const isBuildingScoped =
-    BUILDING_SCOPED_ENDPOINTS.some(
-      endpoint =>
-        matchesEndpoint(req.url, endpoint),
-    );
-
-
-  if (!isBuildingScoped) {
-    return next(req);
-  }
-
 
   const buildingId =
     buildingContext.getBuildingId();

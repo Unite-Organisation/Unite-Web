@@ -11,7 +11,6 @@ import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-root',
@@ -27,8 +26,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     MatListModule, 
     MatSidenavModule, 
     MatTabsModule, 
-    MatTooltipModule, 
-    MatSnackBarModule
+    MatTooltipModule
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss'

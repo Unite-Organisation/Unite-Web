@@ -45,21 +45,25 @@ export interface DateFilterOption {
 
 export interface AnnouncementRequest {
   name: string;
-  buildingId: string;
   content: string;
   relatedDate: string;
   postType: PostType;
+  visibleFrom: string;
+  visibleTo: string;
+  fileKeys: string[] | null;
 }
 
 export interface EventRequest {
   name: string;
-  buildingId: string | null;
   content: string;
   relatedDate: string;
   postType: PostType;
+  visibleFrom: string;
+  visibleTo: string;
   startDate: string;
   endDate: string;
   location: string;
   onlineUrl: string;
   maxAttendees: number;
+  fileKeys: string[] | null;
 }

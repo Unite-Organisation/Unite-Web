@@ -13,9 +13,9 @@ import { finalize } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ConversationService } from '../chats.service';
 import { GroupConversationRequest, PotentialContactResponse } from '../../models/api-models/chat.models';
-import { ToastService } from '../../core/toast.service';
-import { ErrorService } from '../../core/error.sevice';
+import { ToastService } from '../../core/toast/toast.service';
 import { PaginationParams } from '../../models/common/common.models';
+import { ServerValidationBinder } from '../../core/errors/server-validation';
 
 @Component({
   selector: 'app-create-group-dialog',
@@ -37,10 +37,10 @@ import { PaginationParams } from '../../models/common/common.models';
 })
 export class CreateGroupDialog implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly serverValidation = inject(ServerValidationBinder);
   private readonly dialogRef = inject(MatDialogRef<CreateGroupDialog>);
   private readonly conversationService = inject(ConversationService);
   private readonly toast = inject(ToastService);
-  private readonly errorService = inject(ErrorService);
 
   protected isSubmitting = false;
   protected isLoadingUsers = false;
@@ -86,7 +86,6 @@ export class CreateGroupDialog implements OnInit {
         },
         error: (error: HttpErrorResponse) => {
           console.error('Failed to load users', error);
-          this.errorService.handleServerError(error);
         }
       });
   }
@@ -134,8 +133,10 @@ export class CreateGroupDialog implements OnInit {
           this.dialogRef.close(true);
         },
         error: (error: HttpErrorResponse) => {
+          // VALIDATION_ERROR entries name rejected DTO fields; show them on
+          // the form itself. The generic notice comes from the interceptor.
+          this.serverValidation.apply(this.form, error);
           console.error('Failed to create group', error);
-          this.errorService.handleServerError(error);
         }
       });
   }

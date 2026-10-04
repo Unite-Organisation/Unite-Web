@@ -8,8 +8,7 @@ import { finalize } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AreaApiService } from '../services/area-api.service';
 import { BuildingResponse, ResidentToAdd } from '../../models/api-models/area.models';
-import { ToastService } from '../../core/toast.service';
-import { ErrorService } from '../../core/error.sevice';
+import { ToastService } from '../../core/toast/toast.service';
 
 export interface AddUserDialogData {
   building: BuildingResponse;
@@ -32,7 +31,6 @@ export class AddUserDialog implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<AddUserDialog>);
   private readonly areaApiService = inject(AreaApiService);
   private readonly toast = inject(ToastService);
-  private readonly errorService = inject(ErrorService);
   protected readonly data = inject<AddUserDialogData>(MAT_DIALOG_DATA);
 
   protected users: ResidentToAdd[] = [];
@@ -54,7 +52,6 @@ export class AddUserDialog implements OnInit {
         },
         error: (error: HttpErrorResponse) => {
           console.error('Failed to load users', error);
-          this.errorService.handleServerError(error);
         }
       });
   }
@@ -87,21 +84,9 @@ export class AddUserDialog implements OnInit {
         },
         error: (error: HttpErrorResponse) => {
           console.error('Failed to add user to building', error);
-          this.errorService.handleServerError(error);
         }
       });
   }
 }
-
-
-
-
-
-
-
-
-
-
-
 
 

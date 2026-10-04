@@ -87,6 +87,9 @@
 
 .featured-announcement__card {
   display: block;
+
+  transform-origin: center;
+  will-change: transform;
 }
 
 
