@@ -215,3 +215,77 @@
   }
 }
 
+
+/* ─────────────────────────────────────────────
+   Setting up an event without an account
+   ───────────────────────────────────────────── */
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  margin: 24px 0 18px;
+
+  color: var(--color-muted);
+
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+
+  flex: 1;
+  height: 1px;
+
+  background: var(--color-border);
+}
+
+.guest-event {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 14px 16px;
+
+  text-align: left;
+
+  background: var(--color-cream);
+
+  border: 1.5px solid var(--color-border);
+  border-radius: 4px;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.guest-event:hover {
+  border-color: var(--color-terracotta-light);
+  background: rgba(192, 86, 58, 0.04);
+}
+
+.guest-event__title {
+  color: var(--color-charcoal);
+
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.guest-event__hint {
+  color: var(--color-muted);
+
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.4;
+}

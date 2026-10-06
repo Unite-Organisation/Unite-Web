@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, inject, OnInit, viewChild } from '@angular/core';
+import { afterNextRender, Component, ElementRef, inject, Injector, OnInit, viewChild } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -24,6 +24,7 @@ export class Announcements implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly rolesService = inject(RolesService);
   private readonly router = inject(Router);
+  private readonly injector = inject(Injector);
 
 
   isLoading = false;
@@ -42,17 +43,71 @@ export class Announcements implements OnInit {
 
   selectPost(post: Post): void {
     if (this.selectedPost?.id === post.id) {
+      this.revealFeaturedCard();
       return;
     }
 
     this.selectedPost = post;
-    this.bounceFeaturedCard();
+    this.revealFeaturedCard();
+  }
+
+  private revealFeaturedCard(): void {
+    afterNextRender(
+      () => {
+        const element = this.featuredCard()?.nativeElement as HTMLElement | undefined;
+
+        if (!element) {
+          return;
+        }
+
+        if (this.prefersReducedMotion()) {
+          element.scrollIntoView({ block: 'start' });
+          return;
+        }
+
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        this.afterScrollSettles(() => this.bounceFeaturedCard());
+      },
+      { injector: this.injector },
+    );
+  }
+
+  private afterScrollSettles(callback: () => void): void {
+    const framesToConfirm = 3;
+    const startedAt = performance.now();
+    const minWaitMs = 120;
+    const timeoutMs = 2000;
+
+    let lastY = window.scrollY;
+    let stableFrames = 0;
+
+    const tick = () => {
+      const currentY = window.scrollY;
+
+      stableFrames = currentY === lastY ? stableFrames + 1 : 0;
+      lastY = currentY;
+
+      const elapsed = performance.now() - startedAt;
+
+      if ((elapsed >= minWaitMs && stableFrames >= framesToConfirm) || elapsed > timeoutMs) {
+        callback();
+        return;
+      }
+
+      requestAnimationFrame(tick);
+    };
+
+    requestAnimationFrame(tick);
+  }
+
+  private prefersReducedMotion(): boolean {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
   private bounceFeaturedCard(): void {
     const element = this.featuredCard()?.nativeElement as HTMLElement | undefined;
 
-    if (!element || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (!element) {
       return;
     }
 

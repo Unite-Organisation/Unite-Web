@@ -22,6 +22,12 @@ export const buildingScopeInterceptor: HttpInterceptorFn = (
     return next(req);
   }
 
+  // a public event belongs to no building - whoever holds the link is in, and a stray buildingId
+  // would only suggest otherwise
+  if (req.url.includes('/public/')) {
+    return next(req);
+  }
+
   if (req.params.has('buildingId')) {
     return next(req);
   }

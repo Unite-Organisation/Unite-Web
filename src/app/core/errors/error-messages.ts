@@ -109,6 +109,60 @@ export const ERROR_PRESENTATION = {
     text: 'This event is full — the attendee limit has been reached.',
     severity: 'warning',
   },
+
+  // --- Public events -----------------------------------------------------
+  [ErrorCode.EVENT_NOT_FOUND]: {
+    text: "This link doesn't lead to an event any more.",
+    severity: 'warning',
+  },
+  [ErrorCode.EVENT_SESSION_REQUIRED]: {
+    text: 'Join the event first to do that.',
+    severity: 'warning',
+  },
+  [ErrorCode.EVENT_MEMBER_NAME_TAKEN]: {
+    text: 'Someone in this event already goes by that name.',
+    severity: 'warning',
+  },
+  [ErrorCode.EVENT_RETURN_CODE_INVALID]: {
+    text: "That code doesn't match.",
+    severity: 'warning',
+  },
+  [ErrorCode.EVENT_MEMBER_LOCKED]: {
+    text: 'Too many tries. Give it a few minutes.',
+    severity: 'warning',
+  },
+  [ErrorCode.EVENT_MODE_MISMATCH]: {
+    text: "That doesn't apply to this kind of event.",
+    severity: 'warning',
+  },
+  [ErrorCode.EVENT_SLOT_NOT_FOUND]: {
+    text: 'That date is not part of this event.',
+    severity: 'warning',
+  },
+  [ErrorCode.EVENT_SLOT_NOT_CHOSEN]: {
+    text: 'No date has been settled on yet.',
+    severity: 'warning',
+  },
+  [ErrorCode.EVENT_SLOT_NOT_AVAILABLE]: {
+    text: 'That date is no longer on the table.',
+    severity: 'warning',
+  },
+  [ErrorCode.EVENT_VOTING_CLOSED]: {
+    text: 'The date is settled — it can no longer be changed.',
+    severity: 'warning',
+  },
+  [ErrorCode.EVENT_VOTES_REQUIRED]: {
+    text: 'Pick at least one date that works for you.',
+    severity: 'warning',
+  },
+  [ErrorCode.EVENT_HOST_REQUIRED]: {
+    text: 'Only the host can do that.',
+    severity: 'warning',
+  },
+  [ErrorCode.EVENT_ALREADY_PUBLISHED]: {
+    text: 'This event is already in the building feed.',
+    severity: 'warning',
+  },
   [ErrorCode.PRIVATE_CONVERSATION_EXISTS]: {
     text: 'You already have a conversation with this person.',
     severity: 'info',

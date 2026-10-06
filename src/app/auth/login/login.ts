@@ -105,4 +105,9 @@ export class Login {
   switchToRegister(): void {
     this.router.navigateByUrl('/register')
   }
+
+  /** A public event needs no account at either end - there is no reason to make someone log in. */
+  createEventWithoutAccount(): void {
+    this.router.navigateByUrl('/e/new');
+  }
 }

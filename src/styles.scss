@@ -273,3 +273,273 @@ body {
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Public events
+
+   These pages are opened from a link someone pasted into a group chat,
+   so they are phone screens first: one column, thumb-sized targets, the
+   primary action pinned to the bottom, and no hover-only affordances.
+   Everything here is prefixed pe- and shared by the create and view pages.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.pe-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  box-sizing: border-box;
+
+  padding:
+    20px 16px
+    calc(24px + env(safe-area-inset-bottom));
+
+  background: var(--color-cream);
+
+  font-family: var(--font-body);
+  color: var(--color-charcoal);
+}
+
+.pe-shell {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.pe-card {
+  box-sizing: border-box;
+
+  padding: 22px 18px;
+
+  background: var(--color-white);
+
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+
+  box-shadow:
+    0 1px 2px rgba(30, 26, 22, 0.02),
+    0 8px 24px rgba(30, 26, 22, 0.05);
+}
+
+.pe-card + .pe-card {
+  margin-top: 14px;
+}
+
+/* ───────────── Headings ───────────── */
+
+.pe-eyebrow {
+  margin: 0 0 6px;
+
+  color: var(--color-terracotta);
+
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.pe-title {
+  margin: 0;
+
+  color: var(--color-charcoal);
+
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+
+  overflow-wrap: anywhere;
+}
+
+.pe-subtitle {
+  margin: 8px 0 0;
+
+  color: var(--color-muted);
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.pe-section-title {
+  margin: 0 0 14px;
+
+  color: var(--color-charcoal);
+
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* ───────────── Fields ───────────── */
+
+.pe-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.pe-field + .pe-field,
+.pe-field + .pe-row,
+.pe-row + .pe-field,
+.pe-row + .pe-row {
+  margin-top: 16px;
+}
+
+.pe-field label {
+  color: var(--color-charcoal-mid);
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pe-field .pe-required {
+  margin-left: 3px;
+  color: var(--color-terracotta);
+}
+
+.pe-field input,
+.pe-field textarea,
+.pe-field select {
+  width: 100%;
+  min-height: 48px;
+  box-sizing: border-box;
+
+  padding: 12px 14px;
+
+  color: var(--color-charcoal);
+  background: var(--color-white);
+
+  border: 1.5px solid var(--color-border);
+  border-radius: 4px;
+
+  outline: none;
+
+  font-family: var(--font-body);
+  /* 16px keeps iOS from zooming the page when a field takes focus */
+  font-size: 16px;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.pe-field textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.pe-field input::placeholder,
+.pe-field textarea::placeholder {
+  color: #a49b91;
+}
+
+.pe-field input:focus,
+.pe-field textarea:focus,
+.pe-field select:focus {
+  border-color: var(--color-terracotta);
+  box-shadow: 0 0 0 3px rgba(192, 86, 58, 0.1);
+}
+
+.pe-field input.ng-invalid.ng-touched,
+.pe-field textarea.ng-invalid.ng-touched {
+  border-color: var(--color-error);
+}
+
+.pe-hint {
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.pe-error {
+  color: var(--color-error);
+  font-size: 12px;
+}
+
+.pe-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ───────────── Sticky action bar ───────────── */
+
+.pe-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+
+  margin: 18px -16px calc(-24px - env(safe-area-inset-bottom));
+  padding:
+    14px 16px
+    calc(14px + env(safe-area-inset-bottom));
+
+  background: linear-gradient(
+    to bottom,
+    rgba(247, 243, 238, 0) 0%,
+    var(--color-cream) 26%
+  );
+}
+
+.pe-actions app-button {
+  display: block;
+}
+
+.pe-actions app-button ::ng-deep .button,
+.pe-full app-button ::ng-deep .button {
+  width: 100%;
+  min-height: 50px;
+}
+
+.pe-actions__pair {
+  display: flex;
+  gap: 10px;
+}
+
+.pe-actions__pair app-button {
+  flex: 1;
+}
+
+/* ───────────── Misc ───────────── */
+
+.pe-quiet-link {
+  padding: 10px 0;
+
+  color: var(--color-muted);
+  background: transparent;
+  border: 0;
+
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.pe-quiet-link:hover {
+  color: var(--color-charcoal-mid);
+}
+
+.pe-center {
+  text-align: center;
+}
+
+@media (min-width: 560px) {
+  .pe-page {
+    padding: 48px 24px 56px;
+  }
+
+  .pe-card {
+    padding: 28px 26px;
+  }
+
+  .pe-title {
+    font-size: 36px;
+  }
+
+  .pe-actions {
+    position: static;
+    margin: 20px 0 0;
+    padding: 0;
+    background: none;
+  }
+}
