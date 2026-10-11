@@ -74,6 +74,7 @@ export class PublicEventCreate {
     waitlistEnabled: this.fb.nonNullable.control(false),
 
     displayName: this.fb.nonNullable.control(''),
+    email: this.fb.nonNullable.control('', [Validators.email, Validators.maxLength(254)]),
   });
 
   constructor() {
@@ -126,6 +127,8 @@ export class PublicEventCreate {
     if (this.isGuest) {
       this.form.controls['displayName'].addValidators(Validators.required);
       this.form.controls['displayName'].updateValueAndValidity();
+      this.form.controls['email'].addValidators(Validators.required);
+      this.form.controls['email'].updateValueAndValidity();
     }
 
     if (this.form.invalid) {
@@ -216,6 +219,7 @@ export class PublicEventCreate {
       maxAttendees: raw.maxAttendees || null,
       waitlistEnabled: raw.waitlistEnabled,
       displayName: this.isGuest ? raw.displayName.trim() : null,
+      email: this.isGuest ? raw.email.trim() : null,
       schedulingMode: raw.schedulingMode,
       minAttendees: choosing ? raw.minAttendees : null,
       votingDeadline: choosing ? withSeconds(raw.votingDeadline) : null,
