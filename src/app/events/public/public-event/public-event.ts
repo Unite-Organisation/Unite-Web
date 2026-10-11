@@ -210,6 +210,7 @@ export class PublicEventPage implements OnInit {
 
   // ───────────────────────────────────────── joining
 
+
   openJoin(): void {
     const event = this.event();
     if (!event) {
@@ -217,15 +218,12 @@ export class PublicEventPage implements OnInit {
     }
 
     if (this.directSlotId) {
-      // the link already answered the only question there was
+      // If coming from a direct slot link, keep that specific slot picked
       this.picks.set({ [this.directSlotId]: SlotPreference.PREFERRED });
-      this.joinStep.set('name');
-    } else if (event.schedulingMode === SchedulingMode.FIXED) {
-      this.joinStep.set('name');
-    } else {
-      this.joinStep.set('works');
     }
-
+    
+    // Always skip straight to the name/code entry step
+    this.joinStep.set('name');
     this.joinOpen.set(true);
   }
 
@@ -281,22 +279,11 @@ export class PublicEventPage implements OnInit {
     });
   }
 
-  /** The second step is skipped when there is nothing left to ask about. */
-  goToSecondStep(): void {
-    this.nameError.set(null);
-    this.joinStep.set(this.undecidedSlots().length > 0 ? 'if-needed' : 'name');
-  }
-
-  goToName(): void {
-    this.joinStep.set('name');
-  }
 
   backAStep(): void {
-    if (this.joinStep() === 'name') {
-      this.joinStep.set(this.undecidedSlots().length > 0 ? 'if-needed' : 'works');
-      return;
-    }
-    this.joinStep.set('works');
+    // Since 'name' is now the first and only step in the dialog, 
+    // going back just closes the join dialog or resets the view.
+    this.closeJoin();
   }
 
   private votes(): SlotVote[] | null {
@@ -516,5 +503,77 @@ export class PublicEventPage implements OnInit {
 
   createYourOwn(): void {
     this.router.navigateByUrl('/e/new');
+  }
+
+  /** Toggles picks directly from the main event page when logged in */
+  toggleMainPagePick(slot: EventSlotResponse): void {
+    if (!this.isChoosingDate()) return;
+    
+    // Default to preferred if not picked yet, or cycle/remove
+    this.picks.update((current) => {
+      const next = { ...current };
+      if (next[slot.id] === SlotPreference.PREFERRED) {
+        next[slot.id] = SlotPreference.IF_NEEDED;
+      } else if(next[slot.id] === SlotPreference.IF_NEEDED) {
+        delete next[slot.id];
+      } else {
+        next[slot.id] = SlotPreference.PREFERRED;
+      }
+      return next;
+    });
+  }
+
+  /** Checks if current local picks differ from what was loaded from the server */
+  protected readonly hasUnsavedChanges = computed(() => {
+    const event = this.event();
+    if (!event) return false;
+    
+    const serverVotes: Record<string, SlotPreference> = {};
+    event.myVotes.forEach((vote) => (serverVotes[vote.slotId] = vote.preference));
+    
+    const currentPicks = this.picks();
+    const serverKeys = Object.keys(serverVotes);
+    const currentKeys = Object.keys(currentPicks);
+
+    if (serverKeys.length !== currentKeys.length) return true;
+
+    for (const key of currentKeys) {
+      if (serverVotes[key] !== currentPicks[key]) {
+        return true;
+      }
+    }
+    return false;
+  });
+
+  // Add these properties inside PublicEventPage class:
+  protected readonly expandedSlotId = signal<string | null>(null);
+  protected readonly slotMembersMap = signal<Record<string, EventMemberRow[]>>({});
+  protected readonly slotMembersLoading = signal<Record<string, boolean>>({});
+
+  // Add this method to handle toggling and fetching:
+  toggleSlotMembers(slotId: string): void {
+    const current = this.expandedSlotId();
+    if (current === slotId) {
+      this.expandedSlotId.set(null);
+      return;
+    }
+    this.expandedSlotId.set(slotId);
+
+    // Fetch members if not already cached
+    if (!this.slotMembersMap()[slotId]) {
+      this.slotMembersLoading.update((map) => ({ ...map, [slotId]: true }));
+      this.events
+        .slotMembers(this.slug, slotId)
+        .pipe(
+          finalize(() =>
+            this.slotMembersLoading.update((map) => ({ ...map, [slotId]: false }))
+          )
+        )
+        .subscribe({
+          next: (members) => {
+            this.slotMembersMap.update((map) => ({ ...map, [slotId]: members }));
+          },
+        });
+    }
   }
 }

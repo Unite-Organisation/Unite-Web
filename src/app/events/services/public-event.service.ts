@@ -81,4 +81,8 @@ export class PublicEventService {
     }
     return this.http.get<EventMemberRow[]>(`${API_URLS.public_event}/${slug}/members`, { params });
   }
+
+  slotMembers(slug: string, slotId: string): Observable<EventMemberRow[]> {
+    return this.http.get<EventMemberRow[]>(`${API_URLS.public_event}/${slug}/slots/${slotId}/members`);
+  }
 }

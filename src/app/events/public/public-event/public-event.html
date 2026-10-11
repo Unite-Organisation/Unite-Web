@@ -39,15 +39,37 @@
 
       <!-- ─────────── What and when ─────────── -->
 
+      <!-- ─────────── What and when ─────────── -->
+
       <section class="pe-card hero">
-        <p class="pe-eyebrow">
-          @switch (ev.status) {
-            @case (status.COLLECTING_VOTES) { Picking a date }
-            @case (status.ONE_SLOT_LEFT) { One date left }
-            @case (status.GROUP_FORMED) { It's happening }
-            @default { You're invited }
+        <div class="hero__header-row">
+          <p class="pe-eyebrow">
+            @switch (ev.status) {
+              @case (status.COLLECTING_VOTES) { Picking a date }
+              @case (status.ONE_SLOT_LEFT) { One date left }
+              @case (status.GROUP_FORMED) { It's happening }
+              @default { You're invited }
+            }
+          </p>
+
+          @if (ev.status !== status.CONFIRMED || isHost()) {
+            <button
+              type="button"
+              class="hero__share-btn"
+              (click)="share(ev.status === status.ONE_SLOT_LEFT ? directUrl : shareUrl)"
+              title="Share the link"
+              aria-label="Share the link"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+              </svg>
+            </button>
           }
-        </p>
+        </div>
 
         <h1 class="pe-title">{{ ev.name }}</h1>
 
@@ -135,13 +157,59 @@
           }
 
           @for (slot of ev.slots; track slot.id) {
-            <app-date-tile
-              [slot]="slot"
-              [minAttendees]="ev.minAttendees"
-              [selection]="picks()[slot.id] ?? null"
-              [chosen]="slot.id === ev.selectedSlotId"
-            />
+            <div class="slot-row">
+              <div class="slot-row__tile">
+                <app-date-tile
+                  [slot]="slot"
+                  [minAttendees]="ev.minAttendees"
+                  [selection]="picks()[slot.id] ?? null"
+                  [chosen]="slot.id === ev.selectedSlotId"
+                  [selectable]="isChoosingDate()"
+                  (picked)="toggleMainPagePick(slot)"
+                />
+              </div>
+
+              <button
+                type="button"
+                class="slot-row__toggle"
+                [attr.aria-expanded]="expandedSlotId() === slot.id"
+                (click)="toggleSlotMembers(slot.id)"
+                title="Who is going?"
+              >
+                <span class="who__chevron" [class.who__chevron--open]="expandedSlotId() === slot.id">⌄</span>
+              </button>
+            </div>
+
+            @if (expandedSlotId() === slot.id) {
+              <div class="slot-dropdown-body">
+                @if (slotMembersLoading()[slot.id]) {
+                  <p class="who__note">Loading…</p>
+                } @else {
+                  @let slotPeople = slotMembersMap()[slot.id] ?? [];
+                  @if (slotPeople.length > 0) {
+                    <ul class="people">
+                      @for (person of slotPeople; track person.displayName) {
+                        <li class="person">
+                          <span class="person__name">{{ person.displayName }}</span>
+
+                          @if (person.isHost) {
+                            <span class="person__tag">Host</span>
+                          }
+                          @if (isYou(person.displayName)) {
+                            <span class="person__tag person__tag--you">You</span>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  } @else {
+                    <p class="who__note">Nobody signed up for this date yet.</p>
+                  }
+                }
+              </div>
+            }
           }
+
+        
         </section>
       }
 
@@ -233,35 +301,6 @@
       }
 
 
-      <!-- ─────────── Host ─────────── -->
-
-      @if (ev.status !== status.CONFIRMED || isHost()) {
-        <section class="pe-card">
-          <h2 class="pe-section-title">
-            @if (isHost()) { Your link } @else { Bring someone along }
-          </h2>
-
-          <p class="pe-hint share-hint">
-            @if (isHost() && ev.status === status.ONE_SLOT_LEFT) {
-              Send this one and people join the remaining date straight away.
-            } @else {
-              Anyone with it can join — no account needed.
-            }
-          </p>
-
-          <div class="pe-full">
-            <app-button
-              variant="outline"
-              size="md"
-              (clicked)="share(ev.status === status.ONE_SLOT_LEFT ? directUrl : shareUrl)"
-            >
-              Share the link
-            </app-button>
-          </div>
-        </section>
-      }
-
-
       <!-- ─────────── Actions ─────────── -->
 
       <div class="pe-actions">
@@ -286,8 +325,8 @@
               <app-button variant="primary" size="lg" [disabled]="working()" (clicked)="startNow()">
                 Start it now
               </app-button>
-            } @else if (canChangeDates()) {
-              <app-button variant="outline" size="lg" [disabled]="working()" (clicked)="openJoin()">
+            } @else if (canChangeDates() && hasUnsavedChanges()) {
+              <app-button variant="outline" size="lg" [disabled]="working()" (clicked)="saveDates()">
                 Change dates
               </app-button>
             }
@@ -315,63 +354,6 @@
           <div class="sheet__grip"></div>
 
           @switch (joinStep()) {
-            @case ('works') {
-              <h2 class="sheet__title">Which of these work for you?</h2>
-              <p class="sheet__hint">Tap every date you could actually make.</p>
-
-              <div class="sheet__body">
-                @for (slot of openSlots(); track slot.id) {
-                  <app-date-tile
-                    [slot]="slot"
-                    [minAttendees]="ev.minAttendees"
-                    [selection]="picks()[slot.id] ?? null"
-                    [selectable]="true"
-                    [showCounts]="false"
-                    (picked)="togglePick(slot)"
-                  />
-                }
-              </div>
-
-              <div class="sheet__actions">
-                <app-button
-                  variant="primary"
-                  size="lg"
-                  [disabled]="pickedCount() === 0"
-                  (clicked)="goToSecondStep()"
-                >
-                  Continue
-                </app-button>
-              </div>
-            }
-
-            @case ('if-needed') {
-              <h2 class="sheet__title">Any of these at a push?</h2>
-              <p class="sheet__hint">
-                Only if it's what gets the group together. Skip if none.
-              </p>
-
-              <div class="sheet__body">
-                @for (slot of undecidedSlots(); track slot.id) {
-                  <app-date-tile
-                    [slot]="slot"
-                    [minAttendees]="ev.minAttendees"
-                    [selection]="picks()[slot.id] ?? null"
-                    [selectable]="true"
-                    [showCounts]="false"
-                    (picked)="togglePick(slot)"
-                  />
-                }
-              </div>
-
-              <div class="sheet__actions">
-                <app-button variant="primary" size="lg" (clicked)="goToName()">
-                  Continue
-                </app-button>
-                <button type="button" class="pe-quiet-link sheet__back" (click)="backAStep()">
-                  ← Back
-                </button>
-              </div>
-            }
 
             @case ('name') {
               <h2 class="sheet__title">

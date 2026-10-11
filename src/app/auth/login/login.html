@@ -1,7 +1,8 @@
 <div class="auth-page">
   <div class="auth-shell">
+    
+    <!-- Left Card: Login Form -->
     <div class="auth-card">
-
       <div class="auth-card__header">
         <div class="auth-brand">Unite</div>
         <p class="auth-subtitle">Sign in to continue</p>
@@ -85,17 +86,27 @@
           </button>
         </div>
       </form>
-
-      <div class="auth-divider"><span>or</span></div>
-
-      <button type="button" class="guest-event" (click)="createEventWithoutAccount()">
-        <span class="guest-event__title">Set up an event</span>
-        <span class="guest-event__hint">
-          No account. Share a link, people join.
-        </span>
-      </button>
-
     </div>
+
+    <!-- Right Card: Unite Events / Guest Setup -->
+    <div class="auth-card auth-card--secondary">
+  <div class="auth-card__header">
+    <div class="auth-brand auth-brand--small">Unite Events</div>
+    <p class="auth-subtitle">No account needed. Share a link, people join.</p>
+  </div>
+
+  <div class="auth-card__body auth-card__body--centered">
+    <app-button
+      variant="primary"
+      size="lg"
+      type="button"
+      [fullWidth]="true"
+      (click)="createEventWithoutAccount()"
+    >
+      Set up an event
+    </app-button>
   </div>
 </div>
 
+  </div>
+</div>

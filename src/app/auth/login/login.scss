@@ -1,38 +1,47 @@
-.auth-page {
+:host {
+  display: block;
+  width: 100vw;
   min-height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 
+.auth-page {
+  width: 100%;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-
   padding: 40px 20px;
-
   box-sizing: border-box;
-
   background: var(--color-cream);
-
   font-family: var(--font-body);
 }
 
 .auth-shell {
   width: 100%;
-  max-width: 440px;
+  max-width: 960px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  box-sizing: border-box;
 }
 
 .auth-card {
+  width: 100%;
   padding: 40px;
-
   background: var(--color-white);
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--color-border);
   border-radius: 4px;
-
   box-shadow: 0 8px 30px rgba(30, 26, 22, 0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
 }
 
-/* ─────────────────────────────────────────────
-   Header
-   ───────────────────────────────────────────── */
-
+/* Nagłówek */
 .auth-card__header {
   margin-bottom: 32px;
   text-align: center;
@@ -40,9 +49,7 @@
 
 .auth-brand {
   margin: 0;
-
   color: var(--color-charcoal);
-
   font-family: var(--font-display);
   font-size: 42px;
   font-weight: 400;
@@ -50,19 +57,18 @@
   letter-spacing: -0.025em;
 }
 
+.auth-brand--small {
+  font-size: 36px;
+}
+
 .auth-subtitle {
   margin: 8px 0 0;
-
   color: var(--color-muted);
-
   font-size: 14px;
   line-height: 1.5;
 }
 
-/* ─────────────────────────────────────────────
-   Form
-   ───────────────────────────────────────────── */
-
+/* Formularz */
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -77,37 +83,27 @@
 
 .form-field label {
   color: var(--color-charcoal-mid);
-
   font-size: 13px;
   font-weight: 600;
 }
 
 .required {
   margin-left: 3px;
-
   color: var(--color-terracotta);
 }
 
 .form-field input {
   width: 100%;
   box-sizing: border-box;
-
   padding: 11px 14px;
-
   color: var(--color-charcoal);
   background: var(--color-white);
-
   border: 1.5px solid var(--color-border);
   border-radius: 3px;
-
   outline: none;
-
   font-family: var(--font-body);
   font-size: 14px;
-
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .form-field input::placeholder {
@@ -120,9 +116,7 @@
 
 .form-field input:focus {
   border-color: var(--color-terracotta);
-
-  box-shadow:
-    0 0 0 2px rgba(192, 86, 58, 0.1);
+  box-shadow: 0 0 0 2px rgba(192, 86, 58, 0.1);
 }
 
 .form-field input.ng-invalid.ng-touched {
@@ -131,24 +125,17 @@
 
 .form-field input.ng-invalid.ng-touched:focus {
   border-color: var(--color-error);
-
-  box-shadow:
-    0 0 0 2px rgba(185, 64, 64, 0.1);
+  box-shadow: 0 0 0 2px rgba(185, 64, 64, 0.1);
 }
 
 .form-error {
   color: var(--color-error);
-
   font-size: 12px;
 }
 
-/* ─────────────────────────────────────────────
-   Login button
-   ───────────────────────────────────────────── */
-
+/* Przyciski */
 .auth-form app-button {
   display: block;
-
   margin-top: 4px;
 }
 
@@ -156,37 +143,53 @@
   width: 100%;
 }
 
-/* ─────────────────────────────────────────────
-   Register link
-   ───────────────────────────────────────────── */
+/* Prawa karta – obsługa szerokiego przycisku */
+.auth-card--secondary .auth-card__body {
+  margin-top: auto;
+  width: 100%;
+}
 
+.auth-card--secondary .auth-card__body--centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centruje przycisk w poziomie */
+  width: 100%;
+}
+
+/* Wymuszenie, aby tag <app-button> zachował się jak blok i miał ładną szerokość na PC */
+.auth-card--secondary app-button {
+  display: block;
+  width: 100%;
+  max-width: 320px; /* Maksymalna szerokość na komputerze */
+}
+
+/* Wymuszenie, aby wewnętrzny element .button wypełnił ten blok */
+.auth-card--secondary app-button::ng-deep .button {
+  display: flex !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Link rejestracji */
 .auth-action-row {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
-
   margin-top: 4px;
-
   color: var(--color-muted);
-
   font-size: 13px;
 }
 
 .auth-action-link {
   padding: 0;
-
   color: var(--color-terracotta);
   background: transparent;
-
   border: none;
-
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 600;
-
   cursor: pointer;
-
   transition: color 0.15s ease;
 }
 
@@ -195,14 +198,23 @@
   text-decoration: underline;
 }
 
-/* ─────────────────────────────────────────────
-   Mobile
-   ───────────────────────────────────────────── */
+/* RERSPONSYWNOŚĆ (mobilki) */
+@media (max-width: 768px) {
+  :host {
+    position: static;
+    width: 100%;
+    min-height: auto;
+  }
+
+  .auth-shell {
+    grid-template-columns: 1fr;
+    max-width: 440px;
+  }
+}
 
 @media (max-width: 480px) {
   .auth-page {
     align-items: flex-start;
-
     padding: 24px 16px;
   }
 
@@ -213,79 +225,8 @@
   .auth-brand {
     font-size: 36px;
   }
-}
-
-
-/* ─────────────────────────────────────────────
-   Setting up an event without an account
-   ───────────────────────────────────────────── */
-
-.auth-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  margin: 24px 0 18px;
-
-  color: var(--color-muted);
-
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.auth-divider::before,
-.auth-divider::after {
-  content: '';
-
-  flex: 1;
-  height: 1px;
-
-  background: var(--color-border);
-}
-
-.guest-event {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-
-  width: 100%;
-  box-sizing: border-box;
-
-  padding: 14px 16px;
-
-  text-align: left;
-
-  background: var(--color-cream);
-
-  border: 1.5px solid var(--color-border);
-  border-radius: 4px;
-
-  cursor: pointer;
-
-  transition:
-    border-color 0.15s ease,
-    background-color 0.15s ease;
-}
-
-.guest-event:hover {
-  border-color: var(--color-terracotta-light);
-  background: rgba(192, 86, 58, 0.04);
-}
-
-.guest-event__title {
-  color: var(--color-charcoal);
-
-  font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.guest-event__hint {
-  color: var(--color-muted);
-
-  font-family: var(--font-body);
-  font-size: 12.5px;
-  line-height: 1.4;
+  
+  .auth-brand--small {
+    font-size: 30px;
+  }
 }

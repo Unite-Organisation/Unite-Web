@@ -24,6 +24,7 @@ import {
   })
   export class ButtonComponent {
     @Input() variant: ButtonVariant = 'primary';
+    @Input() fullWidth: boolean = false;
     @Input() size: ButtonSize = 'md';
     @Input() disabled = false;
     @Input() type: 'button' | 'submit' | 'reset' = 'button';

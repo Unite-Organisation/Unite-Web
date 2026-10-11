@@ -29,74 +29,77 @@
     --font-body: 'Outfit', sans-serif;
   }
 
-.auth-page {
+:host {
+  display: block;
+  width: 100vw;
   min-height: 100vh;
-  min-height: 100dvh;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 
+.auth-page {
+  width: 100%;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-
-  padding: 48px 24px;
+  padding: 40px 20px;
   box-sizing: border-box;
-
   background: var(--color-cream);
+  font-family: var(--font-body);
 }
 
 .auth-shell {
   width: 100%;
-  max-width: 420px;
+  max-width: 960px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  box-sizing: border-box;
 }
 
 .auth-card {
-  box-sizing: border-box;
-
   width: 100%;
-  padding: 48px 44px 40px;
-
+  padding: 40px;
   background: var(--color-white);
-
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--color-border);
   border-radius: 4px;
-
-  /* Very subtle elevation — the Figma style isn't a material-design shadow */
-  box-shadow:
-    0 2px 4px rgba(30, 26, 22, 0.02),
-    0 12px 32px rgba(30, 26, 22, 0.06);
+  box-shadow: 0 8px 30px rgba(30, 26, 22, 0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
 }
 
-/* ───────────── Header ───────────── */
-
+/* Nagłówek */
 .auth-card__header {
-  margin-bottom: 36px;
+  margin-bottom: 32px;
   text-align: center;
 }
 
 .auth-brand {
   margin: 0;
-
   color: var(--color-charcoal);
-
   font-family: var(--font-display);
-  font-size: 44px;
+  font-size: 42px;
   font-weight: 400;
-  line-height: 1;
-
+  line-height: 1.1;
   letter-spacing: -0.025em;
 }
 
+.auth-brand--small {
+  font-size: 36px;
+}
+
 .auth-subtitle {
-  margin: 12px 0 0;
-
+  margin: 8px 0 0;
   color: var(--color-muted);
-
-  font-family: var(--font-body);
   font-size: 14px;
   line-height: 1.5;
 }
 
-/* ───────────── Form ───────────── */
-
+/* Formularz */
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -111,11 +114,8 @@
 
 .form-field label {
   color: var(--color-charcoal-mid);
-
-  font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.02em;
 }
 
 .required {
@@ -124,100 +124,117 @@
 }
 
 .form-field input {
-  display: block;
-
   width: 100%;
-  height: 44px;
-
   box-sizing: border-box;
-
-  padding: 0 13px;
-
+  padding: 11px 14px;
   color: var(--color-charcoal);
   background: var(--color-white);
-
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--color-border);
   border-radius: 3px;
-
   outline: none;
-
   font-family: var(--font-body);
   font-size: 14px;
-
-  transition:
-    border-color 150ms ease,
-    box-shadow 150ms ease,
-    background-color 150ms ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .form-field input::placeholder {
-  color: #a49b91;
+  color: var(--color-muted);
 }
 
-.form-field input:hover {
-  border-color: #c8beb1;
+.form-field input:hover:not(:disabled) {
+  border-color: var(--color-charcoal-mid);
 }
 
 .form-field input:focus {
   border-color: var(--color-terracotta);
-
-  box-shadow:
-    0 0 0 3px rgba(192, 86, 58, 0.09);
+  box-shadow: 0 0 0 2px rgba(192, 86, 58, 0.1);
 }
 
 .form-field input.ng-invalid.ng-touched {
   border-color: var(--color-error);
 }
 
-.form-error {
-  margin-top: -1px;
-
-  color: var(--color-error);
-
-  font-family: var(--font-body);
-  font-size: 11px;
+.form-field input.ng-invalid.ng-touched:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 2px rgba(185, 64, 64, 0.1);
 }
 
-/* ───────────── Button ───────────── */
+.form-error {
+  color: var(--color-error);
+  font-size: 12px;
+}
 
+/* Przyciski */
 .auth-form app-button {
   display: block;
-  width: 100%;
   margin-top: 4px;
 }
 
-/* ───────────── Register ───────────── */
+.auth-form app-button::ng-deep .button {
+  width: 100%;
+}
 
+
+/* Prawa karta – przycisk wypełniający całą wolną przestrzeń */
+.auth-card--secondary {
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+}
+
+.auth-card--secondary .auth-card__body {
+  flex: 1; /* Rozciąga ciało karty na całą wysokość pozostałą po nagłówku */
+  display: flex;
+  flex-direction: column;
+  margin-top: 0;
+}
+
+.auth-card--secondary .auth-card__body--centered {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Przycisk zajmuje 100% szerokości karty i rozciąga się na całą wysokość */
+.auth-card--secondary app-button {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  max-width: 100%;
+}
+
+.auth-card--secondary app-button::ng-deep .button {
+  display: flex !important;
+  flex: 1 !important;
+  width: 100% !important;
+  height: 100% !important;
+  box-sizing: border-box !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Link rejestracji */
 .auth-action-row {
   display: flex;
   align-items: center;
   justify-content: center;
-
-  gap: 4px;
-
+  gap: 5px;
   margin-top: 4px;
-
   color: var(--color-muted);
-
-  font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .auth-action-link {
   padding: 0;
-
   color: var(--color-terracotta);
   background: transparent;
-
-  border: 0;
-
-  font-family: inherit;
-  font-size: inherit;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 13px;
   font-weight: 600;
-
   cursor: pointer;
-
-  transition: color 150ms ease;
+  transition: color 0.15s ease;
 }
 
 .auth-action-link:hover {
@@ -225,20 +242,38 @@
   text-decoration: underline;
 }
 
+/* RERSPONSYWNOŚĆ (mobilki) */
+@media (max-width: 768px) {
+  :host {
+    position: static;
+    width: 100%;
+    min-height: auto;
+  }
+
+  .auth-shell {
+    grid-template-columns: 1fr;
+    max-width: 440px;
+  }
+}
+
 @media (max-width: 480px) {
   .auth-page {
+    align-items: flex-start;
     padding: 24px 16px;
   }
 
   .auth-card {
-    padding: 36px 24px 32px;
+    padding: 28px 22px;
   }
 
   .auth-brand {
-    font-size: 38px;
+    font-size: 36px;
+  }
+  
+  .auth-brand--small {
+    font-size: 30px;
   }
 }
-
 /* Toast stack overlay — see src/app/core/toast/ for the component itself. */
 .toast-overlay-panel {
   pointer-events: none;
