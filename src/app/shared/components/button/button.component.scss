@@ -93,4 +93,9 @@
         border-color: #9a2f2f;
       }
     }
+
+    &--full {
+    width: 100% !important;
+    display: flex !important;
+  }
   }

@@ -7,7 +7,6 @@ import { Post, PostType } from '../models/api-models/posts.models';
 import { PostService } from '../posts/services/post.service';
 import { AddButton } from '../shared/add-button/add-button';
 import { PostCard } from '../shared/post-card/post-card';
-import { CreateEventDialog } from './create-event-dialog/create-event-dialog';
 import { RolesService } from '../auth/services/roles.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ButtonComponent } from '../shared/components/button/button.component';
@@ -44,7 +43,8 @@ export class Events implements OnInit {
   }
 
   createEvent(): void {
-    this.router.navigate(['/app/home/events/create']);
+    // the same card a guest gets - a public event works the same whether its host has an account
+    this.router.navigateByUrl('/e/new');
   }
 
   private loadPosts(): void {

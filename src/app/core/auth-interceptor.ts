@@ -74,6 +74,14 @@ export const AuthInterceptor: HttpInterceptorFn = (
         return throwError(() => error);
       }
 
+      // A caller who was never signed in has no Unite session to refresh and none to expire. Their
+      // 401 belongs to whatever they were actually doing - a public event turning down a return
+      // code, or asking for one - and it has to reach the caller so the screen can say so. Refreshing
+      // here would always fail and would answer "your session expired" to a guest who never had one.
+      if (!authService.isLoggedIn()) {
+        return throwError(() => error);
+      }
+
       return from(refreshService.refreshAccessToken()).pipe(
         switchMap((newToken) =>
           next(

@@ -1,0 +1,498 @@
+<div class="pe-page">
+  <div class="pe-shell">
+
+    @if (loading()) {
+      <div class="pe-card skeleton">
+        <span class="skeleton__line skeleton__line--short"></span>
+        <span class="skeleton__line skeleton__line--title"></span>
+        <span class="skeleton__line"></span>
+      </div>
+    }
+
+    @if (notFound()) {
+      <section class="pe-card pe-center">
+        <h1 class="pe-title">Nothing here</h1>
+        <p class="pe-subtitle">
+          This link doesn't lead to an event any more.
+        </p>
+        <div class="pe-full">
+          <app-button variant="outline" size="md" (clicked)="createYourOwn()">
+            Set up your own
+          </app-button>
+        </div>
+      </section>
+    }
+
+    @if (event(); as ev) {
+
+      @if (returnCode()) {
+        <section class="code-card">
+          <p class="code-card__label">Your code to come back</p>
+          <p class="code-card__code">{{ returnCode() }}</p>
+          <p class="code-card__hint">
+            Write it down. On a new phone it's how you prove this is you.
+          </p>
+          <button type="button" class="code-card__ok" (click)="dismissReturnCode()">Got it</button>
+        </section>
+      }
+
+
+      <!-- ─────────── What and when ─────────── -->
+
+      <!-- ─────────── What and when ─────────── -->
+
+      <section class="pe-card hero">
+        <div class="hero__header-row">
+          <p class="pe-eyebrow">
+            @switch (ev.status) {
+              @case (status.COLLECTING_VOTES) { Picking a date }
+              @case (status.ONE_SLOT_LEFT) { One date left }
+              @case (status.GROUP_FORMED) { It's happening }
+              @default { You're invited }
+            }
+          </p>
+
+          @if (ev.status !== status.CONFIRMED || isHost()) {
+            <button
+              type="button"
+              class="hero__share-btn"
+              (click)="share(ev.status === status.ONE_SLOT_LEFT ? directUrl : shareUrl)"
+              title="Share the link"
+              aria-label="Share the link"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+              </svg>
+            </button>
+          }
+        </div>
+
+        <h1 class="pe-title">{{ ev.name }}</h1>
+
+        @if (ev.startDate) {
+          <p class="hero__when">{{ whenLabel(ev.startDate) }}</p>
+        } @else if (chosenSlot(); as chosen) {
+          <p class="hero__when">{{ whenLabel(chosen.startDate) }}</p>
+        } @else {
+          <p class="hero__when hero__when--open">Date not settled yet</p>
+        }
+
+        @if (ev.locationName) {
+          <p class="hero__meta">{{ ev.locationName }}</p>
+        }
+
+        @if (ev.onlineUrl) {
+          <a class="hero__link" [href]="ev.onlineUrl" target="_blank" rel="noopener">
+            Join online
+          </a>
+        }
+
+        @if (ev.description) {
+          <p class="hero__description">{{ ev.description }}</p>
+        }
+
+        @if (me(); as member) {
+          <div class="hero__footer">
+            <p class="hero__you" [class.hero__you--out]="member.status === 'NOT_GOING'">
+              {{ statusLabel() }}
+              <span class="hero__as">as {{ member.displayName }}</span>
+            </p>
+
+            <button
+              type="button"
+              class="hero__signout"
+              [disabled]="working()"
+              (click)="signOut()"
+            >
+              Not you? Sign out
+            </button>
+          </div>
+        }
+      </section>
+
+
+      <!-- ─────────── The group formed ─────────── -->
+
+      @if (ev.status === status.GROUP_FORMED) {
+        <section class="pe-card banner banner--good">
+          <p class="banner__title">Enough people — it's on</p>
+          <p class="banner__text">
+            Anyone who can't make it can still drop out. After that the date is final.
+          </p>
+        </section>
+      }
+
+      @if (ev.status === status.ONE_SLOT_LEFT) {
+        <section class="pe-card banner">
+          <p class="banner__title">The deadline passed</p>
+          <p class="banner__text">
+            Not enough people settled on a date, so the best one was kept. It still needs a few more.
+          </p>
+        </section>
+      }
+
+
+      <!-- ─────────── Dates ─────────── -->
+
+      @if (ev.slots.length > 0) {
+        <section class="pe-card">
+          <div class="dates-head">
+            <h2 class="pe-section-title">
+              @if (isChoosingDate()) { Which date works } @else { The date }
+            </h2>
+
+            @if (isChoosingDate() && ev.votingDeadline) {
+              <span class="dates-head__deadline">closes {{ deadlineLabel() }}</span>
+            }
+          </div>
+
+          @if (ev.minAttendees) {
+            <p class="dates-head__goal">
+              A date needs <strong>{{ ev.minAttendees }}</strong> people to go ahead
+            </p>
+          }
+
+          @for (slot of ev.slots; track slot.id) {
+            <div class="slot-row">
+              <div class="slot-row__tile">
+                <app-date-tile
+                  [slot]="slot"
+                  [minAttendees]="ev.minAttendees"
+                  [selection]="picks()[slot.id] ?? null"
+                  [chosen]="slot.id === ev.selectedSlotId"
+                  [selectable]="isChoosingDate()"
+                  (picked)="toggleMainPagePick(slot)"
+                />
+              </div>
+
+              <button
+                type="button"
+                class="slot-row__toggle"
+                [attr.aria-expanded]="expandedSlotId() === slot.id"
+                (click)="toggleSlotMembers(slot.id)"
+                title="Who is going?"
+              >
+                <span class="who__chevron" [class.who__chevron--open]="expandedSlotId() === slot.id">⌄</span>
+              </button>
+            </div>
+
+            @if (expandedSlotId() === slot.id) {
+              <div class="slot-dropdown-body">
+                @if (slotMembersLoading()[slot.id]) {
+                  <p class="who__note">Loading…</p>
+                } @else {
+                  @let slotPeople = slotMembersMap()[slot.id] ?? [];
+                  @if (slotPeople.length > 0) {
+                    <ul class="people">
+                      @for (person of slotPeople; track person.displayName) {
+                        <li class="person">
+                          <span class="person__name">{{ person.displayName }}</span>
+
+                          @if (person.isHost) {
+                            <span class="person__tag">Host</span>
+                          }
+                          @if (isYou(person.displayName)) {
+                            <span class="person__tag person__tag--you">You</span>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  } @else {
+                    <p class="who__note">Nobody signed up for this date yet.</p>
+                  }
+                }
+              </div>
+            }
+          }
+
+        
+        </section>
+      }
+
+
+      <!-- ─────────── Who's in ─────────── -->
+
+      @if (!isChoosingDate()) {
+        <section class="pe-card">
+          <button
+            type="button"
+            class="who"
+            [attr.aria-expanded]="membersOpen()"
+            (click)="toggleMembers()"
+          >
+            <span class="who__left">
+              <span class="pe-section-title who__title">Who's coming</span>
+
+              <span class="count">
+                <strong>{{ ev.goingCount }}</strong>
+                {{ ev.goingCount === 1 ? 'person is in' : 'people are in' }}
+                @if (ev.maxAttendees) {
+                  <span class="count__limit">of {{ ev.maxAttendees }} spots</span>
+                }
+              </span>
+            </span>
+
+            <span class="who__chevron" [class.who__chevron--open]="membersOpen()">⌄</span>
+          </button>
+
+          @if (membersOpen()) {
+            <div class="who__body">
+              @if (ev.status === status.GROUP_FORMED) {
+                <p class="who__note">
+                  Still settling — final once the event starts.
+                </p>
+              }
+
+              @if (membersLoading() && members() === null) {
+                <p class="who__note">Loading…</p>
+              }
+
+              @if (members() !== null) {
+                <ul class="people">
+                  @for (person of going(); track person.displayName) {
+                    <li class="person">
+                      <span class="person__name">{{ person.displayName }}</span>
+
+                      @if (person.isHost) {
+                        <span class="person__tag">Host</span>
+                      }
+                      @if (isYou(person.displayName)) {
+                        <span class="person__tag person__tag--you">You</span>
+                      }
+                    </li>
+                  }
+                </ul>
+
+                @if (waiting().length > 0) {
+                  <p class="people__heading">Waiting for a spot</p>
+
+                  <ul class="people">
+                    @for (person of waiting(); track person.displayName) {
+                      <li class="person person--waiting">
+                        <span class="person__name">{{ person.displayName }}</span>
+
+                        @if (isYou(person.displayName)) {
+                          <span class="person__tag person__tag--you">You</span>
+                        }
+                      </li>
+                    }
+                  </ul>
+                }
+
+                @if (unavailableCount() > 0) {
+                  <p class="who__note">
+                    {{ unavailableCount() }}
+                    {{ unavailableCount() === 1 ? 'person' : 'people' }}
+                    couldn't make this date.
+                  </p>
+                }
+
+                @if (going().length === 0 && waiting().length === 0) {
+                  <p class="who__note">Nobody yet. Be the first.</p>
+                }
+              }
+            </div>
+          }
+        </section>
+      }
+
+
+      <!-- ─────────── Actions ─────────── -->
+
+      <div class="pe-actions">
+        @if (!isMember()) {
+          <app-button
+            variant="primary"
+            size="lg"
+            [disabled]="working()"
+            (clicked)="openJoin()"
+          >
+            @if (isChoosingDate()) { Pick your dates } @else { Count me in }
+          </app-button>
+
+          @if (isGuest) {
+            <button type="button" class="pe-quiet-link actions__return" (click)="openReturn()">
+              Already joined? Use your code
+            </button>
+          }
+        } @else {
+          <div class="pe-actions__pair">
+            @if (canStartNow()) {
+              <app-button variant="primary" size="lg" [disabled]="working()" (clicked)="startNow()">
+                Start it now
+              </app-button>
+            } @else if (canChangeDates() && hasUnsavedChanges()) {
+              <app-button variant="outline" size="lg" [disabled]="working()" (clicked)="saveDates()">
+                Change dates
+              </app-button>
+            }
+
+            @if (canRejoin()) {
+              <app-button variant="primary" size="lg" [disabled]="working()" (clicked)="comeBack()">
+                I'm back in
+              </app-button>
+            } @else if (canLeave()) {
+              <app-button variant="ghost" size="lg" [disabled]="working()" (clicked)="leave()">
+                Can't make it
+              </app-button>
+            }
+          </div>
+        }
+      </div>
+
+
+      <!-- ─────────── Join sheet ─────────── -->
+
+      @if (joinOpen()) {
+        <div class="sheet-backdrop" (click)="closeJoin()"></div>
+
+        <section class="sheet" role="dialog" aria-modal="true">
+          <div class="sheet__grip"></div>
+
+          @switch (joinStep()) {
+
+            @case ('name') {
+              <h2 class="sheet__title">
+                @if (returningWithCode()) {
+                  Welcome back
+                } @else if (isMember()) {
+                  Save your dates
+                } @else {
+                  Almost there
+                }
+              </h2>
+
+              @if (returningWithCode()) {
+                <p class="sheet__hint">
+                  The name you joined with, and the code you got back then.
+                </p>
+              }
+
+              @if (isGuest && !isMember()) {
+                <div class="pe-field sheet__field">
+                  <label for="joinName">
+                    Your name
+                    <span class="pe-required">*</span>
+                  </label>
+
+                  <input
+                    id="joinName"
+                    type="text"
+                    autocomplete="name"
+                    enterkeyhint="done"
+                    placeholder="Anna"
+                    [value]="displayName()"
+                    (input)="displayName.set($any($event.target).value)"
+                  />
+
+                  @if (nameError()) {
+                    <span class="pe-error">{{ nameError() }}</span>
+                  }
+                </div>
+
+                @if (!askingForCode() && !returningWithCode()) {
+                  <div class="pe-field sheet__field">
+                    <label for="joinEmail">
+                      Your email
+                      <span class="pe-required">*</span>
+                    </label>
+
+                    <input
+                      id="joinEmail"
+                      type="email"
+                      autocomplete="email"
+                      inputmode="email"
+                      enterkeyhint="done"
+                      placeholder="anna@example.com"
+                      [value]="email()"
+                      (input)="email.set($any($event.target).value)"
+                    />
+
+                    <span class="pe-hint">
+                      We'll write to you when the date is chosen. Nobody else sees it.
+                    </span>
+
+                    @if (emailError()) {
+                      <span class="pe-error">{{ emailError() }}</span>
+                    }
+                  </div>
+                }
+
+                @if (askingForCode()) {
+                  <div class="pe-field sheet__field">
+                    <label for="joinCode">Your 4-digit code</label>
+
+                    <input
+                      id="joinCode"
+                      type="text"
+                      inputmode="numeric"
+                      maxlength="4"
+                      autocomplete="one-time-code"
+                      placeholder="0000"
+                      [value]="codeInput()"
+                      (input)="codeInput.set($any($event.target).value)"
+                    />
+
+                    @if (returningWithCode()) {
+                      <span class="pe-hint">
+                        You got it the first time you joined.
+                      </span>
+                    } @else {
+                      <span class="pe-hint">
+                        You got it when you first joined. No code? Pick a different name.
+                      </span>
+
+                      <button type="button" class="pe-quiet-link" (click)="useAnotherName()">
+                        Use another name
+                      </button>
+                    }
+                  </div>
+                }
+              }
+
+              @if (pickedCount() > 0) {
+                <p class="sheet__summary">
+                  {{ pickedCount() }}
+                  {{ pickedCount() === 1 ? 'date' : 'dates' }} selected
+                </p>
+              }
+
+              <div class="sheet__actions">
+                @if (isMember()) {
+                  <app-button
+                    variant="primary"
+                    size="lg"
+                    [disabled]="working() || pickedCount() === 0"
+                    (clicked)="saveDates()"
+                  >
+                    @if (working()) { Saving… } @else { Save }
+                  </app-button>
+                } @else {
+                  <app-button
+                    variant="primary"
+                    size="lg"
+                    [disabled]="working()"
+                    (clicked)="confirmJoin()"
+                  >
+                    @if (working()) { Joining… } @else { Join }
+                  </app-button>
+                }
+
+                @if (isChoosingDate() && !returningWithCode()) {
+                  <button type="button" class="pe-quiet-link sheet__back" (click)="backAStep()">
+                    ← Back
+                  </button>
+                }
+              </div>
+            }
+          }
+        </section>
+      }
+    }
+
+  </div>
+</div>
