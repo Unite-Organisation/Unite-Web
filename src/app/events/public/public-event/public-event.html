@@ -394,6 +394,34 @@
                   }
                 </div>
 
+                @if (!askingForCode() && !returningWithCode()) {
+                  <div class="pe-field sheet__field">
+                    <label for="joinEmail">
+                      Your email
+                      <span class="pe-required">*</span>
+                    </label>
+
+                    <input
+                      id="joinEmail"
+                      type="email"
+                      autocomplete="email"
+                      inputmode="email"
+                      enterkeyhint="done"
+                      placeholder="anna@example.com"
+                      [value]="email()"
+                      (input)="email.set($any($event.target).value)"
+                    />
+
+                    <span class="pe-hint">
+                      We'll write to you when the date is chosen. Nobody else sees it.
+                    </span>
+
+                    @if (emailError()) {
+                      <span class="pe-error">{{ emailError() }}</span>
+                    }
+                  </div>
+                }
+
                 @if (askingForCode()) {
                   <div class="pe-field sheet__field">
                     <label for="joinCode">Your 4-digit code</label>

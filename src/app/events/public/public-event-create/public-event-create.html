@@ -198,6 +198,30 @@
               <span class="pe-error">Tell people who is hosting</span>
             }
           </div>
+
+          <div class="pe-field">
+            <label for="email">
+              Your email
+              <span class="pe-required">*</span>
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              placeholder="kuba@example.com"
+              autocomplete="email"
+              inputmode="email"
+            />
+
+            <span class="pe-hint">
+              We'll write to you when the date is chosen. Nobody else sees it.
+            </span>
+
+            @if (form.controls['email'].touched && form.controls['email'].invalid) {
+              <span class="pe-error">Enter a valid email address</span>
+            }
+          </div>
         </section>
       }
 

@@ -24,6 +24,8 @@ import { PublicEventService } from '../../services/public-event.service';
 import { DateTile } from '../date-tile/date-tile';
 import { formatDayTime, formatTimeLeft } from '../event-dates';
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 type JoinStep = 'works' | 'if-needed' | 'name';
 
 /**
@@ -60,6 +62,8 @@ export class PublicEventPage implements OnInit {
   protected readonly joinStep = signal<JoinStep>('works');
   protected readonly picks = signal<Record<string, SlotPreference>>({});
   protected readonly displayName = signal('');
+  protected readonly email = signal('');
+  protected readonly emailError = signal<string | null>(null);
   protected readonly nameError = signal<string | null>(null);
 
   /** The name belongs to someone already - which is the question "is that you?". */
@@ -230,6 +234,7 @@ export class PublicEventPage implements OnInit {
   closeJoin(): void {
     this.joinOpen.set(false);
     this.nameError.set(null);
+    this.emailError.set(null);
     this.askingForCode.set(false);
     this.returningWithCode.set(false);
     this.codeInput.set('');
@@ -241,6 +246,7 @@ export class PublicEventPage implements OnInit {
     this.displayName.set('');
     this.codeInput.set('');
     this.nameError.set(null);
+    this.emailError.set(null);
     this.returningWithCode.set(true);
     this.askingForCode.set(true);
     this.joinStep.set('name');
@@ -307,12 +313,22 @@ export class PublicEventPage implements OnInit {
       return;
     }
 
+    // someone coming back with a code is already a member, and has given their address
+    const email = this.email().trim();
+    const needsEmail = this.isGuest && !this.askingForCode();
+    if (needsEmail && !EMAIL_PATTERN.test(email)) {
+      this.emailError.set(email ? 'That does not look like an email address' : 'We need an email to tell you which date won');
+      return;
+    }
+    this.emailError.set(null);
+
     const choosing = event.schedulingMode === SchedulingMode.POLL;
     this.working.set(true);
 
     this.events
       .join(this.slug, {
         displayName: this.isGuest ? name : null,
+        email: this.isGuest && email ? email : null,
         returnCode: this.askingForCode() ? this.codeInput().trim() : null,
         votes: choosing ? this.votes() : null,
       })

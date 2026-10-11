@@ -64,6 +64,8 @@ export interface PublicEventCreateRequest {
   waitlistEnabled: boolean;
   /** Required without an account; ignored when a token is sent. */
   displayName: string | null;
+  /** Required without an account: where the news about the date are sent. */
+  email: string | null;
   schedulingMode: SchedulingMode;
   minAttendees: number | null;
   votingDeadline: string | null;
@@ -120,6 +122,8 @@ export interface PublicEvent {
 
 export interface OpenSessionRequest {
   displayName: string | null;
+  /** Required the first time a guest joins; ignored for an account. */
+  email: string | null;
   returnCode: string | null;
   votes: SlotVote[] | null;
 }
