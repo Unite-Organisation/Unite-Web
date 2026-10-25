@@ -133,7 +133,7 @@
             </div>
 
             <div formArrayName="slots">
-              @for (slot of slots.controls; track $index) {
+              @for (slot of slots.controls; track slot) {
                 <div class="date-row">
                   <input
                     type="datetime-local"
