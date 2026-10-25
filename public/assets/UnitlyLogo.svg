@@ -1,0 +1,19 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_4_2)">
+<path d="M200 0H56C25.0721 0 0 25.0721 0 56V200C0 230.928 25.0721 256 56 256H200C230.928 256 256 230.928 256 200V56C256 25.0721 230.928 0 200 0Z" fill="#C0563A"/>
+<path d="M56 44H96V141C96 164 108 175 128 175C148 175 160 164 160 141V44H200V142C200 187 172 214 128 214C84 214 56 187 56 142V44ZM69 66H83V80H69V66ZM69 94H83V108H69V94ZM173 66H187V80H173V66ZM173 94H187V108H173V94ZM69 122H83V136H69V122ZM173 122H187V136H173V122Z" fill-rule="evenodd" clip-rule="evenodd" fill="#F7F3EE"/>
+<path d="M114 187C114 185.895 114.895 185 116 185H140C141.105 185 142 185.895 142 187V213H114V187Z" fill="#C0563A"/>
+<mask id="stroke0_4_2" fill="white">
+<path d="M114 187C114 185.895 114.895 185 116 185H140C141.105 185 142 185.895 142 187V213H114V187Z"/>
+</mask>
+<path d="M142 213V187C142 185.895 141.105 185 140 185H116C114.895 185 114 185.895 114 187V213H142Z" stroke-width="2" stroke="#F7F3EE" mask="url(#stroke0_4_2)"/>
+<rect x="127.25" y="186" width="1.5" height="28" fill="#F7F3EE"/>
+<rect x="122" y="196" width="2.5" height="7" rx="1" fill="#F7F3EE"/>
+<rect x="131.5" y="196" width="2.5" height="7" rx="1" fill="#F7F3EE"/>
+</g>
+<defs>
+<clipPath id="clip0_4_2">
+<rect width="256" height="256" fill="white"/>
+</clipPath>
+</defs>
+</svg>
