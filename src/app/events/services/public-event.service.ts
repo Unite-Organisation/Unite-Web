@@ -1,10 +1,12 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { from, Observable, switchMap } from 'rxjs';
 import { API_URLS } from '../../core/api.config';
 import { handleErrorCodes } from '../../core/errors/error-context';
 import { ErrorCode } from '../../core/errors/error-code';
 import {
+  DeviceFingerprint,
+  EventIdentityOrigin,
   EventMemberRow,
   EventMemberStatus,
   EventSessionResponse,
@@ -14,6 +16,7 @@ import {
   PublicEventCreatedResponse,
   SlotVote,
 } from '../../models/api-models/public-event.models';
+import { DeviceFingerprintService } from './device-fingerprint.service';
 
 /**
  * Every call carries the session cookie the backend sets, which is what identifies a guest with no
@@ -23,9 +26,13 @@ import {
 @Injectable({ providedIn: 'root' })
 export class PublicEventService {
   private readonly http = inject(HttpClient);
+  private readonly fingerprint = inject(DeviceFingerprintService);
 
+  /** The device goes along so the host's tile can be found first the next time they sign in. */
   create(payload: PublicEventCreateRequest): Observable<PublicEventCreatedResponse> {
-    return this.http.post<PublicEventCreatedResponse>(API_URLS.public_event, payload);
+    return this.withDevice((device) =>
+      this.http.post<PublicEventCreatedResponse>(API_URLS.public_event, { ...payload, device })
+    );
   }
 
   get(slug: string): Observable<PublicEvent> {
@@ -37,17 +44,19 @@ export class PublicEventService {
    * an answer would count towards nothing.
    */
   join(slug: string, payload: OpenSessionRequest): Observable<EventSessionResponse> {
-    return this.http.post<EventSessionResponse>(
-      `${API_URLS.public_event}/${slug}/session`,
-      payload,
-      // a taken name and a wrong code are answers, not failures - the form shows them itself
-      {
-        context: handleErrorCodes([
-          ErrorCode.EVENT_MEMBER_NAME_TAKEN,
-          ErrorCode.EVENT_RETURN_CODE_INVALID,
-          ErrorCode.EVENT_MEMBER_LOCKED,
-        ]),
-      }
+    return this.withDevice((device) =>
+      this.http.post<EventSessionResponse>(
+        `${API_URLS.public_event}/${slug}/session`,
+        { ...payload, device },
+        // a taken name and a wrong code are answers, not failures - the form shows them itself
+        {
+          context: handleErrorCodes([
+            ErrorCode.EVENT_MEMBER_NAME_TAKEN,
+            ErrorCode.EVENT_RETURN_CODE_INVALID,
+            ErrorCode.EVENT_MEMBER_LOCKED,
+          ]),
+        }
+      )
     );
   }
 
@@ -82,7 +91,38 @@ export class PublicEventService {
     return this.http.get<EventMemberRow[]>(`${API_URLS.public_event}/${slug}/members`, { params });
   }
 
+  /**
+   * The "who are you?" list on the sign-in sheet: guests only, since an account holder signs in with
+   * their account, and the one most likely using this phone first.
+   */
+  whoCouldThisBe(slug: string, search?: string): Observable<EventMemberRow[]> {
+    return this.withDevice((device) => {
+      let params = new HttpParams()
+        .set('origin', EventIdentityOrigin.GUEST)
+        .set('sortedByCallerMembershipProbability', true);
+      if (search) {
+        params = params.set('search', search);
+      }
+      // Spring binds a nested @ModelAttribute through dotted names
+      Object.entries(device ?? {})
+        .filter(([, value]) => value !== null && value !== undefined)
+        .forEach(([key, value]) => (params = params.set(`device.${key}`, value)));
+
+      return this.http.get<EventMemberRow[]>(`${API_URLS.public_event}/${slug}/members`, {
+        params,
+      });
+    });
+  }
+
   slotMembers(slug: string, slotId: string): Observable<EventMemberRow[]> {
-    return this.http.get<EventMemberRow[]>(`${API_URLS.public_event}/${slug}/slots/${slotId}/members`);
+    return this.http.get<EventMemberRow[]>(
+      `${API_URLS.public_event}/${slug}/slots/${slotId}/members`
+    );
+  }
+
+  private withDevice<T>(
+    request: (device: DeviceFingerprint | null) => Observable<T>
+  ): Observable<T> {
+    return from(this.fingerprint.collect()).pipe(switchMap(request));
   }
 }

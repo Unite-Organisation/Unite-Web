@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
 import { AuthService } from '../../../auth/services/auth';
@@ -26,7 +27,11 @@ import { formatDayTime, formatTimeLeft } from '../event-dates';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type JoinStep = 'works' | 'if-needed' | 'name';
+type JoinStep = 'works' | 'if-needed' | 'pick' | 'name';
+
+const CODE_LENGTH = 4;
+/** Asks again once typing pauses, not on every key. */
+const PICKER_SEARCH_DELAY_MS = 300;
 
 /**
  * Everything a member of a public event does, on one screen. Which parts show depends on the mode
@@ -72,6 +77,17 @@ export class PublicEventPage implements OnInit {
 
   /** Came in through "already joined?" rather than by colliding with a name. */
   protected readonly returningWithCode = signal(false);
+
+  /** The "who are you?" list - null until loaded, most likely person first. */
+  protected readonly pickerMembers = signal<EventMemberRow[] | null>(null);
+  protected readonly pickerLoading = signal(false);
+  protected readonly pickerSearch = signal('');
+  /** Tapped on the list - the name is settled, only the code is left to type. */
+  protected readonly pickedMember = signal<EventMemberRow | null>(null);
+  private pickerRequest: Subscription | null = null;
+  private pickerSearchTimer: ReturnType<typeof setTimeout> | null = null;
+  /** What the list on screen was asked for - a space typed at the end is not worth a request. */
+  private pickerSearchedFor: string | null = null;
 
   protected readonly membersOpen = signal(false);
   /** null until someone asks - the names are a detail most people never open. */
@@ -233,6 +249,7 @@ export class PublicEventPage implements OnInit {
 
   closeJoin(): void {
     this.joinOpen.set(false);
+    this.resetPicker();
     this.nameError.set(null);
     this.emailError.set(null);
     this.askingForCode.set(false);
@@ -240,7 +257,10 @@ export class PublicEventPage implements OnInit {
     this.codeInput.set('');
   }
 
-  /** For someone who joined from another phone and has their code rather than the session. */
+  /**
+   * For someone who joined before and has their code rather than the session. They pick themselves
+   * off the list - this phone's previous user comes first - so the code is all there is to type.
+   */
   openReturn(): void {
     this.picks.set({});
     this.displayName.set('');
@@ -249,8 +269,98 @@ export class PublicEventPage implements OnInit {
     this.emailError.set(null);
     this.returningWithCode.set(true);
     this.askingForCode.set(true);
-    this.joinStep.set('name');
+    this.resetPicker();
+    this.joinStep.set('pick');
     this.joinOpen.set(true);
+    this.loadPicker();
+  }
+
+  pickMember(member: EventMemberRow): void {
+    this.pickedMember.set(member);
+    this.displayName.set(member.displayName);
+    this.codeInput.set('');
+    this.nameError.set(null);
+    this.joinStep.set('name');
+    // once the field is rendered - on Android this brings the number pad up straight away
+    setTimeout(() => document.getElementById('joinCode')?.focus());
+  }
+
+  /** Back to the list from the code step - the list is kept, nothing to load again. */
+  notMe(): void {
+    this.pickedMember.set(null);
+    this.displayName.set('');
+    this.codeInput.set('');
+    this.nameError.set(null);
+    this.joinStep.set('pick');
+  }
+
+  /** The list does not have them, or they would rather type - the plain name and code form. */
+  typeNameInstead(): void {
+    this.pickedMember.set(null);
+    this.displayName.set('');
+    this.nameError.set(null);
+    this.joinStep.set('name');
+  }
+
+  searchPicker(value: string): void {
+    this.pickerSearch.set(value);
+    if (this.pickerSearchTimer) {
+      clearTimeout(this.pickerSearchTimer);
+    }
+    this.pickerSearchTimer = setTimeout(() => {
+      if (this.pickerSearch().trim() !== this.pickerSearchedFor) {
+        this.loadPicker();
+      }
+    }, PICKER_SEARCH_DELAY_MS);
+  }
+
+  /** Four digits are the whole answer, so the fourth one signs in without another tap. */
+  typeCode(value: string): void {
+    const code = value.replace(/\D/g, '').slice(0, CODE_LENGTH);
+    this.codeInput.set(code);
+    if (this.pickedMember() && code.length === CODE_LENGTH && !this.working()) {
+      this.confirmJoin();
+    }
+  }
+
+  initial(name: string): string {
+    return name.trim().charAt(0).toUpperCase() || '?';
+  }
+
+  private loadPicker(): void {
+    this.pickerRequest?.unsubscribe();
+    this.pickerLoading.set(true);
+
+    const search = this.pickerSearch().trim();
+    this.pickerSearchedFor = search;
+    this.pickerRequest = this.events
+      .whoCouldThisBe(this.slug, search || undefined)
+      .pipe(finalize(() => this.pickerLoading.set(false)))
+      .subscribe({
+        next: (rows) => {
+          if (!search && rows.length === 0) {
+            // nobody to pick from - straight to typing the name
+            this.typeNameInstead();
+            return;
+          }
+          this.pickerMembers.set(rows);
+        },
+        error: () => this.typeNameInstead(),
+      });
+  }
+
+  private resetPicker(): void {
+    this.pickerRequest?.unsubscribe();
+    this.pickerRequest = null;
+    if (this.pickerSearchTimer) {
+      clearTimeout(this.pickerSearchTimer);
+      this.pickerSearchTimer = null;
+    }
+    this.pickerMembers.set(null);
+    this.pickerLoading.set(false);
+    this.pickerSearch.set('');
+    this.pickerSearchedFor = null;
+    this.pickedMember.set(null);
   }
 
   signOut(): void {
@@ -379,7 +489,12 @@ export class PublicEventPage implements OnInit {
     }
 
     if (codes.includes(ErrorCode.EVENT_RETURN_CODE_INVALID)) {
-      this.nameError.set("That code doesn't match. Try another name instead?");
+      this.codeInput.set('');
+      this.nameError.set(
+        this.pickedMember()
+          ? "That code doesn't match. Try again?"
+          : "That code doesn't match. Try another name instead?"
+      );
       return;
     }
 

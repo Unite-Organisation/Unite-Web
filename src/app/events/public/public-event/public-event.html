@@ -355,6 +355,62 @@
 
           @switch (joinStep()) {
 
+            @case ('pick') {
+              <h2 class="sheet__title">Who are you?</h2>
+              <p class="sheet__hint">Tap your name, then type the 4-digit code you got.</p>
+
+              <div class="pe-field sheet__field">
+                <input
+                  id="pickerSearch"
+                  type="search"
+                  aria-label="Find your name"
+                  autocomplete="off"
+                  enterkeyhint="search"
+                  placeholder="Find your name"
+                  [value]="pickerSearch()"
+                  (input)="searchPicker($any($event.target).value)"
+                />
+              </div>
+
+              @if (pickerMembers() === null) {
+                <div class="picker" aria-busy="true">
+                  @for (row of [1, 2, 3]; track row) {
+                    <div class="picker__tile picker__tile--ghost"></div>
+                  }
+                </div>
+              } @else {
+                <ul class="picker" [class.picker--loading]="pickerLoading()">
+                  @for (member of pickerMembers(); track member.id; let first = $first) {
+                    <li>
+                      <button
+                        type="button"
+                        class="picker__tile"
+                        [class.picker__tile--likely]="first && !pickerSearch()"
+                        (click)="pickMember(member)"
+                      >
+                        <span class="picker__avatar" aria-hidden="true">{{ initial(member.displayName) }}</span>
+                        <span class="picker__name">{{ member.displayName }}</span>
+                        @if (first && !pickerSearch()) {
+                          <span class="picker__badge">Probably you</span>
+                        } @else if (member.isHost) {
+                          <span class="picker__note">host</span>
+                        }
+                        <span class="picker__chevron" aria-hidden="true">›</span>
+                      </button>
+                    </li>
+                  } @empty {
+                    <li class="picker__empty">Nobody here goes by that name.</li>
+                  }
+                </ul>
+              }
+
+              <div class="sheet__actions">
+                <button type="button" class="pe-quiet-link sheet__back" (click)="typeNameInstead()">
+                  I'm not on the list
+                </button>
+              </div>
+            }
+
             @case ('name') {
               <h2 class="sheet__title">
                 @if (returningWithCode()) {
@@ -366,13 +422,22 @@
                 }
               </h2>
 
-              @if (returningWithCode()) {
+              @if (pickedMember()) {
+                <p class="sheet__hint">The code you got when you first joined.</p>
+              } @else if (returningWithCode()) {
                 <p class="sheet__hint">
                   The name you joined with, and the code you got back then.
                 </p>
               }
 
               @if (isGuest && !isMember()) {
+                @if (pickedMember(); as picked) {
+                  <div class="picked">
+                    <span class="picker__avatar" aria-hidden="true">{{ initial(picked.displayName) }}</span>
+                    <span class="picker__name">{{ picked.displayName }}</span>
+                    <button type="button" class="pe-quiet-link" (click)="notMe()">Not you?</button>
+                  </div>
+                } @else {
                 <div class="pe-field sheet__field">
                   <label for="joinName">
                     Your name
@@ -393,6 +458,7 @@
                     <span class="pe-error">{{ nameError() }}</span>
                   }
                 </div>
+                }
 
                 @if (!askingForCode() && !returningWithCode()) {
                   <div class="pe-field sheet__field">
@@ -430,12 +496,19 @@
                       id="joinCode"
                       type="text"
                       inputmode="numeric"
+                      pattern="[0-9]*"
                       maxlength="4"
                       autocomplete="one-time-code"
+                      enterkeyhint="go"
                       placeholder="0000"
+                      [class.code-input]="pickedMember()"
                       [value]="codeInput()"
-                      (input)="codeInput.set($any($event.target).value)"
+                      (input)="typeCode($any($event.target).value)"
                     />
+
+                    @if (pickedMember() && nameError()) {
+                      <span class="pe-error">{{ nameError() }}</span>
+                    }
 
                     @if (returningWithCode()) {
                       <span class="pe-hint">
@@ -478,7 +551,11 @@
                     [disabled]="working()"
                     (clicked)="confirmJoin()"
                   >
-                    @if (working()) { Joining… } @else { Join }
+                    @if (pickedMember()) {
+                      @if (working()) { Signing in… } @else { Sign in }
+                    } @else {
+                      @if (working()) { Joining… } @else { Join }
+                    }
                   </app-button>
                 }
 
