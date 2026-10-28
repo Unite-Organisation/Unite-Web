@@ -37,10 +37,6 @@ export const routes: Routes = [
                 loadComponent: () => import('./events/events').then(m => m.Events)
             },
             {
-                path: 'events/create',
-                loadComponent: () => import('./events/event-create/event-create').then(m => m.CreateEvent)
-            },
-            {
                 path: 'facilities',
                 loadComponent: () => import('./facilities/facilities').then(m => m.Facilities)
             },
@@ -95,6 +91,23 @@ export const routes: Routes = [
         ]
     },
     ]
+    },
+
+    // Public events: opened from a link someone pasted into a chat, by people who may never
+    // have heard of Unite. No guard, no building, no account.
+    {
+        path: 'e/new',
+        loadComponent: () => import('./events/public/public-event-create/public-event-create').then(m => m.PublicEventCreate)
+    },
+
+    {
+        path: 'e/:slug/d/:slotId',
+        loadComponent: () => import('./events/public/public-event/public-event').then(m => m.PublicEventPage)
+    },
+
+    {
+        path: 'e/:slug',
+        loadComponent: () => import('./events/public/public-event/public-event').then(m => m.PublicEventPage)
     },
 
     {

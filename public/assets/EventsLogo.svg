@@ -1,0 +1,23 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="96" height="96"/>
+<g id="Calendar &#194;&#183; Transparent export">
+<path id="Vector" d="M70 20H26C19.3726 20 14 25.3726 14 32V72C14 78.6274 19.3726 84 26 84H70C76.6274 84 82 78.6274 82 72V32C82 25.3726 76.6274 20 70 20Z" stroke="#C0563A" stroke-width="3"/>
+<g id="Vector_2">
+<path d="M32 12V27V12ZM64 12V27V12Z" fill="black"/>
+<path d="M32 12V27M64 12V27" stroke="#C0563A" stroke-width="3" stroke-linecap="round"/>
+</g>
+<g id="Vector_3">
+<path d="M16 38H80H16Z" fill="black"/>
+<path d="M16 38H80" stroke="#C0563A" stroke-width="3"/>
+</g>
+<g id="Vector_4">
+<path d="M32 48H29C27.8954 48 27 48.8954 27 50V53C27 54.1046 27.8954 55 29 55H32C33.1046 55 34 54.1046 34 53V50C34 48.8954 33.1046 48 32 48Z" fill="#1E1A16"/>
+<path d="M49 48H46C44.8954 48 44 48.8954 44 50V53C44 54.1046 44.8954 55 46 55H49C50.1046 55 51 54.1046 51 53V50C51 48.8954 50.1046 48 49 48Z" fill="#1E1A16"/>
+<path d="M66 48H63C61.8954 48 61 48.8954 61 50V53C61 54.1046 61.8954 55 63 55H66C67.1046 55 68 54.1046 68 53V50C68 48.8954 67.1046 48 66 48Z" fill="#1E1A16"/>
+<path d="M32 65H29C27.8954 65 27 65.8954 27 67V70C27 71.1046 27.8954 72 29 72H32C33.1046 72 34 71.1046 34 70V67C34 65.8954 33.1046 65 32 65Z" fill="#1E1A16"/>
+<path d="M49 65H46C44.8954 65 44 65.8954 44 67V70C44 71.1046 44.8954 72 46 72H49C50.1046 72 51 71.1046 51 70V67C51 65.8954 50.1046 65 49 65Z" fill="#1E1A16"/>
+</g>
+<path id="Vector_5" d="M64.5 78C69.4706 78 73.5 73.9706 73.5 69C73.5 64.0294 69.4706 60 64.5 60C59.5294 60 55.5 64.0294 55.5 69C55.5 73.9706 59.5294 78 64.5 78Z" fill="#C0563A"/>
+<path id="Vector_6" d="M60.5 68.5714L63.7 72L68.5 66" stroke="#F7F3EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</svg>
