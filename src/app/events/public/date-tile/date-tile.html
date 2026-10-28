@@ -4,6 +4,7 @@
   [class]="stateClass"
   [class.tile--selectable]="selectable && !disabled"
   [class.tile--closed]="!slot.open && !chosen"
+  [class.tile--reached]="reached && slot.open"
   [disabled]="!selectable || disabled"
   [attr.aria-pressed]="selectable ? selection !== null : null"
   (click)="handleClick()"

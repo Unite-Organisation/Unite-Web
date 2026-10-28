@@ -58,6 +58,11 @@
   background: rgba(107, 127, 107, 0.07);
 }
 
+.tile--reached {
+  border-color: var(--color-sage);
+  background: rgba(107, 127, 107, 0.07);
+}
+
 .tile--closed {
   opacity: 0.5;
 }
@@ -153,7 +158,8 @@
   transition: width 0.3s ease;
 }
 
-.tile--chosen .tile__bar-fill {
+.tile--chosen .tile__bar-fill,
+.tile--reached .tile__bar-fill {
   background: var(--color-sage);
 }
 
@@ -179,4 +185,9 @@
 .tile__count--goal {
   margin-left: auto;
   font-variant-numeric: tabular-nums;
+}
+
+.tile--reached .tile__count--goal {
+  color: var(--color-sage);
+  font-weight: 700;
 }

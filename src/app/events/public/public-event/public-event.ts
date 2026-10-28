@@ -8,6 +8,7 @@ import { AuthService } from '../../../auth/services/auth';
 import { parseApiError } from '../../../core/errors/api-error.parser';
 import { ErrorCode } from '../../../core/errors/error-code';
 import { ToastService } from '../../../core/toast/toast.service';
+import { previewSlot } from '../slot-preview';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import {
   EventMemberRow,
@@ -128,6 +129,25 @@ export class PublicEventPage implements OnInit {
   });
 
   protected readonly openSlots = computed(() => this.event()?.slots.filter((s) => s.open) ?? []);
+
+  /** The dates with the member's unsent picks counted in, so the tiles show what a tap changes. */
+  protected readonly previewSlots = computed<EventSlotResponse[]>(() => {
+    const event = this.event();
+    if (!event) {
+      return [];
+    }
+    if (!this.isChoosingDate()) {
+      return event.slots;
+    }
+
+    const saved: Record<string, SlotPreference> = {};
+    event.myVotes.forEach((vote) => (saved[vote.slotId] = vote.preference));
+    const picks = this.picks();
+
+    return event.slots.map((slot) =>
+      slot.open ? previewSlot(slot, saved[slot.id], picks[slot.id], event.minAttendees) : slot
+    );
+  });
 
   /** Dates nobody has put in the first bucket yet - the only ones the second step asks about. */
   protected readonly undecidedSlots = computed(() =>

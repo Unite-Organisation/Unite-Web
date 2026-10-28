@@ -163,7 +163,7 @@
             </p>
           }
 
-          @for (slot of ev.slots; track slot.id) {
+          @for (slot of previewSlots(); track slot.id) {
             <div class="slot-row">
               <div class="slot-row__tile">
                 <app-date-tile
