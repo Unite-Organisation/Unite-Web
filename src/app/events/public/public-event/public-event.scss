@@ -565,46 +565,6 @@
   margin-top: 14px;
 }
 
-/* Slot row layout for side-by-side tile and chevron button */
-.slot-row {
-  display: flex;
-  align-items: stretch;
-  gap: 8px;
-  margin-bottom: 12px;
-
-  &__tile {
-    flex: 1;
-  }
-
-  &__toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    background: transparent;
-    border: 1.5px solid var(--color-border);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
-
-    &:hover {
-      background: var(--color-cream-dark, rgba(0, 0, 0, 0.03));
-      border-color: var(--color-charcoal-mid);
-    }
-  }
-}
-
-/* Dropdown list container matching your existing 'who__body' style */
-.slot-dropdown-body {
-  padding: 14px 16px;
-  margin-top: -6px;
-  margin-bottom: 16px;
-  background: var(--color-cream, #f9f8f6);
-  border: 1.5px solid var(--color-border);
-  border-top: none;
-  border-radius: 0 0 4px 4px;
-}
-
 .hero__header-row {
   display: flex;
   align-items: center;

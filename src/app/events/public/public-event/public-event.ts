@@ -43,7 +43,7 @@ const CODE_LENGTH = 4;
   standalone: true,
   imports: [CommonModule, ButtonComponent, DateTile, MemberPicker, PickedMember],
   templateUrl: './public-event.html',
-  styleUrl: './public-event.scss',
+  styleUrls: ['./public-event.scss', './slot-members.scss'],
 })
 export class PublicEventPage implements OnInit {
   private readonly route = inject(ActivatedRoute);

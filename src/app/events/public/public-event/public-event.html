@@ -150,6 +150,13 @@
             }
           </div>
 
+          @if (isChoosingDate()) {
+            <p class="dates-hint">
+              Tap a date once if it works for you, twice if it only works if needed,
+              and a third time to clear it.
+            </p>
+          }
+
           @if (ev.minAttendees) {
             <p class="dates-head__goal">
               A date needs <strong>{{ ev.minAttendees }}</strong> people to go ahead
@@ -175,21 +182,30 @@
                 [attr.aria-expanded]="expandedSlotId() === slot.id"
                 (click)="toggleSlotMembers(slot.id)"
                 title="Who is going?"
+                aria-label="Who is going?"
               >
-                <span class="who__chevron" [class.who__chevron--open]="expandedSlotId() === slot.id">⌄</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
               </button>
             </div>
 
             @if (expandedSlotId() === slot.id) {
-              <div class="slot-dropdown-body">
+              <div class="slot-dropdown-body" role="region" aria-label="People going on this date">
                 @if (slotMembersLoading()[slot.id]) {
                   <p class="who__note">Loading…</p>
                 } @else {
                   @let slotPeople = slotMembersMap()[slot.id] ?? [];
                   @if (slotPeople.length > 0) {
-                    <ul class="people">
+                    <ul class="people slot-people">
                       @for (person of slotPeople; track person.displayName) {
                         <li class="person">
+                          <span class="slot-people__avatar" aria-hidden="true">
+                            {{ person.displayName.charAt(0).toUpperCase() }}
+                          </span>
                           <span class="person__name">{{ person.displayName }}</span>
 
                           @if (person.isHost) {
