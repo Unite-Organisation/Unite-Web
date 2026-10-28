@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
 import { AuthService } from '../../../auth/services/auth';
@@ -23,6 +22,8 @@ import {
 } from '../../../models/api-models/public-event.models';
 import { PublicEventService } from '../../services/public-event.service';
 import { DateTile } from '../date-tile/date-tile';
+import { MemberPicker } from '../member-picker/member-picker';
+import { PickedMember } from '../member-picker/picked-member';
 import { formatDayTime, formatTimeLeft } from '../event-dates';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -30,8 +31,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 type JoinStep = 'works' | 'if-needed' | 'pick' | 'name';
 
 const CODE_LENGTH = 4;
-/** Asks again once typing pauses, not on every key. */
-const PICKER_SEARCH_DELAY_MS = 300;
+
 
 /**
  * Everything a member of a public event does, on one screen. Which parts show depends on the mode
@@ -41,7 +41,7 @@ const PICKER_SEARCH_DELAY_MS = 300;
 @Component({
   selector: 'app-public-event',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, DateTile],
+  imports: [CommonModule, ButtonComponent, DateTile, MemberPicker, PickedMember],
   templateUrl: './public-event.html',
   styleUrl: './public-event.scss',
 })
@@ -78,16 +78,8 @@ export class PublicEventPage implements OnInit {
   /** Came in through "already joined?" rather than by colliding with a name. */
   protected readonly returningWithCode = signal(false);
 
-  /** The "who are you?" list - null until loaded, most likely person first. */
-  protected readonly pickerMembers = signal<EventMemberRow[] | null>(null);
-  protected readonly pickerLoading = signal(false);
-  protected readonly pickerSearch = signal('');
-  /** Tapped on the list - the name is settled, only the code is left to type. */
+  /** Tapped on the "who are you?" list - the name is settled, only the code is left to type. */
   protected readonly pickedMember = signal<EventMemberRow | null>(null);
-  private pickerRequest: Subscription | null = null;
-  private pickerSearchTimer: ReturnType<typeof setTimeout> | null = null;
-  /** What the list on screen was asked for - a space typed at the end is not worth a request. */
-  private pickerSearchedFor: string | null = null;
 
   protected readonly membersOpen = signal(false);
   /** null until someone asks - the names are a detail most people never open. */
@@ -249,7 +241,7 @@ export class PublicEventPage implements OnInit {
 
   closeJoin(): void {
     this.joinOpen.set(false);
-    this.resetPicker();
+    this.pickedMember.set(null);
     this.nameError.set(null);
     this.emailError.set(null);
     this.askingForCode.set(false);
@@ -269,10 +261,9 @@ export class PublicEventPage implements OnInit {
     this.emailError.set(null);
     this.returningWithCode.set(true);
     this.askingForCode.set(true);
-    this.resetPicker();
+    this.pickedMember.set(null);
     this.joinStep.set('pick');
     this.joinOpen.set(true);
-    this.loadPicker();
   }
 
   pickMember(member: EventMemberRow): void {
@@ -285,7 +276,7 @@ export class PublicEventPage implements OnInit {
     setTimeout(() => document.getElementById('joinCode')?.focus());
   }
 
-  /** Back to the list from the code step - the list is kept, nothing to load again. */
+  /** Back to the list from the code step. */
   notMe(): void {
     this.pickedMember.set(null);
     this.displayName.set('');
@@ -302,18 +293,6 @@ export class PublicEventPage implements OnInit {
     this.joinStep.set('name');
   }
 
-  searchPicker(value: string): void {
-    this.pickerSearch.set(value);
-    if (this.pickerSearchTimer) {
-      clearTimeout(this.pickerSearchTimer);
-    }
-    this.pickerSearchTimer = setTimeout(() => {
-      if (this.pickerSearch().trim() !== this.pickerSearchedFor) {
-        this.loadPicker();
-      }
-    }, PICKER_SEARCH_DELAY_MS);
-  }
-
   /** Four digits are the whole answer, so the fourth one signs in without another tap. */
   typeCode(value: string): void {
     const code = value.replace(/\D/g, '').slice(0, CODE_LENGTH);
@@ -321,46 +300,6 @@ export class PublicEventPage implements OnInit {
     if (this.pickedMember() && code.length === CODE_LENGTH && !this.working()) {
       this.confirmJoin();
     }
-  }
-
-  initial(name: string): string {
-    return name.trim().charAt(0).toUpperCase() || '?';
-  }
-
-  private loadPicker(): void {
-    this.pickerRequest?.unsubscribe();
-    this.pickerLoading.set(true);
-
-    const search = this.pickerSearch().trim();
-    this.pickerSearchedFor = search;
-    this.pickerRequest = this.events
-      .whoCouldThisBe(this.slug, search || undefined)
-      .pipe(finalize(() => this.pickerLoading.set(false)))
-      .subscribe({
-        next: (rows) => {
-          if (!search && rows.length === 0) {
-            // nobody to pick from - straight to typing the name
-            this.typeNameInstead();
-            return;
-          }
-          this.pickerMembers.set(rows);
-        },
-        error: () => this.typeNameInstead(),
-      });
-  }
-
-  private resetPicker(): void {
-    this.pickerRequest?.unsubscribe();
-    this.pickerRequest = null;
-    if (this.pickerSearchTimer) {
-      clearTimeout(this.pickerSearchTimer);
-      this.pickerSearchTimer = null;
-    }
-    this.pickerMembers.set(null);
-    this.pickerLoading.set(false);
-    this.pickerSearch.set('');
-    this.pickerSearchedFor = null;
-    this.pickedMember.set(null);
   }
 
   signOut(): void {

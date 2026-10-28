@@ -359,50 +359,11 @@
               <h2 class="sheet__title">Who are you?</h2>
               <p class="sheet__hint">Tap your name, then type the 4-digit code you got.</p>
 
-              <div class="pe-field sheet__field">
-                <input
-                  id="pickerSearch"
-                  type="search"
-                  aria-label="Find your name"
-                  autocomplete="off"
-                  enterkeyhint="search"
-                  placeholder="Find your name"
-                  [value]="pickerSearch()"
-                  (input)="searchPicker($any($event.target).value)"
-                />
-              </div>
-
-              @if (pickerMembers() === null) {
-                <div class="picker" aria-busy="true">
-                  @for (row of [1, 2, 3]; track row) {
-                    <div class="picker__tile picker__tile--ghost"></div>
-                  }
-                </div>
-              } @else {
-                <ul class="picker" [class.picker--loading]="pickerLoading()">
-                  @for (member of pickerMembers(); track member.id; let first = $first) {
-                    <li>
-                      <button
-                        type="button"
-                        class="picker__tile"
-                        [class.picker__tile--likely]="first && !pickerSearch()"
-                        (click)="pickMember(member)"
-                      >
-                        <span class="picker__avatar" aria-hidden="true">{{ initial(member.displayName) }}</span>
-                        <span class="picker__name">{{ member.displayName }}</span>
-                        @if (first && !pickerSearch()) {
-                          <span class="picker__badge">Probably you</span>
-                        } @else if (member.isHost) {
-                          <span class="picker__note">host</span>
-                        }
-                        <span class="picker__chevron" aria-hidden="true">›</span>
-                      </button>
-                    </li>
-                  } @empty {
-                    <li class="picker__empty">Nobody here goes by that name.</li>
-                  }
-                </ul>
-              }
+              <app-member-picker
+                [slug]="slug"
+                (picked)="pickMember($event)"
+                (notListed)="typeNameInstead()"
+              />
 
               <div class="sheet__actions">
                 <button type="button" class="pe-quiet-link sheet__back" (click)="typeNameInstead()">
@@ -432,11 +393,7 @@
 
               @if (isGuest && !isMember()) {
                 @if (pickedMember(); as picked) {
-                  <div class="picked">
-                    <span class="picker__avatar" aria-hidden="true">{{ initial(picked.displayName) }}</span>
-                    <span class="picker__name">{{ picked.displayName }}</span>
-                    <button type="button" class="pe-quiet-link" (click)="notMe()">Not you?</button>
-                  </div>
+                  <app-picked-member [member]="picked" (notMe)="notMe()" />
                 } @else {
                 <div class="pe-field sheet__field">
                   <label for="joinName">

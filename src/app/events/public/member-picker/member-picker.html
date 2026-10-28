@@ -1,0 +1,43 @@
+<div class="pe-field picker__search">
+  <input
+    type="search"
+    aria-label="Find your name"
+    autocomplete="off"
+    enterkeyhint="search"
+    placeholder="Find your name"
+    [value]="search()"
+    (input)="searchFor($any($event.target).value)"
+  />
+</div>
+
+@if (members() === null) {
+  <div class="picker" aria-busy="true">
+    @for (row of [1, 2, 3]; track row) {
+      <div class="picker__tile picker__tile--ghost"></div>
+    }
+  </div>
+} @else {
+  <ul class="picker" [class.picker--loading]="loading()">
+    @for (member of members(); track member.id; let first = $first) {
+      <li>
+        <button
+          type="button"
+          class="picker__tile"
+          [class.picker__tile--likely]="first && !search()"
+          (click)="picked.emit(member)"
+        >
+          <span class="picker__avatar" aria-hidden="true">{{ initial(member.displayName) }}</span>
+          <span class="picker__name">{{ member.displayName }}</span>
+          @if (first && !search()) {
+            <span class="picker__badge">Probably you</span>
+          } @else if (member.isHost) {
+            <span class="picker__note">host</span>
+          }
+          <span class="picker__chevron" aria-hidden="true">›</span>
+        </button>
+      </li>
+    } @empty {
+      <li class="picker__empty">Nobody here goes by that name.</li>
+    }
+  </ul>
+}
