@@ -96,17 +96,17 @@ export const routes: Routes = [
     // Public events: opened from a link someone pasted into a chat, by people who may never
     // have heard of Unite. No guard, no building, no account.
     {
-        path: 'e/new',
+        path: 'event/new',
         loadComponent: () => import('./events/public/public-event-create/public-event-create').then(m => m.PublicEventCreate)
     },
 
     {
-        path: 'e/:slug/d/:slotId',
+        path: 'event/:slug/d/:slotId',
         loadComponent: () => import('./events/public/public-event/public-event').then(m => m.PublicEventPage)
     },
 
     {
-        path: 'e/:slug',
+        path: 'event/:slug',
         loadComponent: () => import('./events/public/public-event/public-event').then(m => m.PublicEventPage)
     },
 

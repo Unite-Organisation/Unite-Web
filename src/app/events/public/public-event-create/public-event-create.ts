@@ -147,7 +147,7 @@ export class PublicEventCreate {
       .pipe(finalize(() => this.isSubmitting.set(false)))
       .subscribe({
         next: (created) => {
-          this.router.navigate(['/e', created.slug], {
+          this.router.navigate(['/event', created.slug], {
             // shown once, on arrival - it is the guest's only way back on another device
             state: { returnCode: created.returnCode, justCreated: true },
           });

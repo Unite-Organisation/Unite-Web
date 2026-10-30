@@ -44,7 +44,7 @@ export class Events implements OnInit {
 
   createEvent(): void {
     // the same card a guest gets - a public event works the same whether its host has an account
-    this.router.navigateByUrl('/e/new');
+    this.router.navigateByUrl('/event/new');
   }
 
   private loadPosts(): void {

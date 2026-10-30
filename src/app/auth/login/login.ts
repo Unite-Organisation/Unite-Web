@@ -108,6 +108,6 @@ export class Login {
 
   /** A public event needs no account at either end - there is no reason to make someone log in. */
   createEventWithoutAccount(): void {
-    this.router.navigateByUrl('/e/new');
+    this.router.navigateByUrl('/event/new');
   }
 }

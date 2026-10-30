@@ -561,13 +561,13 @@ export class PublicEventPage implements OnInit {
   // ───────────────────────────────────────── sharing
 
   get shareUrl(): string {
-    return `${window.location.origin}/e/${this.slug}`;
+    return `${window.location.origin}/event/${this.slug}`;
   }
 
   get directUrl(): string {
     const event = this.event();
     return event?.selectedSlotId
-      ? `${window.location.origin}/e/${this.slug}/d/${event.selectedSlotId}`
+      ? `${window.location.origin}/event/${this.slug}/d/${event.selectedSlotId}`
       : this.shareUrl;
   }
 
@@ -592,7 +592,7 @@ export class PublicEventPage implements OnInit {
   }
 
   createYourOwn(): void {
-    this.router.navigateByUrl('/e/new');
+    this.router.navigateByUrl('/event/new');
   }
 
   /** Toggles picks directly from the main event page when logged in */

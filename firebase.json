@@ -6,13 +6,20 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "redirects": [
+      {
+        "regex": "^/e/(.+)$",
+        "destination": "/event/:1",
+        "type": 301
+      }
+    ],
     "rewrites": [
       {
-        "source": "/e/new",
+        "source": "/event/new",
         "destination": "/index.html"
       },
       {
-        "source": "/e/**",
+        "source": "/event/**",
         "run": {
           "serviceId": "unite-backend",
           "region": "europe-west1"
