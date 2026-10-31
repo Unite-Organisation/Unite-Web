@@ -479,51 +479,60 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   border-color: var(--color-error);
 }
 
-.pe-page input[type='datetime-local'] {
-  padding: 12px 14px;
+/* The date picker opens in an overlay outside the page, so it is themed from here.
+   Its panel class lands on the calendar inside, hence :has() to reach the whole panel. */
+.mat-datepicker-content:has(.pe-date-picker) {
+  --mat-datepicker-calendar-container-background-color: var(--color-white);
+  --mat-datepicker-calendar-container-text-color: var(--color-charcoal);
+  --mat-datepicker-calendar-container-shape: 8px;
+  --mat-datepicker-calendar-container-touch-shape: 8px;
+  --mat-datepicker-calendar-text-font: var(--font-body);
+
+  --mat-datepicker-calendar-date-text-color: var(--color-charcoal);
+  --mat-datepicker-calendar-date-selected-state-background-color: var(--color-terracotta);
+  --mat-datepicker-calendar-date-selected-state-text-color: var(--color-white);
+  --mat-datepicker-calendar-date-today-outline-color: var(--color-terracotta-light);
+  --mat-datepicker-calendar-date-today-selected-state-outline-color: var(--color-white);
+  --mat-datepicker-calendar-date-hover-state-background-color: var(--color-cream-dark);
+  --mat-datepicker-calendar-date-focus-state-background-color: var(--color-cream-dark);
+
+  --mat-datepicker-calendar-header-text-color: var(--color-muted);
+  --mat-datepicker-calendar-body-label-text-color: var(--color-muted);
+  --mat-datepicker-calendar-header-divider-color: var(--color-border);
+  --mat-datepicker-calendar-period-button-text-color: var(--color-charcoal);
+  --mat-datepicker-calendar-period-button-icon-color: var(--color-charcoal);
+  --mat-datepicker-calendar-navigation-button-icon-color: var(--color-charcoal);
+
+  --mat-button-text-label-text-font: var(--font-body);
+  --mat-button-text-label-text-color: var(--color-charcoal);
 }
 
-/* Android and iOS draw date fields as dropdowns with a chevron and an offset
-   value, so the look is replaced with the same calendar icon everywhere.
-   Firefox draws its own icon that cannot be hidden, so it keeps the native look. */
-@supports not (-moz-appearance: none) {
-  .pe-page input[type='datetime-local'] {
-    position: relative;
+/* Material sizes its centred panel for a calendar and one row of buttons, not the time too.
+   It also scales it to the screen, which on a desktop makes it far larger than a calendar needs. */
+.mat-datepicker-content-touch:has(.pe-date-picker) {
+  max-height: 100dvh;
+  overflow: auto;
+}
 
-    -webkit-appearance: none;
-    appearance: none;
+.mat-datepicker-content-touch:has(.pe-date-picker) .mat-datepicker-content-container {
+  width: min(340px, 90vw);
+  height: auto;
+}
 
-    padding: 12px 44px 12px 14px;
+/* Hangs below the panel and would give it a scrollbar. Cancel already does its job. */
+.mat-datepicker-content-touch:has(.pe-date-picker) .mat-datepicker-close-button {
+  display: none;
+}
 
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%231e1a16' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    background-size: 20px;
-  }
-
-  .pe-page input[type='datetime-local']::-webkit-date-and-time-value {
-    /* Keeps an empty field on iOS from collapsing */
-    min-height: 1.5em;
-    margin: 0;
-
-    text-align: left;
-  }
-
-  /* Invisible, but still sits over the icon so a click on desktop opens the picker */
-  .pe-page input[type='datetime-local']::-webkit-calendar-picker-indicator {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-
-    width: 44px;
-    height: auto;
-    margin: 0;
-    padding: 0;
-
-    opacity: 0;
-    cursor: pointer;
-  }
+/* Only the date picker uses the timepicker, and its panel takes no class of its own */
+.mat-timepicker-panel {
+  --mat-timepicker-container-background-color: var(--color-white);
+  --mat-option-label-text-font: var(--font-body);
+  --mat-option-label-text-color: var(--color-charcoal);
+  --mat-option-hover-state-layer-color: var(--color-cream-dark);
+  --mat-option-focus-state-layer-color: var(--color-cream-dark);
+  --mat-option-selected-state-label-text-color: var(--color-terracotta-dark);
+  --mat-option-selected-state-layer-color: var(--color-cream);
 }
 
 .pe-hint {

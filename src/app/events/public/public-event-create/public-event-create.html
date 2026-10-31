@@ -84,18 +84,17 @@
               Starts
               <span class="pe-required">*</span>
             </label>
-            <input id="startDate" type="datetime-local" formControlName="startDate" />
+            <app-date-time-field fieldId="startDate" label="Starts" formControlName="startDate" />
           </div>
 
           <div class="pe-field">
             <label for="endDate">Ends <span class="pe-hint-inline">optional</span></label>
-            <!-- pointerup: comes before any picker opens, and never fires for a scroll -->
-            <input
-              id="endDate"
-              type="datetime-local"
+            <app-date-time-field
+              fieldId="endDate"
+              label="Ends"
+              clearable
               formControlName="endDate"
-              (pointerup)="seedEndDate(endDate)"
-              (blur)="dropUnchangedCopy(endDate)"
+              [startFrom]="form.controls['startDate'].value"
             />
           </div>
         }
@@ -126,7 +125,11 @@
               <span class="pe-required">*</span>
             </label>
 
-            <input id="votingDeadline" type="datetime-local" formControlName="votingDeadline" />
+            <app-date-time-field
+              fieldId="votingDeadline"
+              label="Decide by"
+              formControlName="votingDeadline"
+            />
 
             <span class="pe-hint">
               If nobody has settled on a date by then, the best one is kept and the rest drop off.
@@ -142,12 +145,10 @@
             <div formArrayName="slots">
               @for (slot of slots.controls; track slot) {
                 <div class="date-row">
-                  <input
-                    type="datetime-local"
+                  <app-date-time-field
                     [formControlName]="$index"
-                    [attr.aria-label]="'Date ' + ($index + 1)"
-                    (pointerup)="seedSlot(slot)"
-                    (blur)="dropUnchangedCopy(slot)"
+                    [label]="'Date ' + ($index + 1)"
+                    [startFrom]="nextSlotDate"
                   />
 
                   @if (slots.length > minDates) {

@@ -19,6 +19,7 @@ import {
   SlotRequest,
 } from '../../../models/api-models/public-event.models';
 import { PublicEventService } from '../../services/public-event.service';
+import { DateTimeField } from '../date-time-field/date-time-field';
 import { toInputValue } from '../event-dates';
 
 const MIN_DATES = 2;
@@ -34,7 +35,7 @@ const DEFAULT_HOUR = 12;
 @Component({
   selector: 'app-public-event-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonComponent, DateTimeField],
   templateUrl: './public-event-create.html',
   styleUrl: './public-event-create.scss',
 })
@@ -52,9 +53,6 @@ export class PublicEventCreate {
   protected readonly isSubmitting = signal(false);
   protected readonly showDetails = signal(false);
   protected readonly datesError = signal<string | null>(null);
-
-  /** The field last filled with a copy of another date, until the host changes it or leaves. */
-  private copiedDate: { control: FormControl<string>; value: string } | null = null;
 
   readonly form: FormGroup = this.fb.group({
     name: this.fb.nonNullable.control('', [Validators.required, Validators.maxLength(256)]),
@@ -91,8 +89,20 @@ export class PublicEventCreate {
     return this.form.get('slots') as FormArray<FormControl<string>>;
   }
 
-  get endDate(): FormControl<string> {
-    return this.form.get('endDate') as FormControl<string>;
+  /**
+   * Hosts usually propose several days at the same hour, so a new date starts from the last one.
+   * The very first starts the day after the deadline, because proposed dates have to fall after it.
+   */
+  get nextSlotDate(): string {
+    const last = this.filledDates.at(-1);
+    if (last) {
+      return last;
+    }
+
+    const now = new Date();
+    const deadline = new Date(this.form.controls['votingDeadline'].value);
+    const from = deadline > now ? deadline : now;
+    return toInputValue(atHour(addDays(from, 1), DEFAULT_HOUR));
   }
 
   get letsTheGroupPick(): boolean {
@@ -119,44 +129,6 @@ export class PublicEventCreate {
     if (this.slots.length > MIN_DATES) {
       this.slots.removeAt(index);
     }
-  }
-
-  /**
-   * The native picker opens on the field's value, or on the current time when it has none. Hosts
-   * usually propose several days at the same hour, so a new date starts from the last one.
-   */
-  seedSlot(control: FormControl<string>): void {
-    this.seedDate(control, this.filledDates.at(-1), this.firstSlotDate());
-  }
-
-  seedEndDate(control: FormControl<string>): void {
-    const tomorrowAtNoon = toInputValue(atHour(addDays(new Date(), 1), DEFAULT_HOUR));
-    this.seedDate(control, this.form.controls['startDate'].value, tomorrowAtNoon);
-  }
-
-  /** A copy left unchanged says nothing new - the host closed the picker without choosing. */
-  dropUnchangedCopy(control: FormControl<string>): void {
-    if (this.copiedDate?.control === control && control.value === this.copiedDate.value) {
-      control.setValue('');
-    }
-    this.copiedDate = null;
-  }
-
-  private seedDate(control: FormControl<string>, copy: string | undefined, fallback: string): void {
-    if (control.value) {
-      return;
-    }
-
-    control.setValue(copy || fallback);
-    this.copiedDate = copy ? { control, value: copy } : null;
-  }
-
-  /** The day after the deadline, because proposed dates have to fall after it. */
-  private firstSlotDate(): string {
-    const now = new Date();
-    const deadline = new Date(this.form.controls['votingDeadline'].value);
-    const from = deadline > now ? deadline : now;
-    return toInputValue(atHour(addDays(from, 1), DEFAULT_HOUR));
   }
 
   toggleDetails(): void {
@@ -274,7 +246,7 @@ export class PublicEventCreate {
   }
 }
 
-/** `datetime-local` gives `YYYY-MM-DDTHH:mm`; LocalDateTime wants the seconds too. */
+/** The date fields give `YYYY-MM-DDTHH:mm`; LocalDateTime wants the seconds too. */
 function withSeconds(value: string): string {
   return value.length === 16 ? `${value}:00` : value;
 }

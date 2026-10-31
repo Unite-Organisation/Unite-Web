@@ -15,7 +15,7 @@ export function toLocalDateTime(date: Date): string {
   );
 }
 
-/** What a `datetime-local` input wants, which is the same thing minus the seconds. */
+/** What the date fields hold, which is the same thing minus the seconds. */
 export function toInputValue(date: Date): string {
   return toLocalDateTime(date).slice(0, 16);
 }
