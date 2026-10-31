@@ -89,7 +89,14 @@
 
           <div class="pe-field">
             <label for="endDate">Ends <span class="pe-hint-inline">optional</span></label>
-            <input id="endDate" type="datetime-local" formControlName="endDate" />
+            <!-- pointerup: comes before any picker opens, and never fires for a scroll -->
+            <input
+              id="endDate"
+              type="datetime-local"
+              formControlName="endDate"
+              (pointerup)="seedEndDate(endDate)"
+              (blur)="dropUnchangedCopy(endDate)"
+            />
           </div>
         }
 
@@ -139,6 +146,8 @@
                     type="datetime-local"
                     [formControlName]="$index"
                     [attr.aria-label]="'Date ' + ($index + 1)"
+                    (pointerup)="seedSlot(slot)"
+                    (blur)="dropUnchangedCopy(slot)"
                   />
 
                   @if (slots.length > minDates) {
