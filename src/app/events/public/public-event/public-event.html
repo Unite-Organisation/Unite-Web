@@ -190,7 +190,7 @@
                     <ul class="people">
                       @for (person of slotPeople; track person.displayName) {
                         <li class="person">
-                          <div class="person__info" style="display: flex; align-items: center; gap: 8px;">
+                          <div style="display:flex;flex-direction:row;gap:8px;min-width:0">
                             <span class="person__name">{{ person.displayName }}</span>
 
                             @if (person.isHost) {
@@ -291,7 +291,7 @@
                 <ul class="people">
                   @for (person of going(); track person.displayName) {
                     <li class="person">
-                      <div class="person__info" style="display: flex; align-items: center; gap: 8px;">
+                      <div style="display:flex;flex-direction:row;gap:8px;min-width:0">
                         <span class="person__name">{{ person.displayName }}</span>
 
                         @if (person.isHost) {
@@ -390,7 +390,7 @@
               @for (person of awaitingMembers(); track person.id; let i = $index) {
                 <li class="person">
                   <!-- Dane członka po lewej stronie -->
-                  <div class="person__info" style="flex-direction: row;">
+                  <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
                     <span class="person__name">{{ person.displayName }}</span>
                     <span class="pe-hint person__time">Zgłosił(a) się: {{ person.joinedAt }}</span>
                   </div>
