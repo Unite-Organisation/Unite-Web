@@ -392,7 +392,7 @@ export class PublicEventPage implements OnInit {
     }
 
     if (codes.includes(ErrorCode.EVENT_MEMBER_AWAITING_APPROVAL)) {
-      this.nameError.set(null);
+      this.nameError.set("You're awaiting approval.");
       return;
     }
 
