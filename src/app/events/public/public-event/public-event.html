@@ -301,6 +301,25 @@
                               Wyrzuć
                             </button>
                       }
+
+                      <!-- Modal z pytaniem po wyrzuceniu (gdy requiresApproval było false) -->
+                          @if (showApprovalPromptModal()) {
+                            <div class="sheet-backdrop" (click)="showApprovalPromptModal.set(false)"></div>
+                            <section class="sheet" role="dialog" aria-modal="true">
+                              <h2 class="sheet__title">Włączysz akceptację?</h2>
+                              <p class="sheet__hint">
+                                Ta osoba może wrócić przez link. Chcesz od teraz sam akceptować nowe osoby? Tego nie da się cofnąć.
+                              </p>
+                              <div class="sheet__actions">
+                                <app-button variant="primary" size="lg" (clicked)="handleApprovalPromptResponse(true)">
+                                  Tak, włącz akceptację
+                                </app-button>
+                                <button type="button" class="pe-quiet-link sheet__back" (click)="handleApprovalPromptResponse(false)">
+                                  Nie, zostaw jak jest
+                                </button>
+                              </div>
+                            </section>
+                          }
                     </li>
                   }
                 </ul>
