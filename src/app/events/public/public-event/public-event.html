@@ -190,14 +190,16 @@
                     <ul class="people">
                       @for (person of slotPeople; track person.displayName) {
                         <li class="person">
-                          <span class="person__name">{{ person.displayName }}</span>
+                          <div class="person__info" style="display: flex; align-items: center; gap: 8px;">
+                            <span class="person__name">{{ person.displayName }}</span>
 
-                          @if (person.isHost) {
-                            <span class="person__tag">Host</span>
-                          }
-                          @if (isYou(person.displayName)) {
-                            <span class="person__tag person__tag--you">You</span>
-                          }
+                            @if (person.isHost) {
+                              <span class="person__tag">Host</span>
+                            }
+                            @if (isYou(person.displayName)) {
+                              <span class="person__tag person__tag--you">You</span>
+                            }
+                          </div>
 
                           <!-- Przycisk wyrzucania (X) wyrównany do prawej -->
                           @if (isHost() && !isYou(person.displayName) && !person.isHost) {
@@ -289,14 +291,16 @@
                 <ul class="people">
                   @for (person of going(); track person.displayName) {
                     <li class="person">
-                      <span class="person__name">{{ person.displayName }}</span>
+                      <div class="person__info" style="display: flex; align-items: center; gap: 8px;">
+                        <span class="person__name">{{ person.displayName }}</span>
 
-                      @if (person.isHost) {
-                        <span class="person__tag">Host</span>
-                      }
-                      @if (isYou(person.displayName)) {
-                        <span class="person__tag person__tag--you">You</span>
-                      }
+                        @if (person.isHost) {
+                          <span class="person__tag">Host</span>
+                        }
+                        @if (isYou(person.displayName)) {
+                          <span class="person__tag person__tag--you">You</span>
+                        }
+                      </div>
                       <!-- Przycisk wyrzucania (X) wyrównany do prawej -->
                       @if (isHost() && !isYou(person.displayName) && !person.isHost) {
                         <div class="person__actions">
