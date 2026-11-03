@@ -116,36 +116,16 @@
   margin-top: 8px;
 }
 
-.date-row input {
+.date-row app-date-time-field {
   flex: 1;
   min-width: 0;
-  min-height: 48px;
-  box-sizing: border-box;
-
-  padding: 12px 14px;
-
-  color: var(--color-charcoal);
-  background: var(--color-white);
-
-  border: 1.5px solid var(--color-border);
-  border-radius: 4px;
-
-  outline: none;
-
-  font-family: var(--font-body);
-  font-size: 16px;
-}
-
-.date-row input:focus {
-  border-color: var(--color-terracotta);
-  box-shadow: 0 0 0 3px rgba(192, 86, 58, 0.1);
 }
 
 .date-row__remove {
   flex: 0 0 auto;
 
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
 
   color: var(--color-muted);
   background: transparent;
@@ -261,4 +241,65 @@
 
   font-size: 13.5px;
   line-height: 1.4;
+}
+
+/* Styling for checkbox fields inside your form */
+.pe-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 500;
+  color: var(--color-charcoal, #222);
+
+  input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px !important;
+    height: 20px !important;
+    margin-top: 1px; /* Aligns nicely with the first line of text */
+    border: 1.5px solid var(--color-border, #ccc);
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+    display: grid;
+    place-content: center;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+
+    /* Checkmark icon appearance when checked */
+    &::before {
+      content: "";
+      width: 10px;
+      height: 6px;
+      border-left: 2px solid white;
+      border-bottom: 2px solid white;
+      transform: scale(0) rotate(-45deg);
+      transition: transform 0.15s ease-in-out;
+    }
+
+    &:checked {
+      background-color: var(--color-terracotta, #e05a47);
+      border-color: var(--color-terracotta, #e05a47);
+
+      &::before {
+        transform: scale(1) rotate(-45deg);
+      }
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-terracotta, #e05a47);
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      background-color: var(--color-cream-dark, #eae6df);
+      border-color: var(--color-border, #ccc);
+      cursor: not-allowed;
+
+      &::before {
+        border-color: #888;
+      }
+    }
+  }
 }

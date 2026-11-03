@@ -1,6 +1,16 @@
 <div class="pe-page">
   <div class="pe-shell">
 
+    @if (!isGuest) {
+      <a class="back-link" routerLink="/app/home/events">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to events
+      </a>
+    }
+
     @if (loading()) {
       <div class="pe-card skeleton">
         <span class="skeleton__line skeleton__line--short"></span>
@@ -150,13 +160,20 @@
             }
           </div>
 
+          @if (isChoosingDate()) {
+            <p class="dates-hint">
+              Tap a date once if it works for you, twice if it only works if needed,
+              and a third time to clear it.
+            </p>
+          }
+
           @if (ev.minAttendees) {
             <p class="dates-head__goal">
               A date needs <strong>{{ ev.minAttendees }}</strong> people to go ahead
             </p>
           }
 
-          @for (slot of ev.slots; track slot.id) {
+          @for (slot of previewSlots(); track slot.id) {
             <div class="slot-row">
               <div class="slot-row__tile">
                 <app-date-tile
@@ -175,28 +192,73 @@
                 [attr.aria-expanded]="expandedSlotId() === slot.id"
                 (click)="toggleSlotMembers(slot.id)"
                 title="Who is going?"
+                aria-label="Who is going?"
               >
-                <span class="who__chevron" [class.who__chevron--open]="expandedSlotId() === slot.id">⌄</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
               </button>
             </div>
 
             @if (expandedSlotId() === slot.id) {
-              <div class="slot-dropdown-body">
+              <div class="slot-dropdown-body" role="region" aria-label="People going on this date">
                 @if (slotMembersLoading()[slot.id]) {
                   <p class="who__note">Loading…</p>
                 } @else {
                   @let slotPeople = slotMembersMap()[slot.id] ?? [];
                   @if (slotPeople.length > 0) {
-                    <ul class="people">
+                    <ul class="people slot-people">
                       @for (person of slotPeople; track person.displayName) {
                         <li class="person">
-                          <span class="person__name">{{ person.displayName }}</span>
+                          <div style="display:flex;flex-direction:row;align-items:center;gap:8px;min-width:0">
+                            <span class="slot-people__avatar" aria-hidden="true">
+                              {{ person.displayName.charAt(0).toUpperCase() }}
+                            </span>
+                            <span class="person__name">{{ person.displayName }}</span>
 
-                          @if (person.isHost) {
-                            <span class="person__tag">Host</span>
+                            @if (person.isHost) {
+                              <span class="person__tag">Host</span>
+                            }
+                            @if (isYou(person.displayName)) {
+                              <span class="person__tag person__tag--you">You</span>
+                            }
+                          </div>
+
+                          <!-- Przycisk wyrzucania (X) wyrównany do prawej -->
+                          @if (isHost() && !isYou(person.displayName) && !person.isHost) {
+                            <div class="person__actions">
+                              <button
+                                type="button"
+                                class="person__remove-btn"
+                                [disabled]="working()"
+                                (click)="confirmRemoveMember(person)"
+                                title="Wyrzuć"
+                              >
+                                ✕
+                              </button>
+                            </div>
                           }
-                          @if (isYou(person.displayName)) {
-                            <span class="person__tag person__tag--you">You</span>
+
+                          <!-- Modal z pytaniem po wyrzuceniu (gdy requiresApproval było false) -->
+                          @if (showApprovalPromptModal()) {
+                            <div class="sheet-backdrop" (click)="showApprovalPromptModal.set(false)"></div>
+                            <section class="sheet" role="dialog" aria-modal="true">
+                              <h2 class="sheet__title">Włączysz akceptację?</h2>
+                              <p class="sheet__hint">
+                                Ta osoba może wrócić przez link. Chcesz od teraz sam akceptować nowe osoby? Tego nie da się cofnąć.
+                              </p>
+                              <div class="sheet__actions">
+                                <app-button variant="primary" size="lg" (clicked)="handleApprovalPromptResponse(true)">
+                                  Tak, włącz akceptację
+                                </app-button>
+                                <button type="button" class="pe-quiet-link sheet__back" (click)="handleApprovalPromptResponse(false)">
+                                  Nie, zostaw jak jest
+                                </button>
+                              </div>
+                            </section>
                           }
                         </li>
                       }
@@ -255,14 +317,49 @@
                 <ul class="people">
                   @for (person of going(); track person.displayName) {
                     <li class="person">
-                      <span class="person__name">{{ person.displayName }}</span>
+                      <div style="display:flex;flex-direction:row;gap:8px;min-width:0">
+                        <span class="person__name">{{ person.displayName }}</span>
 
-                      @if (person.isHost) {
-                        <span class="person__tag">Host</span>
+                        @if (person.isHost) {
+                          <span class="person__tag">Host</span>
+                        }
+                        @if (isYou(person.displayName)) {
+                          <span class="person__tag person__tag--you">You</span>
+                        }
+                      </div>
+                      <!-- Przycisk wyrzucania (X) wyrównany do prawej -->
+                      @if (isHost() && !isYou(person.displayName) && !person.isHost) {
+                        <div class="person__actions">
+                          <button
+                            type="button"
+                            class="person__remove-btn"
+                            [disabled]="working()"
+                            (click)="confirmRemoveMember(person)"
+                            title="Wyrzuć"
+                          >
+                            ✕
+                          </button>
+                        </div>
                       }
-                      @if (isYou(person.displayName)) {
-                        <span class="person__tag person__tag--you">You</span>
-                      }
+
+                      <!-- Modal z pytaniem po wyrzuceniu (gdy requiresApproval było false) -->
+                          @if (showApprovalPromptModal()) {
+                            <div class="sheet-backdrop" (click)="showApprovalPromptModal.set(false)"></div>
+                            <section class="sheet" role="dialog" aria-modal="true">
+                              <h2 class="sheet__title">Włączysz akceptację?</h2>
+                              <p class="sheet__hint">
+                                Ta osoba może wrócić przez link. Chcesz od teraz sam akceptować nowe osoby? Tego nie da się cofnąć.
+                              </p>
+                              <div class="sheet__actions">
+                                <app-button variant="primary" size="lg" (clicked)="handleApprovalPromptResponse(true)">
+                                  Tak, włącz akceptację
+                                </app-button>
+                                <button type="button" class="pe-quiet-link sheet__back" (click)="handleApprovalPromptResponse(false)">
+                                  Nie, zostaw jak jest
+                                </button>
+                              </div>
+                            </section>
+                          }
                     </li>
                   }
                 </ul>
@@ -300,6 +397,51 @@
         </section>
       }
 
+      @if (isHost() && event()?.requiresApproval) {
+        <section class="pe-card">
+          <h2 class="pe-section-title">Czekają na akceptację ({{ awaitingMembers().length }})</h2>
+          
+          @if (awaitingLoading()) {
+            <p class="who__note">Ładowanie kolejki…</p>
+          } @else if (awaitingMembers().length === 0) {
+            <p class="who__note">Brak osób oczekujących w kolejce.</p>
+          } @else {
+            <div style="margin-bottom: 12px;">
+              <app-button variant="outline" size="sm" (clicked)="approveAll()">
+                Wpuść wszystkich
+              </app-button>
+            </div>
+
+            <ul class="people">
+              @for (person of awaitingMembers(); track person.id; let i = $index) {
+                <li class="person">
+                  <!-- Dane członka po lewej stronie -->
+                  <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                    <span class="person__name">{{ person.displayName }}</span>
+                    <span class="pe-hint person__time">Zgłosił(a) się: {{ person.joinedAt }}</span>
+                  </div>
+
+                  <!-- Przyciski akcji wyrównane do prawej -->
+                  <div class="person__actions">
+                    <app-button variant="primary" size="sm" (clicked)="approveUpTo(i)">
+                      Wpuść do tego miejsca
+                    </app-button>
+
+                    <button
+                      type="button"
+                      class="person__remove-btn"
+                      (click)="confirmRemoveMember(person)"
+                      title="Wyrzuć"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
 
       <!-- ─────────── Actions ─────────── -->
 
@@ -355,6 +497,23 @@
 
           @switch (joinStep()) {
 
+            @case ('pick') {
+              <h2 class="sheet__title">Who are you?</h2>
+              <p class="sheet__hint">Tap your name, then type the 4-digit code you got.</p>
+
+              <app-member-picker
+                [slug]="slug"
+                (picked)="pickMember($event)"
+                (notListed)="typeNameInstead()"
+              />
+
+              <div class="sheet__actions">
+                <button type="button" class="pe-quiet-link sheet__back" (click)="typeNameInstead()">
+                  I'm not on the list
+                </button>
+              </div>
+            }
+
             @case ('name') {
               <h2 class="sheet__title">
                 @if (returningWithCode()) {
@@ -366,13 +525,18 @@
                 }
               </h2>
 
-              @if (returningWithCode()) {
+              @if (pickedMember()) {
+                <p class="sheet__hint">The code you got when you first joined.</p>
+              } @else if (returningWithCode()) {
                 <p class="sheet__hint">
                   The name you joined with, and the code you got back then.
                 </p>
               }
 
               @if (isGuest && !isMember()) {
+                @if (pickedMember(); as picked) {
+                  <app-picked-member [member]="picked" (notMe)="notMe()" />
+                } @else {
                 <div class="pe-field sheet__field">
                   <label for="joinName">
                     Your name
@@ -393,6 +557,7 @@
                     <span class="pe-error">{{ nameError() }}</span>
                   }
                 </div>
+                }
 
                 @if (!askingForCode() && !returningWithCode()) {
                   <div class="pe-field sheet__field">
@@ -430,12 +595,19 @@
                       id="joinCode"
                       type="text"
                       inputmode="numeric"
+                      pattern="[0-9]*"
                       maxlength="4"
                       autocomplete="one-time-code"
+                      enterkeyhint="go"
                       placeholder="0000"
+                      [class.code-input]="pickedMember()"
                       [value]="codeInput()"
-                      (input)="codeInput.set($any($event.target).value)"
+                      (input)="typeCode($any($event.target).value)"
                     />
+
+                    @if (pickedMember() && nameError()) {
+                      <span class="pe-error">{{ nameError() }}</span>
+                    }
 
                     @if (returningWithCode()) {
                       <span class="pe-hint">
@@ -478,7 +650,11 @@
                     [disabled]="working()"
                     (clicked)="confirmJoin()"
                   >
-                    @if (working()) { Joining… } @else { Join }
+                    @if (pickedMember()) {
+                      @if (working()) { Signing in… } @else { Sign in }
+                    } @else {
+                      @if (working()) { Joining… } @else { Join }
+                    }
                   </app-button>
                 }
 

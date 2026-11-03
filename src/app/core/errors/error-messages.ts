@@ -131,6 +131,10 @@ export const ERROR_PRESENTATION = {
     text: 'Too many tries. Give it a few minutes.',
     severity: 'warning',
   },
+  [ErrorCode.EVENT_MEMBER_AWAITING_APPROVAL]: {
+    text: "You're awaiting approval.",
+    severity: "info",
+  },
   [ErrorCode.EVENT_MODE_MISMATCH]: {
     text: "That doesn't apply to this kind of event.",
     severity: 'warning',

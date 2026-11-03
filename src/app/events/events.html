@@ -64,6 +64,8 @@
         <post-card
           [post]="selectedPost"
           [featured]="true"
+          [featuredClickable]="true"
+          (cardClick)="openEvent(selectedPost)"
         ></post-card>
 
       </section>
@@ -90,7 +92,7 @@
           <post-card
             [post]="post"
             [selected]="selectedPost?.id === post.id"
-            (cardClick)="selectPost(post)"
+            (cardClick)="openEvent(post)"
           ></post-card>
         }
 

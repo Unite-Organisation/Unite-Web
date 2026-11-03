@@ -25,6 +25,7 @@ export enum SlotPreference {
 }
 
 export enum EventMemberStatus {
+  PENDING_APPROVAL = 'PENDING_APPROVAL',
   UNDECIDED = 'UNDECIDED',
   GOING = 'GOING',
   WAITLIST = 'WAITLIST',
@@ -41,6 +42,26 @@ export enum EventMemberRole {
 export enum EventIdentityOrigin {
   UNITE = 'UNITE',
   GUEST = 'GUEST',
+}
+
+/** What the browser says about itself - every field is null when the browser keeps it to itself. */
+export interface DeviceFingerprint {
+  /** Random UUID kept in localStorage. */
+  deviceId: string | null;
+  screenWidth: number | null;
+  screenHeight: number | null;
+  pixelRatio: number | null;
+  colorDepth: number | null;
+  hardwareConcurrency: number | null;
+  deviceMemory: number | null;
+  maxTouchPoints: number | null;
+  timeZone: string | null;
+  timeZoneOffset: number | null;
+  languages: string | null;
+  deviceModel: string | null;
+  platformVersion: string | null;
+  renderer: string | null;
+  canvasHash: string | null;
 }
 
 export interface SlotRequest {
@@ -70,6 +91,8 @@ export interface PublicEventCreateRequest {
   minAttendees: number | null;
   votingDeadline: string | null;
   slots: SlotRequest[] | null;
+  requiresApproval: boolean;
+  device?: DeviceFingerprint | null;
 }
 
 export interface PublicEventCreatedResponse {
@@ -118,6 +141,7 @@ export interface PublicEvent {
   /** Null until the viewer has a session on this event. */
   me: EventMemberView | null;
   myVotes: SlotVote[];
+  requiresApproval: boolean;
 }
 
 export interface OpenSessionRequest {
@@ -126,6 +150,7 @@ export interface OpenSessionRequest {
   email: string | null;
   returnCode: string | null;
   votes: SlotVote[] | null;
+  device?: DeviceFingerprint | null;
 }
 
 export interface EventSessionResponse {
@@ -134,6 +159,8 @@ export interface EventSessionResponse {
 }
 
 export interface EventMemberRow {
+  id: string;
+  joinedAt: string;
   displayName: string;
   isHost: boolean;
   status: EventMemberStatus;

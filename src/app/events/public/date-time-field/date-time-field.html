@@ -1,0 +1,74 @@
+<button
+  type="button"
+  class="field"
+  [class.field--open]="picker.opened"
+  [class.field--empty]="!value()"
+  [class.field--clearable]="clearable() && value()"
+  [id]="fieldId()"
+  [attr.aria-label]="label() + ': ' + text"
+  (click)="open()"
+>
+  <span class="field__text">{{ text }}</span>
+
+  <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="3" y="5" width="18" height="16" rx="2" />
+    <path d="M3 10h18M8 3v4M16 3v4" />
+  </svg>
+</button>
+
+@if (clearable() && value()) {
+  <button
+    type="button"
+    class="clear"
+    [attr.aria-label]="'Clear ' + label()"
+    (click)="clear()"
+  >
+    ×
+  </button>
+}
+
+<!-- Never seen or focused: the picker insists on an input -->
+<input
+  class="anchor"
+  tabindex="-1"
+  aria-hidden="true"
+  [matDatepicker]="picker"
+  [min]="today"
+/>
+
+<mat-datepicker
+  #picker
+  panelClass="pe-date-picker"
+  [touchUi]="true"
+  (closed)="onClosed()"
+>
+  <mat-datepicker-actions>
+    <div class="footer">
+      <label class="time">
+        <span class="time__label">Time</span>
+        <input
+          class="time__input"
+          [matTimepicker]="timeList"
+          [readonly]="heldInHand"
+          [value]="time()"
+          (valueChange)="time.set($event)"
+        />
+        <mat-timepicker #timeList interval="15min" aria-label="Time" />
+      </label>
+
+      <div class="buttons">
+        <button type="button" class="action" matDatepickerCancel>Cancel</button>
+
+        <button
+          type="button"
+          class="action action--done"
+          matDatepickerApply
+          [disabled]="!time()"
+          (click)="confirm()"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+  </mat-datepicker-actions>
+</mat-datepicker>

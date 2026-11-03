@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 import { AuthService } from '../../../auth/services/auth';
 import { parseApiError } from '../../../core/errors/api-error.parser';
 import { ErrorCode } from '../../../core/errors/error-code';
 import { ToastService } from '../../../core/toast/toast.service';
+import { previewSlot } from '../slot-preview';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import {
   EventMemberRow,
@@ -22,11 +23,16 @@ import {
 } from '../../../models/api-models/public-event.models';
 import { PublicEventService } from '../../services/public-event.service';
 import { DateTile } from '../date-tile/date-tile';
+import { MemberPicker } from '../member-picker/member-picker';
+import { PickedMember } from '../member-picker/picked-member';
 import { formatDayTime, formatTimeLeft } from '../event-dates';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type JoinStep = 'works' | 'if-needed' | 'name';
+type JoinStep = 'works' | 'if-needed' | 'pick' | 'name';
+
+const CODE_LENGTH = 4;
+
 
 /**
  * Everything a member of a public event does, on one screen. Which parts show depends on the mode
@@ -36,9 +42,9 @@ type JoinStep = 'works' | 'if-needed' | 'name';
 @Component({
   selector: 'app-public-event',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, DateTile],
+  imports: [CommonModule, RouterLink, ButtonComponent, DateTile, MemberPicker, PickedMember],
   templateUrl: './public-event.html',
-  styleUrl: './public-event.scss',
+  styleUrls: ['./public-event.scss', './slot-members.scss'],
 })
 export class PublicEventPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -72,6 +78,9 @@ export class PublicEventPage implements OnInit {
 
   /** Came in through "already joined?" rather than by colliding with a name. */
   protected readonly returningWithCode = signal(false);
+
+  /** Tapped on the "who are you?" list - the name is settled, only the code is left to type. */
+  protected readonly pickedMember = signal<EventMemberRow | null>(null);
 
   protected readonly membersOpen = signal(false);
   /** null until someone asks - the names are a detail most people never open. */
@@ -121,6 +130,25 @@ export class PublicEventPage implements OnInit {
 
   protected readonly openSlots = computed(() => this.event()?.slots.filter((s) => s.open) ?? []);
 
+  /** The dates with the member's unsent picks counted in, so the tiles show what a tap changes. */
+  protected readonly previewSlots = computed<EventSlotResponse[]>(() => {
+    const event = this.event();
+    if (!event) {
+      return [];
+    }
+    if (!this.isChoosingDate()) {
+      return event.slots;
+    }
+
+    const saved: Record<string, SlotPreference> = {};
+    event.myVotes.forEach((vote) => (saved[vote.slotId] = vote.preference));
+    const picks = this.picks();
+
+    return event.slots.map((slot) =>
+      slot.open ? previewSlot(slot, saved[slot.id], picks[slot.id], event.minAttendees) : slot
+    );
+  });
+
   /** Dates nobody has put in the first bucket yet - the only ones the second step asks about. */
   protected readonly undecidedSlots = computed(() =>
     this.openSlots().filter((slot) => this.picks()[slot.id] === undefined)
@@ -145,6 +173,9 @@ export class PublicEventPage implements OnInit {
    * threshold, and there is no sensible screen for what happens next.
    */
   protected readonly canLeave = computed(() => this.isActiveMember() && !this.isHost());
+
+  protected readonly memberToRemove = signal<EventMemberRow | null>(null);
+  protected readonly showApprovalPromptModal = signal(false);
 
   ngOnInit(): void {
     this.slug = this.route.snapshot.paramMap.get('slug') ?? '';
@@ -171,6 +202,9 @@ export class PublicEventPage implements OnInit {
           if (!afterAction && this.directSlotId && !event.me) {
             // the one-date link goes straight to the question worth asking
             this.openJoin();
+          }
+          if (this.isHost() && event.requiresApproval) {
+            this.loadAwaitingMembers();
           }
         },
         error: () => this.notFound.set(true),
@@ -207,6 +241,8 @@ export class PublicEventPage implements OnInit {
         return 'You dropped out';
       case EventMemberStatus.NOT_AVAILABLE:
         return "The date picked doesn't work for you";
+      case EventMemberStatus.PENDING_APPROVAL:
+        return "You're waiting for approval";
       default:
         return '';
     }
@@ -233,6 +269,7 @@ export class PublicEventPage implements OnInit {
 
   closeJoin(): void {
     this.joinOpen.set(false);
+    this.pickedMember.set(null);
     this.nameError.set(null);
     this.emailError.set(null);
     this.askingForCode.set(false);
@@ -240,7 +277,10 @@ export class PublicEventPage implements OnInit {
     this.codeInput.set('');
   }
 
-  /** For someone who joined from another phone and has their code rather than the session. */
+  /**
+   * For someone who joined before and has their code rather than the session. They pick themselves
+   * off the list - this phone's previous user comes first - so the code is all there is to type.
+   */
   openReturn(): void {
     this.picks.set({});
     this.displayName.set('');
@@ -249,8 +289,45 @@ export class PublicEventPage implements OnInit {
     this.emailError.set(null);
     this.returningWithCode.set(true);
     this.askingForCode.set(true);
-    this.joinStep.set('name');
+    this.pickedMember.set(null);
+    this.joinStep.set('pick');
     this.joinOpen.set(true);
+  }
+
+  pickMember(member: EventMemberRow): void {
+    this.pickedMember.set(member);
+    this.displayName.set(member.displayName);
+    this.codeInput.set('');
+    this.nameError.set(null);
+    this.joinStep.set('name');
+    // once the field is rendered - on Android this brings the number pad up straight away
+    setTimeout(() => document.getElementById('joinCode')?.focus());
+  }
+
+  /** Back to the list from the code step. */
+  notMe(): void {
+    this.pickedMember.set(null);
+    this.displayName.set('');
+    this.codeInput.set('');
+    this.nameError.set(null);
+    this.joinStep.set('pick');
+  }
+
+  /** The list does not have them, or they would rather type - the plain name and code form. */
+  typeNameInstead(): void {
+    this.pickedMember.set(null);
+    this.displayName.set('');
+    this.nameError.set(null);
+    this.joinStep.set('name');
+  }
+
+  /** Four digits are the whole answer, so the fourth one signs in without another tap. */
+  typeCode(value: string): void {
+    const code = value.replace(/\D/g, '').slice(0, CODE_LENGTH);
+    this.codeInput.set(code);
+    if (this.pickedMember() && code.length === CODE_LENGTH && !this.working()) {
+      this.confirmJoin();
+    }
   }
 
   signOut(): void {
@@ -379,7 +456,17 @@ export class PublicEventPage implements OnInit {
     }
 
     if (codes.includes(ErrorCode.EVENT_RETURN_CODE_INVALID)) {
-      this.nameError.set("That code doesn't match. Try another name instead?");
+      this.codeInput.set('');
+      this.nameError.set(
+        this.pickedMember()
+          ? "That code doesn't match. Try again?"
+          : "That code doesn't match. Try another name instead?"
+      );
+      return;
+    }
+
+    if (codes.includes(ErrorCode.EVENT_MEMBER_AWAITING_APPROVAL)) {
+      this.nameError.set("You're awaiting approval.");
       return;
     }
 
@@ -487,13 +574,13 @@ export class PublicEventPage implements OnInit {
   // ───────────────────────────────────────── sharing
 
   get shareUrl(): string {
-    return `${window.location.origin}/e/${this.slug}`;
+    return `${window.location.origin}/event/${this.slug}`;
   }
 
   get directUrl(): string {
     const event = this.event();
     return event?.selectedSlotId
-      ? `${window.location.origin}/e/${this.slug}/d/${event.selectedSlotId}`
+      ? `${window.location.origin}/event/${this.slug}/d/${event.selectedSlotId}`
       : this.shareUrl;
   }
 
@@ -518,7 +605,7 @@ export class PublicEventPage implements OnInit {
   }
 
   createYourOwn(): void {
-    this.router.navigateByUrl('/e/new');
+    this.router.navigateByUrl('/event/new');
   }
 
   /** Toggles picks directly from the main event page when logged in */
@@ -591,5 +678,97 @@ export class PublicEventPage implements OnInit {
           },
         });
     }
+  }
+
+  confirmRemoveMember(member: EventMemberRow): void {
+    if (!this.isHost() || member.isHost) return;
+
+    this.working.set(true);
+    this.events
+      .removeMembers(this.slug, [member.id])
+      .pipe(finalize(() => this.working.set(false)))
+      .subscribe({
+        next: () => {
+          this.toast.success(`Wyrzucono użytkownika ${member.displayName}`);
+          this.loadMembers();
+          this.load(); // odświeżenie danych wydarzenia
+
+          // Jeśli tryb akceptacji jest wyłączony, zapytaj czy go włączyć
+          const event = this.event();
+          if (event && !event.requiresApproval) {
+            this.showApprovalPromptModal.set(true);
+          }
+        },
+        error: (err) => {
+          // Obsługa błędów wg dokumentacji (np. EVENT_HOST_CANNOT_BE_REMOVED, EVENT_MEMBER_NOT_FOUND)
+          this.toast.error('Nie udało się wyrzucić członka');
+        }
+      });
+  }
+
+  // Decyzja hosta w dialogu po wyrzuceniu
+  handleApprovalPromptResponse(enableApproval: boolean): void {
+    this.showApprovalPromptModal.set(false);
+    
+    if (enableApproval) {
+      this.working.set(true);
+      this.events
+        .updateEvent(this.slug, { requiresApproval: true })
+        .pipe(finalize(() => this.working.set(false)))
+        .subscribe({
+          next: (updatedEvent) => {
+            this.event.set(updatedEvent);
+            this.toast.success('Włączono tryb akceptacji nowych osób');
+          },
+          error: () => {
+            this.toast.error('Nie udało się włączyć trybu akceptacji');
+          }
+        });
+    }
+  }
+  protected readonly awaitingMembers = signal<EventMemberRow[]>([]);
+  protected readonly awaitingLoading = signal(false);
+
+  // Pobieranie kolejki oczekujących
+  loadAwaitingMembers(): void {
+    if (!this.isHost()) return;
+    
+    this.awaitingLoading.set(true);
+    this.events
+      .getAwaitingMembers(this.slug)
+      .pipe(finalize(() => this.awaitingLoading.set(false)))
+      .subscribe({
+        next: (rows) => this.awaitingMembers.set(rows),
+        error: () => this.awaitingMembers.set([])
+      });
+  }
+
+  // Hurtowa akceptacja (wpuszczanie do wybranego indeksu / kumulatywnie, by unikać błędu OUT_OF_ORDER)
+  approveUpTo(index: number): void {
+    const membersToApprove = this.awaitingMembers().slice(0, index + 1);
+    const ids = membersToApprove.map(m => m.id);
+    
+    if (ids.length === 0) return;
+
+    this.working.set(true);
+    this.events
+      .approveMembers(this.slug, ids)
+      .pipe(finalize(() => this.working.set(false)))
+      .subscribe({
+        next: () => {
+          this.toast.success('Zaakceptowano wybrane osoby');
+          this.loadAwaitingMembers();
+          this.load(); // Odświeżenie danych wydarzenia i głównej listy
+        },
+        error: (err) => {
+          this.toast.error('Błąd akceptacji (odświeżam kolejkę)');
+          this.loadAwaitingMembers();
+        }
+      });
+  }
+
+  approveAll(): void {
+    if (this.awaitingMembers().length === 0) return;
+    this.approveUpTo(this.awaitingMembers().length - 1);
   }
 }

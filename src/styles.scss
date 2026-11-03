@@ -223,6 +223,7 @@
   margin-top: 4px;
   color: var(--color-muted);
   font-size: 13px;
+  text-align: center;
 }
 
 .auth-action-link {
@@ -269,7 +270,7 @@
   .auth-brand {
     font-size: 36px;
   }
-  
+
   .auth-brand--small {
     font-size: 30px;
   }
@@ -479,6 +480,62 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   border-color: var(--color-error);
 }
 
+/* The date picker opens in an overlay outside the page, so it is themed from here.
+   Its panel class lands on the calendar inside, hence :has() to reach the whole panel. */
+.mat-datepicker-content:has(.pe-date-picker) {
+  --mat-datepicker-calendar-container-background-color: var(--color-white);
+  --mat-datepicker-calendar-container-text-color: var(--color-charcoal);
+  --mat-datepicker-calendar-container-shape: 8px;
+  --mat-datepicker-calendar-container-touch-shape: 8px;
+  --mat-datepicker-calendar-text-font: var(--font-body);
+
+  --mat-datepicker-calendar-date-text-color: var(--color-charcoal);
+  --mat-datepicker-calendar-date-selected-state-background-color: var(--color-terracotta);
+  --mat-datepicker-calendar-date-selected-state-text-color: var(--color-white);
+  --mat-datepicker-calendar-date-today-outline-color: var(--color-terracotta-light);
+  --mat-datepicker-calendar-date-today-selected-state-outline-color: var(--color-white);
+  --mat-datepicker-calendar-date-hover-state-background-color: var(--color-cream-dark);
+  --mat-datepicker-calendar-date-focus-state-background-color: var(--color-cream-dark);
+
+  --mat-datepicker-calendar-header-text-color: var(--color-muted);
+  --mat-datepicker-calendar-body-label-text-color: var(--color-muted);
+  --mat-datepicker-calendar-header-divider-color: var(--color-border);
+  --mat-datepicker-calendar-period-button-text-color: var(--color-charcoal);
+  --mat-datepicker-calendar-period-button-icon-color: var(--color-charcoal);
+  --mat-datepicker-calendar-navigation-button-icon-color: var(--color-charcoal);
+
+  --mat-button-text-label-text-font: var(--font-body);
+  --mat-button-text-label-text-color: var(--color-charcoal);
+}
+
+/* Material sizes its centred panel for a calendar and one row of buttons, not the time too.
+   It also scales it to the screen, which on a desktop makes it far larger than a calendar needs. */
+.mat-datepicker-content-touch:has(.pe-date-picker) {
+  max-height: 100dvh;
+  overflow: auto;
+}
+
+.mat-datepicker-content-touch:has(.pe-date-picker) .mat-datepicker-content-container {
+  width: min(340px, 90vw);
+  height: auto;
+}
+
+/* Hangs below the panel and would give it a scrollbar. Cancel already does its job. */
+.mat-datepicker-content-touch:has(.pe-date-picker) .mat-datepicker-close-button {
+  display: none;
+}
+
+/* Only the date picker uses the timepicker, and its panel takes no class of its own */
+.mat-timepicker-panel {
+  --mat-timepicker-container-background-color: var(--color-white);
+  --mat-option-label-text-font: var(--font-body);
+  --mat-option-label-text-color: var(--color-charcoal);
+  --mat-option-hover-state-layer-color: var(--color-cream-dark);
+  --mat-option-focus-state-layer-color: var(--color-cream-dark);
+  --mat-option-selected-state-label-text-color: var(--color-terracotta-dark);
+  --mat-option-selected-state-layer-color: var(--color-cream);
+}
+
 .pe-hint {
   color: var(--color-muted);
   font-size: 12px;
@@ -592,5 +649,10 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   .auth-card__illustration {
     width: 200px;  /* Adjust the width to fit your design */
     height: auto; /* Maintains the SVG's aspect ratio */
+
+    /* Cards stack here, and the illustration would only push the button further down */
+    @media (max-width: 768px) {
+      display: none;
+    }
   }
 }
