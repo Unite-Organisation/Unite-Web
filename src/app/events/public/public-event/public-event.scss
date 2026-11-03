@@ -53,7 +53,7 @@
 .hero__share-btn:hover{background:var(--color-cream-dark);border-color:var(--color-charcoal);color:var(--color-charcoal)}
 .hero__share-btn svg{width:16px;height:16px}
 .actions__return{display:block;width:100%;margin-top:2px;text-align:center}
-.who{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:0;text-align:left;background:0 0;border:0;font-family:var(--font-body);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.who{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:0;text-align:left;background:0 0;border:0;font-family:var(--font-body);cursor:pointer}
 .who__left{display:flex;flex-direction:column;gap:6px;min-width:0}
 .who__title{margin:0}
 .who__chevron{flex:0 0 auto;color:var(--color-muted);font-size:18px;line-height:1;transition:transform .2s ease}
@@ -77,11 +77,9 @@
 .person__tag--you{color:var(--color-charcoal-mid);background:var(--color-cream-dark)}
 .slot-row{display:flex;align-items:stretch;gap:8px;margin-bottom:12px}
 .slot-row__tile{flex:1}
-.slot-row__toggle{display:flex;align-items:center;justify-content:center;width:44px;background:0 0;border:1.5px solid var(--color-border);border-radius:4px;cursor:pointer;transition:background-color .15s ease,border-color .15s ease}
-.slot-row__toggle:hover{background:var(--color-cream-dark);border-color:var(--color-charcoal-mid)}
+.slot-row__toggle{display:flex;align-items:center;justify-content:center;width:44px;background:0 0;border:1.5px solid var(--color-border);border-radius:4px;cursor:pointer}
 .slot-dropdown-body{padding:14px 16px;margin:-6px 0 16px;background:var(--color-cream);border:1.5px solid var(--color-border);border-top:none;border-radius:0 0 4px 4px}
 .pe-actions{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;text-align:center;margin-top:24px}
-.pe-actions app-button{display:inline-block;width:100%;max-width:320px;margin:0 auto}
+.pe-actions app-button,.pe-actions__pair app-button{display:inline-block;width:100%;max-width:320px;margin:0 auto}
 .pe-actions__pair{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;width:100%}
-.pe-actions__pair app-button{display:inline-block;width:100%;max-width:320px;margin:0 auto}
 .pe-actions .actions__return{display:block;text-align:center;margin-top:12px;width:100%}
