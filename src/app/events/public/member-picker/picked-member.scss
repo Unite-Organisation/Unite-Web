@@ -1,0 +1,45 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  margin-top: 18px;
+  padding: 10px 14px;
+
+  background: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+}
+
+.picked__avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+
+  width: 38px;
+  height: 38px;
+
+  color: var(--color-white);
+  background: var(--color-terracotta);
+
+  border-radius: 50%;
+
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.picked__name {
+  flex: 1;
+  min-width: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-weight: 600;
+}
+
+.pe-quiet-link {
+  flex: none;
+}

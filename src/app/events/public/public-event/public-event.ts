@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 import { AuthService } from '../../../auth/services/auth';
 import { parseApiError } from '../../../core/errors/api-error.parser';
 import { ErrorCode } from '../../../core/errors/error-code';
 import { ToastService } from '../../../core/toast/toast.service';
+import { previewSlot } from '../slot-preview';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import {
   EventMemberRow,
@@ -22,11 +23,16 @@ import {
 } from '../../../models/api-models/public-event.models';
 import { PublicEventService } from '../../services/public-event.service';
 import { DateTile } from '../date-tile/date-tile';
+import { MemberPicker } from '../member-picker/member-picker';
+import { PickedMember } from '../member-picker/picked-member';
 import { formatDayTime, formatTimeLeft } from '../event-dates';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type JoinStep = 'works' | 'if-needed' | 'name';
+type JoinStep = 'works' | 'if-needed' | 'pick' | 'name';
+
+const CODE_LENGTH = 4;
+
 
 /**
  * Everything a member of a public event does, on one screen. Which parts show depends on the mode
@@ -36,9 +42,9 @@ type JoinStep = 'works' | 'if-needed' | 'name';
 @Component({
   selector: 'app-public-event',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, DateTile],
+  imports: [CommonModule, RouterLink, ButtonComponent, DateTile, MemberPicker, PickedMember],
   templateUrl: './public-event.html',
-  styleUrl: './public-event.scss',
+  styleUrls: ['./public-event.scss', './slot-members.scss'],
 })
 export class PublicEventPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -72,6 +78,9 @@ export class PublicEventPage implements OnInit {
 
   /** Came in through "already joined?" rather than by colliding with a name. */
   protected readonly returningWithCode = signal(false);
+
+  /** Tapped on the "who are you?" list - the name is settled, only the code is left to type. */
+  protected readonly pickedMember = signal<EventMemberRow | null>(null);
 
   protected readonly membersOpen = signal(false);
   /** null until someone asks - the names are a detail most people never open. */
@@ -120,6 +129,25 @@ export class PublicEventPage implements OnInit {
   });
 
   protected readonly openSlots = computed(() => this.event()?.slots.filter((s) => s.open) ?? []);
+
+  /** The dates with the member's unsent picks counted in, so the tiles show what a tap changes. */
+  protected readonly previewSlots = computed<EventSlotResponse[]>(() => {
+    const event = this.event();
+    if (!event) {
+      return [];
+    }
+    if (!this.isChoosingDate()) {
+      return event.slots;
+    }
+
+    const saved: Record<string, SlotPreference> = {};
+    event.myVotes.forEach((vote) => (saved[vote.slotId] = vote.preference));
+    const picks = this.picks();
+
+    return event.slots.map((slot) =>
+      slot.open ? previewSlot(slot, saved[slot.id], picks[slot.id], event.minAttendees) : slot
+    );
+  });
 
   /** Dates nobody has put in the first bucket yet - the only ones the second step asks about. */
   protected readonly undecidedSlots = computed(() =>
@@ -241,6 +269,7 @@ export class PublicEventPage implements OnInit {
 
   closeJoin(): void {
     this.joinOpen.set(false);
+    this.pickedMember.set(null);
     this.nameError.set(null);
     this.emailError.set(null);
     this.askingForCode.set(false);
@@ -248,7 +277,10 @@ export class PublicEventPage implements OnInit {
     this.codeInput.set('');
   }
 
-  /** For someone who joined from another phone and has their code rather than the session. */
+  /**
+   * For someone who joined before and has their code rather than the session. They pick themselves
+   * off the list - this phone's previous user comes first - so the code is all there is to type.
+   */
   openReturn(): void {
     this.picks.set({});
     this.displayName.set('');
@@ -257,8 +289,45 @@ export class PublicEventPage implements OnInit {
     this.emailError.set(null);
     this.returningWithCode.set(true);
     this.askingForCode.set(true);
-    this.joinStep.set('name');
+    this.pickedMember.set(null);
+    this.joinStep.set('pick');
     this.joinOpen.set(true);
+  }
+
+  pickMember(member: EventMemberRow): void {
+    this.pickedMember.set(member);
+    this.displayName.set(member.displayName);
+    this.codeInput.set('');
+    this.nameError.set(null);
+    this.joinStep.set('name');
+    // once the field is rendered - on Android this brings the number pad up straight away
+    setTimeout(() => document.getElementById('joinCode')?.focus());
+  }
+
+  /** Back to the list from the code step. */
+  notMe(): void {
+    this.pickedMember.set(null);
+    this.displayName.set('');
+    this.codeInput.set('');
+    this.nameError.set(null);
+    this.joinStep.set('pick');
+  }
+
+  /** The list does not have them, or they would rather type - the plain name and code form. */
+  typeNameInstead(): void {
+    this.pickedMember.set(null);
+    this.displayName.set('');
+    this.nameError.set(null);
+    this.joinStep.set('name');
+  }
+
+  /** Four digits are the whole answer, so the fourth one signs in without another tap. */
+  typeCode(value: string): void {
+    const code = value.replace(/\D/g, '').slice(0, CODE_LENGTH);
+    this.codeInput.set(code);
+    if (this.pickedMember() && code.length === CODE_LENGTH && !this.working()) {
+      this.confirmJoin();
+    }
   }
 
   signOut(): void {
@@ -387,7 +456,12 @@ export class PublicEventPage implements OnInit {
     }
 
     if (codes.includes(ErrorCode.EVENT_RETURN_CODE_INVALID)) {
-      this.nameError.set("That code doesn't match. Try another name instead?");
+      this.codeInput.set('');
+      this.nameError.set(
+        this.pickedMember()
+          ? "That code doesn't match. Try again?"
+          : "That code doesn't match. Try another name instead?"
+      );
       return;
     }
 
@@ -500,13 +574,13 @@ export class PublicEventPage implements OnInit {
   // ───────────────────────────────────────── sharing
 
   get shareUrl(): string {
-    return `${window.location.origin}/e/${this.slug}`;
+    return `${window.location.origin}/event/${this.slug}`;
   }
 
   get directUrl(): string {
     const event = this.event();
     return event?.selectedSlotId
-      ? `${window.location.origin}/e/${this.slug}/d/${event.selectedSlotId}`
+      ? `${window.location.origin}/event/${this.slug}/d/${event.selectedSlotId}`
       : this.shareUrl;
   }
 
@@ -531,7 +605,7 @@ export class PublicEventPage implements OnInit {
   }
 
   createYourOwn(): void {
-    this.router.navigateByUrl('/e/new');
+    this.router.navigateByUrl('/event/new');
   }
 
   /** Toggles picks directly from the main event page when logged in */

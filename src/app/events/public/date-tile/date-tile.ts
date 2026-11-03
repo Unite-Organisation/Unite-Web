@@ -50,6 +50,11 @@ export class DateTile {
     return Math.min(100, Math.max(0, this.slot.chance));
   }
 
+  /** Enough people for the date to go ahead - only meaningful while the dates are still open. */
+  get reached(): boolean {
+    return !this.chosen && !!this.minAttendees && this.people >= this.minAttendees;
+  }
+
   get stateClass(): string {
     if (this.chosen) {
       return 'tile--chosen';

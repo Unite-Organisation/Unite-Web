@@ -9,9 +9,14 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, finalize, map, switchMap } from 'rxjs/operators';
 
 import { AuthService } from '../../../auth/services/auth';
+import { RolesService } from '../../../auth/services/roles.service';
+import { BuildingContextService } from '../../../core/building-context.service';
+import { endOfDay, startOfDay, toLocalDateTime } from '../../../posts/post-dates';
+import { PostService } from '../../../posts/services/post.service';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import {
   PublicEventCreateRequest,
@@ -19,11 +24,14 @@ import {
   SlotRequest,
 } from '../../../models/api-models/public-event.models';
 import { PublicEventService } from '../../services/public-event.service';
+import { DateTimeField } from '../date-time-field/date-time-field';
 import { toInputValue } from '../event-dates';
 
 const MIN_DATES = 2;
 const MAX_DATES = 6;
 const DEFAULT_DATES = 4;
+const DEFAULT_HOUR = 12;
+const FEED_DAYS_WITHOUT_DATE = 30;
 
 /**
  * One card for both modes and both kinds of host. A host with an account gets the same screen as
@@ -33,7 +41,7 @@ const DEFAULT_DATES = 4;
 @Component({
   selector: 'app-public-event-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonComponent, DateTimeField],
   templateUrl: './public-event-create.html',
   styleUrl: './public-event-create.scss',
 })
@@ -42,6 +50,9 @@ export class PublicEventCreate {
   private readonly router = inject(Router);
   private readonly events = inject(PublicEventService);
   private readonly auth = inject(AuthService);
+  private readonly roles = inject(RolesService);
+  private readonly posts = inject(PostService);
+  private readonly buildingContext = inject(BuildingContextService);
 
   protected readonly mode = SchedulingMode;
   protected readonly maxDates = MAX_DATES;
@@ -86,6 +97,22 @@ export class PublicEventCreate {
 
   get slots(): FormArray<FormControl<string>> {
     return this.form.get('slots') as FormArray<FormControl<string>>;
+  }
+
+  /**
+   * Hosts usually propose several days at the same hour, so a new date starts from the last one.
+   * The very first starts the day after the deadline, because proposed dates have to fall after it.
+   */
+  get nextSlotDate(): string {
+    const last = this.filledDates.at(-1);
+    if (last) {
+      return last;
+    }
+
+    const now = new Date();
+    const deadline = new Date(this.form.controls['votingDeadline'].value);
+    const from = deadline > now ? deadline : now;
+    return toInputValue(atHour(addDays(from, 1), DEFAULT_HOUR));
   }
 
   get letsTheGroupPick(): boolean {
@@ -143,12 +170,19 @@ export class PublicEventCreate {
 
     this.isSubmitting.set(true);
 
+    const request = this.buildRequest();
+
     this.events
-      .create(this.buildRequest())
-      .pipe(finalize(() => this.isSubmitting.set(false)))
+      .create(request)
+      .pipe(
+        switchMap((created) =>
+          this.publishInBuilding(created.slug, request).pipe(map(() => created))
+        ),
+        finalize(() => this.isSubmitting.set(false))
+      )
       .subscribe({
         next: (created) => {
-          this.router.navigate(['/e', created.slug], {
+          this.router.navigate(['/event', created.slug], {
             // shown once, on arrival - it is the guest's only way back on another device
             state: { returnCode: created.returnCode, justCreated: true },
           });
@@ -157,6 +191,22 @@ export class PublicEventCreate {
           // the interceptor has already said what went wrong
         },
       });
+  }
+
+  /**
+   * A host with an account and a building also gets the event into that building's feed. By now the
+   * event exists and its link works, so a failed publish must not keep them from it - the
+   * interceptor has already said what went wrong.
+   */
+  private publishInBuilding(slug: string, request: PublicEventCreateRequest): Observable<unknown> {
+    const canPublish = this.roles.isResident() || this.roles.isManager();
+    if (!canPublish || !this.buildingContext.getBuildingId()) {
+      return of(null);
+    }
+
+    return this.posts
+      .publishEvent({ slug, ...feedWindow(request), fileKeys: null })
+      .pipe(catchError(() => of(null)));
   }
 
   /**
@@ -230,7 +280,27 @@ export class PublicEventCreate {
   }
 }
 
-/** `datetime-local` gives `YYYY-MM-DDTHH:mm`; LocalDateTime wants the seconds too. */
+/**
+ * In the feed from today until the end of the day the event ends - for an event still choosing its
+ * date, the last date on the table. Starting at midnight keeps a browser clock running ahead of the
+ * server from hiding the post it has just published.
+ */
+function feedWindow(request: PublicEventCreateRequest): { visibleFrom: string; visibleTo: string } {
+  const now = new Date();
+  const lastDate =
+    request.endDate ||
+    request.startDate ||
+    request.slots?.map((slot) => slot.startDate).sort().at(-1);
+
+  const until = lastDate ? new Date(lastDate) : addDays(now, FEED_DAYS_WITHOUT_DATE);
+
+  return {
+    visibleFrom: toLocalDateTime(startOfDay(now)),
+    visibleTo: toLocalDateTime(endOfDay(until > now ? until : now)),
+  };
+}
+
+/** The date fields give `YYYY-MM-DDTHH:mm`; LocalDateTime wants the seconds too. */
 function withSeconds(value: string): string {
   return value.length === 16 ? `${value}:00` : value;
 }

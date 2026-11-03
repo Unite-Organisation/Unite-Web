@@ -29,8 +29,10 @@ export class Events implements OnInit {
   posts: Post[] = [];
   selectedPost: Post | null = null;
 
-  selectPost(post: Post): void {
-    this.selectedPost = post;
+  openEvent(post: Post): void {
+    if (post.eventSlug) {
+      this.router.navigate(['/event', post.eventSlug]);
+    }
   }
 
   get canCreateEvent(): boolean {
@@ -44,7 +46,7 @@ export class Events implements OnInit {
 
   createEvent(): void {
     // the same card a guest gets - a public event works the same whether its host has an account
-    this.router.navigateByUrl('/e/new');
+    this.router.navigateByUrl('/event/new');
   }
 
   private loadPosts(): void {
