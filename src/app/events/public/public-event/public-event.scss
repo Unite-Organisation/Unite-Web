@@ -1,4 +1,4 @@
-/* ───────────── Hero ───────────── */
+
 
 .hero__when {
   margin: 10px 0 0;
@@ -58,8 +58,6 @@
 .hero__you--out {
   color: var(--color-muted);
 }
-
-/* ───────────── Banners ───────────── */
 
 .banner {
   border-left: 3px solid var(--color-terracotta);
@@ -121,7 +119,7 @@
   color: var(--color-charcoal-mid);
 }
 
-/* ───────────── Counts ───────────── */
+
 
 .count {
   margin: 0;
@@ -150,8 +148,6 @@
   display: block;
   margin-bottom: 14px;
 }
-
-/* ───────────── Return code ───────────── */
 
 .code-card {
   margin-bottom: 14px;
@@ -184,7 +180,7 @@
   font-size: 42px;
   line-height: 1;
   letter-spacing: 0.18em;
-  /* the letter-spacing pushes the block off centre without this */
+
   text-indent: 0.18em;
 }
 
@@ -214,7 +210,6 @@
   cursor: pointer;
 }
 
-/* ───────────── Join sheet ───────────── */
 
 .sheet-backdrop {
   position: fixed;
@@ -343,7 +338,7 @@
   }
 }
 
-/* ───────────── Loading ───────────── */
+
 
 .skeleton {
   display: flex;
@@ -368,7 +363,7 @@
   50% { opacity: 0.55; }
 }
 
-/* ───────────── Who you are here ───────────── */
+
 
 .hero__footer {
   display: flex;
@@ -433,7 +428,7 @@
   text-align: center;
 }
 
-/* ───────────── Who's coming ───────────── */
+
 
 .who {
   display: flex;
@@ -538,16 +533,13 @@
     font-size: 11px;
     color: var(--color-text-muted, #777);
   }
-
-  /* Kontener akcji wyrównany do prawej */
   &__actions {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-left: auto; /* Wypycha przyciski całkowicie w prawą stronę */
+    margin-left: auto; 
   }
 
-  /* Minimalistyczny przycisk X do wyrzucania */
   &__remove-btn {
     background: transparent;
     border: none;
@@ -564,8 +556,8 @@
     transition: background-color 0.15s ease, color 0.15s ease;
 
     &:hover {
-      background-color: rgba(224, 90, 71, 0.1); /* Delikatne czerwone tło przy najechaniu */
-      color: var(--color-danger, #e05a47);       /* Zmiana koloru na ostrzegawczy (np. czerwony) */
+      background-color: rgba(224, 90, 71, 0.1); 
+      color: var(--color-danger, #e05a47);      
     }
   }
 }
@@ -614,7 +606,6 @@
   margin-top: 14px;
 }
 
-/* Slot row layout for side-by-side tile and chevron button */
 .slot-row {
   display: flex;
   align-items: stretch;
@@ -643,7 +634,6 @@
   }
 }
 
-/* Dropdown list container matching your existing 'who__body' style */
 .slot-dropdown-body {
   padding: 14px 16px;
   margin-top: -6px;
@@ -659,9 +649,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 4px; // Adjusts spacing down to the title
+  margin-bottom: 4px;
 
-  /* Push the eyebrow text down to normal alignment */
+
   .pe-eyebrow {
     margin: 0;
   }
@@ -699,11 +689,11 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  text-align: center; // Forces text and inline elements to center
+  text-align: center; 
   margin-top: 24px;
 
   app-button {
-    display: inline-block; // Changes from block to inline-block so margin: 0 auto centers it reliably
+    display: inline-block;
     width: 100%;
     max-width: 320px;
     margin: 0 auto;
