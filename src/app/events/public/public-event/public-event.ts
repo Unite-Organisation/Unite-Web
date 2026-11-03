@@ -175,6 +175,9 @@ export class PublicEventPage implements OnInit {
             // the one-date link goes straight to the question worth asking
             this.openJoin();
           }
+          if (this.isHost() && event.requiresApproval) {
+            this.loadAwaitingMembers();
+          }
         },
         error: () => this.notFound.set(true),
       });
