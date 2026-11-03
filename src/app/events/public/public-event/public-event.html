@@ -292,6 +292,15 @@
                       @if (isYou(person.displayName)) {
                         <span class="person__tag person__tag--you">You</span>
                       }
+                      @if (isHost() && !person.isHost && !isYou(person.displayName)) {
+                            <button 
+                              type="button" 
+                              class="pe-quiet-link pe-text-danger" 
+                              (click)="confirmRemoveMember(person)"
+                            >
+                              Wyrzuć
+                            </button>
+                      }
                     </li>
                   }
                 </ul>
