@@ -390,7 +390,7 @@
               @for (person of awaitingMembers(); track person.id; let i = $index) {
                 <li class="person">
                   <!-- Dane członka po lewej stronie -->
-                  <div class="person__info" flex-direction="column">
+                  <div class="person__info" style="flex-direction: row;">
                     <span class="person__name">{{ person.displayName }}</span>
                     <span class="pe-hint person__time">Zgłosił(a) się: {{ person.joinedAt }}</span>
                   </div>
