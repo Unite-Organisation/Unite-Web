@@ -213,6 +213,8 @@ export class PublicEventPage implements OnInit {
         return 'You dropped out';
       case EventMemberStatus.NOT_AVAILABLE:
         return "The date picked doesn't work for you";
+      case EventMemberStatus.PENDING_APPROVAL:
+        return "You're waiting for approval";
       default:
         return '';
     }
@@ -386,6 +388,11 @@ export class PublicEventPage implements OnInit {
 
     if (codes.includes(ErrorCode.EVENT_RETURN_CODE_INVALID)) {
       this.nameError.set("That code doesn't match. Try another name instead?");
+      return;
+    }
+
+    if (codes.includes(ErrorCode.EVENT_MEMBER_AWAITING_APPROVAL)) {
+      this.nameError.set(null);
       return;
     }
 
