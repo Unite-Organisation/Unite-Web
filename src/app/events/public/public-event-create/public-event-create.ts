@@ -72,6 +72,7 @@ export class PublicEventCreate {
     onlineUrl: this.fb.nonNullable.control(''),
     maxAttendees: this.fb.control<number | null>(null),
     waitlistEnabled: this.fb.nonNullable.control(false),
+    requiresApproval: this.fb.nonNullable.control(false),
 
     displayName: this.fb.nonNullable.control(''),
     email: this.fb.nonNullable.control('', [Validators.email, Validators.maxLength(254)]),
@@ -224,6 +225,7 @@ export class PublicEventCreate {
       minAttendees: choosing ? raw.minAttendees : null,
       votingDeadline: choosing ? withSeconds(raw.votingDeadline) : null,
       slots,
+      requiresApproval: raw.requiresApproval
     };
   }
 }

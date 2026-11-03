@@ -198,6 +198,35 @@
                           @if (isYou(person.displayName)) {
                             <span class="person__tag person__tag--you">You</span>
                           }
+
+                          @if (isHost() && !person.isHost && !isYou(person.displayName)) {
+                            <button 
+                              type="button" 
+                              class="pe-quiet-link pe-text-danger" 
+                              (click)="confirmRemoveMember(person)"
+                            >
+                              Wyrzuć
+                            </button>
+                          }
+
+                          <!-- Modal z pytaniem po wyrzuceniu (gdy requiresApproval było false) -->
+                          @if (showApprovalPromptModal()) {
+                            <div class="sheet-backdrop" (click)="showApprovalPromptModal.set(false)"></div>
+                            <section class="sheet" role="dialog" aria-modal="true">
+                              <h2 class="sheet__title">Włączysz akceptację?</h2>
+                              <p class="sheet__hint">
+                                Ta osoba może wrócić przez link. Chcesz od teraz sam akceptować nowe osoby? Tego nie da się cofnąć.
+                              </p>
+                              <div class="sheet__actions">
+                                <app-button variant="primary" size="lg" (clicked)="handleApprovalPromptResponse(true)">
+                                  Tak, włącz akceptację
+                                </app-button>
+                                <button type="button" class="pe-quiet-link sheet__back" (click)="handleApprovalPromptResponse(false)">
+                                  Nie, zostaw jak jest
+                                </button>
+                              </div>
+                            </section>
+                          }
                         </li>
                       }
                     </ul>
@@ -300,6 +329,44 @@
         </section>
       }
 
+      @if (isHost() && event()?.requiresApproval) {
+        <section class="pe-card">
+          <h2 class="pe-section-title">Czekają na akceptację ({{ awaitingMembers().length }})</h2>
+          
+          @if (awaitingLoading()) {
+            <p class="who__note">Ładowanie kolejki…</p>
+          } @else if (awaitingMembers().length === 0) {
+            <p class="who__note">Brak osób oczekujących w kolejce.</p>
+          } @else {
+            <div style="margin-bottom: 12px;">
+              <app-button variant="outline" size="sm" (clicked)="approveAll()">
+                Wpuść wszystkich
+              </app-button>
+            </div>
+
+            <ul class="people">
+              @for (person of awaitingMembers(); track person.id; let i = $index) {
+                <li class="person" style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                    <span class="person__name">{{ person.displayName }}</span>
+                    <!-- Możesz sformatować joinedAt ładniej, np. jako czas względny -->
+                    <span class="pe-hint" style="display: block; font-size: 11px;">Zgłosił(a) się: {{ person.joinedAt }}</span>
+                  </div>
+
+                  <div style="display: flex; gap: 8px;">
+                    <app-button variant="primary" size="sm" (clicked)="approveUpTo(i)">
+                      Wpuść do tego miejsca
+                    </app-button>
+                    <button type="button" class="pe-quiet-link pe-text-danger" (click)="confirmRemoveMember(person)">
+                      Wyrzuć
+                    </button>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
 
       <!-- ─────────── Actions ─────────── -->
 

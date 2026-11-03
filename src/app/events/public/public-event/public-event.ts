@@ -146,6 +146,9 @@ export class PublicEventPage implements OnInit {
    */
   protected readonly canLeave = computed(() => this.isActiveMember() && !this.isHost());
 
+  protected readonly memberToRemove = signal<EventMemberRow | null>(null);
+  protected readonly showApprovalPromptModal = signal(false);
+
   ngOnInit(): void {
     this.slug = this.route.snapshot.paramMap.get('slug') ?? '';
     this.directSlotId = this.route.snapshot.paramMap.get('slotId');
@@ -591,5 +594,97 @@ export class PublicEventPage implements OnInit {
           },
         });
     }
+  }
+
+  confirmRemoveMember(member: EventMemberRow): void {
+    if (!this.isHost() || member.isHost) return;
+
+    this.working.set(true);
+    this.events
+      .removeMembers(this.slug, [member.id])
+      .pipe(finalize(() => this.working.set(false)))
+      .subscribe({
+        next: () => {
+          this.toast.success(`Wyrzucono użytkownika ${member.displayName}`);
+          this.loadMembers();
+          this.load(); // odświeżenie danych wydarzenia
+
+          // Jeśli tryb akceptacji jest wyłączony, zapytaj czy go włączyć
+          const event = this.event();
+          if (event && !event.requiresApproval) {
+            this.showApprovalPromptModal.set(true);
+          }
+        },
+        error: (err) => {
+          // Obsługa błędów wg dokumentacji (np. EVENT_HOST_CANNOT_BE_REMOVED, EVENT_MEMBER_NOT_FOUND)
+          this.toast.error('Nie udało się wyrzucić członka');
+        }
+      });
+  }
+
+  // Decyzja hosta w dialogu po wyrzuceniu
+  handleApprovalPromptResponse(enableApproval: boolean): void {
+    this.showApprovalPromptModal.set(false);
+    
+    if (enableApproval) {
+      this.working.set(true);
+      this.events
+        .updateEvent(this.slug, { requiresApproval: true })
+        .pipe(finalize(() => this.working.set(false)))
+        .subscribe({
+          next: (updatedEvent) => {
+            this.event.set(updatedEvent);
+            this.toast.success('Włączono tryb akceptacji nowych osób');
+          },
+          error: () => {
+            this.toast.error('Nie udało się włączyć trybu akceptacji');
+          }
+        });
+    }
+  }
+  protected readonly awaitingMembers = signal<EventMemberRow[]>([]);
+  protected readonly awaitingLoading = signal(false);
+
+  // Pobieranie kolejki oczekujących
+  loadAwaitingMembers(): void {
+    if (!this.isHost()) return;
+    
+    this.awaitingLoading.set(true);
+    this.events
+      .getAwaitingMembers(this.slug)
+      .pipe(finalize(() => this.awaitingLoading.set(false)))
+      .subscribe({
+        next: (rows) => this.awaitingMembers.set(rows),
+        error: () => this.awaitingMembers.set([])
+      });
+  }
+
+  // Hurtowa akceptacja (wpuszczanie do wybranego indeksu / kumulatywnie, by unikać błędu OUT_OF_ORDER)
+  approveUpTo(index: number): void {
+    const membersToApprove = this.awaitingMembers().slice(0, index + 1);
+    const ids = membersToApprove.map(m => m.id);
+    
+    if (ids.length === 0) return;
+
+    this.working.set(true);
+    this.events
+      .approveMembers(this.slug, ids)
+      .pipe(finalize(() => this.working.set(false)))
+      .subscribe({
+        next: () => {
+          this.toast.success('Zaakceptowano wybrane osoby');
+          this.loadAwaitingMembers();
+          this.load(); // Odświeżenie danych wydarzenia i głównej listy
+        },
+        error: (err) => {
+          this.toast.error('Błąd akceptacji (odświeżam kolejkę)');
+          this.loadAwaitingMembers();
+        }
+      });
+  }
+
+  approveAll(): void {
+    if (this.awaitingMembers().length === 0) return;
+    this.approveUpTo(this.awaitingMembers().length - 1);
   }
 }

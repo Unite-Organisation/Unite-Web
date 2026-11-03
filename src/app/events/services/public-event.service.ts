@@ -85,4 +85,22 @@ export class PublicEventService {
   slotMembers(slug: string, slotId: string): Observable<EventMemberRow[]> {
     return this.http.get<EventMemberRow[]>(`${API_URLS.public_event}/${slug}/slots/${slotId}/members`);
   }
+
+  removeMembers(slug: string, memberIds: string[]): Observable<void> {
+    return this.http.post<void>(`${API_URLS.public_event}/${slug}/members/remove`, { memberIds });
+  }
+
+  approveMembers(slug: string, memberIds: string[]): Observable<void> {
+    return this.http.post<void>(`${API_URLS.public_event}/${slug}/members/approve`, { memberIds });
+  }
+
+  getAwaitingMembers(slug: string): Observable<EventMemberRow[]> {
+    return this.http.get<EventMemberRow[]>(`${API_URLS.public_event}/${slug}/members`, {
+      params: { awaitingApproval: 'true' }
+    });
+  }
+
+  updateEvent(slug: string, data: { name?: string; description?: string; location?: string; onlineUrl?: string | null; requiresApproval?: boolean }): Observable<PublicEvent> {
+    return this.http.patch<PublicEvent>(`${API_URLS.public_event}/${slug}`, data);
+  }
 }

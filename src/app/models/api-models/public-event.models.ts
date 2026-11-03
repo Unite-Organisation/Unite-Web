@@ -25,6 +25,7 @@ export enum SlotPreference {
 }
 
 export enum EventMemberStatus {
+  PENDING_APPROVAL = 'PENDING_APPROVAL',
   UNDECIDED = 'UNDECIDED',
   GOING = 'GOING',
   WAITLIST = 'WAITLIST',
@@ -70,6 +71,7 @@ export interface PublicEventCreateRequest {
   minAttendees: number | null;
   votingDeadline: string | null;
   slots: SlotRequest[] | null;
+  requiresApproval: boolean;
 }
 
 export interface PublicEventCreatedResponse {
@@ -118,6 +120,7 @@ export interface PublicEvent {
   /** Null until the viewer has a session on this event. */
   me: EventMemberView | null;
   myVotes: SlotVote[];
+  requiresApproval: boolean;
 }
 
 export interface OpenSessionRequest {
@@ -134,6 +137,8 @@ export interface EventSessionResponse {
 }
 
 export interface EventMemberRow {
+  id: string;
+  joinedAt: string;
   displayName: string;
   isHost: boolean;
   status: EventMemberStatus;

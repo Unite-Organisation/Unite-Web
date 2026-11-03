@@ -238,6 +238,7 @@
 
         @if (showDetails()) {
           <div class="details-body">
+
             <div class="pe-field">
               <label for="location">Where</label>
               <input
@@ -278,6 +279,16 @@
               </span>
             </label>
           </div>
+
+          <div class="pe-field">
+              <label class="switch">
+                <input type="checkbox" formControlName="requiresApproval" />
+                <span>Wymagaj akceptacji nowych osób przez hosta</span>
+              </label>
+              <span class="pe-hint">
+                Każda nowa osoba będzie musiała zostać zaakceptowana przez Ciebie przed dołączeniem. Tego trybu nie da się później wyłączyć.
+              </span>
+            </div>
         }
       </section>
 
