@@ -29,8 +29,10 @@ export class Events implements OnInit {
   posts: Post[] = [];
   selectedPost: Post | null = null;
 
-  selectPost(post: Post): void {
-    this.selectedPost = post;
+  openEvent(post: Post): void {
+    if (post.eventSlug) {
+      this.router.navigate(['/event', post.eventSlug]);
+    }
   }
 
   get canCreateEvent(): boolean {

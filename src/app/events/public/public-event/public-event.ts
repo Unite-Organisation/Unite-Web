@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
 import { AuthService } from '../../../auth/services/auth';
@@ -42,7 +42,7 @@ const CODE_LENGTH = 4;
 @Component({
   selector: 'app-public-event',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, DateTile, MemberPicker, PickedMember],
+  imports: [CommonModule, RouterLink, ButtonComponent, DateTile, MemberPicker, PickedMember],
   templateUrl: './public-event.html',
   styleUrls: ['./public-event.scss', './slot-members.scss'],
 })

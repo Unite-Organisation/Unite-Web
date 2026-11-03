@@ -52,6 +52,10 @@
   cursor: default;
 }
 
+.post-card--featured-clickable {
+  cursor: pointer;
+}
+
 .post-card--featured:hover {
   transform: none;
 

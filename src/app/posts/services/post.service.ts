@@ -30,7 +30,7 @@ export class PostService {
     return this.http.post<void>(API_URLS.announcements, payload);
   }
 
-  publishEvent(payload: EventPublishRequest): Observable<{ id: string }> {
-    return this.http.post<{ id: string }>(API_URLS.publish_event, payload);
+  publishEvent(payload: EventPublishRequest): Observable<{ entityId: string }> {
+    return this.http.post<{ entityId: string }>(API_URLS.publish_event, payload);
   }
 }

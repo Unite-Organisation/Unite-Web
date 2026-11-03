@@ -8,6 +8,8 @@ export interface Post {
   relatedDate: string;
   createdAt: string;
   postType: PostType;
+  /** The public event an event post points at. Null on announcements. */
+  eventSlug: string | null;
   startDate: string;
   endDate: string;
   locationName: string;

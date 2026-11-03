@@ -1,3 +1,22 @@
+/* ───────────── Back to the app ───────────── */
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+
+  color: var(--color-charcoal-mid);
+
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: var(--color-terracotta);
+}
+
 /* ───────────── Hero ───────────── */
 
 .hero__when {
@@ -61,12 +80,8 @@
 
 /* ───────────── Banners ───────────── */
 
-.banner {
-  border-left: 3px solid var(--color-terracotta);
-}
-
 .banner--good {
-  border-left-color: var(--color-sage);
+  border-left: 3px solid var(--color-sage);
 }
 
 .banner__title {

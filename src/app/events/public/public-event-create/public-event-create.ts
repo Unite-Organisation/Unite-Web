@@ -9,9 +9,14 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { finalize } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, finalize, map, switchMap } from 'rxjs/operators';
 
 import { AuthService } from '../../../auth/services/auth';
+import { RolesService } from '../../../auth/services/roles.service';
+import { BuildingContextService } from '../../../core/building-context.service';
+import { endOfDay, startOfDay, toLocalDateTime } from '../../../posts/post-dates';
+import { PostService } from '../../../posts/services/post.service';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import {
   PublicEventCreateRequest,
@@ -26,6 +31,7 @@ const MIN_DATES = 2;
 const MAX_DATES = 6;
 const DEFAULT_DATES = 4;
 const DEFAULT_HOUR = 12;
+const FEED_DAYS_WITHOUT_DATE = 30;
 
 /**
  * One card for both modes and both kinds of host. A host with an account gets the same screen as
@@ -44,6 +50,9 @@ export class PublicEventCreate {
   private readonly router = inject(Router);
   private readonly events = inject(PublicEventService);
   private readonly auth = inject(AuthService);
+  private readonly roles = inject(RolesService);
+  private readonly posts = inject(PostService);
+  private readonly buildingContext = inject(BuildingContextService);
 
   protected readonly mode = SchedulingMode;
   protected readonly maxDates = MAX_DATES;
@@ -160,9 +169,16 @@ export class PublicEventCreate {
 
     this.isSubmitting.set(true);
 
+    const request = this.buildRequest();
+
     this.events
-      .create(this.buildRequest())
-      .pipe(finalize(() => this.isSubmitting.set(false)))
+      .create(request)
+      .pipe(
+        switchMap((created) =>
+          this.publishInBuilding(created.slug, request).pipe(map(() => created))
+        ),
+        finalize(() => this.isSubmitting.set(false))
+      )
       .subscribe({
         next: (created) => {
           this.router.navigate(['/event', created.slug], {
@@ -174,6 +190,22 @@ export class PublicEventCreate {
           // the interceptor has already said what went wrong
         },
       });
+  }
+
+  /**
+   * A host with an account and a building also gets the event into that building's feed. By now the
+   * event exists and its link works, so a failed publish must not keep them from it - the
+   * interceptor has already said what went wrong.
+   */
+  private publishInBuilding(slug: string, request: PublicEventCreateRequest): Observable<unknown> {
+    const canPublish = this.roles.isResident() || this.roles.isManager();
+    if (!canPublish || !this.buildingContext.getBuildingId()) {
+      return of(null);
+    }
+
+    return this.posts
+      .publishEvent({ slug, ...feedWindow(request), fileKeys: null })
+      .pipe(catchError(() => of(null)));
   }
 
   /**
@@ -244,6 +276,26 @@ export class PublicEventCreate {
       slots,
     };
   }
+}
+
+/**
+ * In the feed from today until the end of the day the event ends - for an event still choosing its
+ * date, the last date on the table. Starting at midnight keeps a browser clock running ahead of the
+ * server from hiding the post it has just published.
+ */
+function feedWindow(request: PublicEventCreateRequest): { visibleFrom: string; visibleTo: string } {
+  const now = new Date();
+  const lastDate =
+    request.endDate ||
+    request.startDate ||
+    request.slots?.map((slot) => slot.startDate).sort().at(-1);
+
+  const until = lastDate ? new Date(lastDate) : addDays(now, FEED_DAYS_WITHOUT_DATE);
+
+  return {
+    visibleFrom: toLocalDateTime(startOfDay(now)),
+    visibleTo: toLocalDateTime(endOfDay(until > now ? until : now)),
+  };
 }
 
 /** The date fields give `YYYY-MM-DDTHH:mm`; LocalDateTime wants the seconds too. */

@@ -16,10 +16,13 @@ export class PostCard {
 
   @Input() featured = false;
 
+  /** A featured card only displays its post, unless it also leads somewhere. */
+  @Input() featuredClickable = false;
+
   @Output() cardClick = new EventEmitter<void>();
 
   onCardClick(): void {
-    if (!this.featured) {
+    if (!this.featured || this.featuredClickable) {
       this.cardClick.emit();
     }
   }
