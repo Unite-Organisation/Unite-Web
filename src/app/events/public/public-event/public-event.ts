@@ -689,7 +689,7 @@ export class PublicEventPage implements OnInit {
       .pipe(finalize(() => this.working.set(false)))
       .subscribe({
         next: () => {
-          this.toast.success(`Wyrzucono użytkownika ${member.displayName}`);
+          this.toast.success(`Removed ${member.displayName}`);
           this.loadMembers();
           this.load(); // odświeżenie danych wydarzenia
 
@@ -701,7 +701,7 @@ export class PublicEventPage implements OnInit {
         },
         error: (err) => {
           // Obsługa błędów wg dokumentacji (np. EVENT_HOST_CANNOT_BE_REMOVED, EVENT_MEMBER_NOT_FOUND)
-          this.toast.error('Nie udało się wyrzucić członka');
+          this.toast.error('Couldn\'t remove this member');
         }
       });
   }
@@ -718,10 +718,10 @@ export class PublicEventPage implements OnInit {
         .subscribe({
           next: (updatedEvent) => {
             this.event.set(updatedEvent);
-            this.toast.success('Włączono tryb akceptacji nowych osób');
+            this.toast.success('Approval for new people is now on');
           },
           error: () => {
-            this.toast.error('Nie udało się włączyć trybu akceptacji');
+            this.toast.error('Couldn\'t turn on approval');
           }
         });
     }
@@ -756,12 +756,12 @@ export class PublicEventPage implements OnInit {
       .pipe(finalize(() => this.working.set(false)))
       .subscribe({
         next: () => {
-          this.toast.success('Zaakceptowano wybrane osoby');
+          this.toast.success('Selected people approved');
           this.loadAwaitingMembers();
           this.load(); // Odświeżenie danych wydarzenia i głównej listy
         },
         error: (err) => {
-          this.toast.error('Błąd akceptacji (odświeżam kolejkę)');
+          this.toast.error('Approval failed (refreshing the queue)');
           this.loadAwaitingMembers();
         }
       });

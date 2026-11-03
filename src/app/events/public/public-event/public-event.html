@@ -235,7 +235,7 @@
                                 class="person__remove-btn"
                                 [disabled]="working()"
                                 (click)="confirmRemoveMember(person)"
-                                title="Wyrzuć"
+                                title="Remove"
                               >
                                 ✕
                               </button>
@@ -246,16 +246,16 @@
                           @if (showApprovalPromptModal()) {
                             <div class="sheet-backdrop" (click)="showApprovalPromptModal.set(false)"></div>
                             <section class="sheet" role="dialog" aria-modal="true">
-                              <h2 class="sheet__title">Włączysz akceptację?</h2>
+                              <h2 class="sheet__title">Turn on approval?</h2>
                               <p class="sheet__hint">
-                                Ta osoba może wrócić przez link. Chcesz od teraz sam akceptować nowe osoby? Tego nie da się cofnąć.
+                                This person can still come back through the link. Do you want to approve new people yourself from now on? This can't be undone.
                               </p>
                               <div class="sheet__actions">
                                 <app-button variant="primary" size="lg" (clicked)="handleApprovalPromptResponse(true)">
-                                  Tak, włącz akceptację
+                                  Yes, turn on approval
                                 </app-button>
                                 <button type="button" class="pe-quiet-link sheet__back" (click)="handleApprovalPromptResponse(false)">
-                                  Nie, zostaw jak jest
+                                  No, leave it as is
                                 </button>
                               </div>
                             </section>
@@ -335,7 +335,7 @@
                             class="person__remove-btn"
                             [disabled]="working()"
                             (click)="confirmRemoveMember(person)"
-                            title="Wyrzuć"
+                            title="Remove"
                           >
                             ✕
                           </button>
@@ -346,16 +346,16 @@
                           @if (showApprovalPromptModal()) {
                             <div class="sheet-backdrop" (click)="showApprovalPromptModal.set(false)"></div>
                             <section class="sheet" role="dialog" aria-modal="true">
-                              <h2 class="sheet__title">Włączysz akceptację?</h2>
+                              <h2 class="sheet__title">Turn on approval?</h2>
                               <p class="sheet__hint">
-                                Ta osoba może wrócić przez link. Chcesz od teraz sam akceptować nowe osoby? Tego nie da się cofnąć.
+                                This person can still come back through the link. Do you want to approve new people yourself from now on? This can't be undone.
                               </p>
                               <div class="sheet__actions">
                                 <app-button variant="primary" size="lg" (clicked)="handleApprovalPromptResponse(true)">
-                                  Tak, włącz akceptację
+                                  Yes, turn on approval
                                 </app-button>
                                 <button type="button" class="pe-quiet-link sheet__back" (click)="handleApprovalPromptResponse(false)">
-                                  Nie, zostaw jak jest
+                                  No, leave it as is
                                 </button>
                               </div>
                             </section>
@@ -399,16 +399,16 @@
 
       @if (isHost() && event()?.requiresApproval) {
         <section class="pe-card">
-          <h2 class="pe-section-title">Czekają na akceptację ({{ awaitingMembers().length }})</h2>
+          <h2 class="pe-section-title">Awaiting approval ({{ awaitingMembers().length }})</h2>
           
           @if (awaitingLoading()) {
-            <p class="who__note">Ładowanie kolejki…</p>
+            <p class="who__note">Loading the queue…</p>
           } @else if (awaitingMembers().length === 0) {
-            <p class="who__note">Brak osób oczekujących w kolejce.</p>
+            <p class="who__note">Nobody is waiting in the queue.</p>
           } @else {
             <div style="margin-bottom: 12px;">
               <app-button variant="outline" size="sm" (clicked)="approveAll()">
-                Wpuść wszystkich
+                Let everyone in
               </app-button>
             </div>
 
@@ -418,20 +418,20 @@
                   <!-- Dane członka po lewej stronie -->
                   <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
                     <span class="person__name">{{ person.displayName }}</span>
-                    <span class="pe-hint person__time">Zgłosił(a) się: {{ person.joinedAt }}</span>
+                    <span class="pe-hint person__time">Requested: {{ person.joinedAt }}</span>
                   </div>
 
                   <!-- Przyciski akcji wyrównane do prawej -->
                   <div class="person__actions">
                     <app-button variant="primary" size="sm" (clicked)="approveUpTo(i)">
-                      Wpuść do tego miejsca
+                      Let in up to here
                     </app-button>
 
                     <button
                       type="button"
                       class="person__remove-btn"
                       (click)="confirmRemoveMember(person)"
-                      title="Wyrzuć"
+                      title="Remove"
                     >
                       ✕
                     </button>
