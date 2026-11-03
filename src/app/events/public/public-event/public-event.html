@@ -199,14 +199,19 @@
                             <span class="person__tag person__tag--you">You</span>
                           }
 
-                          @if (isHost() && !person.isHost && !isYou(person.displayName)) {
-                            <button 
-                              type="button" 
-                              class="pe-quiet-link pe-text-danger" 
-                              (click)="confirmRemoveMember(person)"
-                            >
-                              Wyrzuć
-                            </button>
+                          <!-- Przycisk wyrzucania (X) wyrównany do prawej -->
+                          @if (isHost() && !isYou(person.displayName) && !person.isHost) {
+                            <div class="person__actions">
+                              <button
+                                type="button"
+                                class="person__remove-btn"
+                                [disabled]="working()"
+                                (click)="confirmRemoveMember(person)"
+                                title="Wyrzuć"
+                              >
+                                ✕
+                              </button>
+                            </div>
                           }
 
                           <!-- Modal z pytaniem po wyrzuceniu (gdy requiresApproval było false) -->
@@ -292,14 +297,19 @@
                       @if (isYou(person.displayName)) {
                         <span class="person__tag person__tag--you">You</span>
                       }
-                      @if (isHost() && !person.isHost && !isYou(person.displayName)) {
-                            <button 
-                              type="button" 
-                              class="pe-quiet-link pe-text-danger" 
-                              (click)="confirmRemoveMember(person)"
-                            >
-                              Wyrzuć
-                            </button>
+                      <!-- Przycisk wyrzucania (X) wyrównany do prawej -->
+                      @if (isHost() && !isYou(person.displayName) && !person.isHost) {
+                        <div class="person__actions">
+                          <button
+                            type="button"
+                            class="person__remove-btn"
+                            [disabled]="working()"
+                            (click)="confirmRemoveMember(person)"
+                            title="Wyrzuć"
+                          >
+                            ✕
+                          </button>
+                        </div>
                       }
 
                       <!-- Modal z pytaniem po wyrzuceniu (gdy requiresApproval było false) -->
@@ -374,19 +384,26 @@
 
             <ul class="people">
               @for (person of awaitingMembers(); track person.id; let i = $index) {
-                <li class="person" style="display: flex; justify-content: space-between; align-items: center;">
-                  <div>
+                <li class="person">
+                  <!-- Dane członka po lewej stronie -->
+                  <div class="person__info">
                     <span class="person__name">{{ person.displayName }}</span>
-                    <!-- Możesz sformatować joinedAt ładniej, np. jako czas względny -->
-                    <span class="pe-hint" style="display: block; font-size: 11px;">Zgłosił(a) się: {{ person.joinedAt }}</span>
+                    <span class="pe-hint person__time">Zgłosił(a) się: {{ person.joinedAt }}</span>
                   </div>
 
-                  <div style="display: flex; gap: 8px;">
+                  <!-- Przyciski akcji wyrównane do prawej -->
+                  <div class="person__actions">
                     <app-button variant="primary" size="sm" (clicked)="approveUpTo(i)">
                       Wpuść do tego miejsca
                     </app-button>
-                    <button type="button" class="pe-quiet-link pe-text-danger" (click)="confirmRemoveMember(person)">
-                      Wyrzuć
+
+                    <button
+                      type="button"
+                      class="person__remove-btn"
+                      (click)="confirmRemoveMember(person)"
+                      title="Wyrzuć"
+                    >
+                      ✕
                     </button>
                   </div>
                 </li>

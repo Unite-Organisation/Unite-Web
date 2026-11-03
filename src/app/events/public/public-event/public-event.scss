@@ -522,12 +522,52 @@
 
 .person {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  width: 100%;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border, #eae6df);
 
-  padding: 11px 0;
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
 
-  border-bottom: 1px solid var(--color-cream-dark);
+  &__time {
+    font-size: 11px;
+    color: var(--color-text-muted, #777);
+  }
+
+  /* Kontener akcji wyrównany do prawej */
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto; /* Wypycha przyciski całkowicie w prawą stronę */
+  }
+
+  /* Minimalistyczny przycisk X do wyrzucania */
+  &__remove-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-muted, #888);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      background-color: rgba(224, 90, 71, 0.1); /* Delikatne czerwone tło przy najechaniu */
+      color: var(--color-danger, #e05a47);       /* Zmiana koloru na ostrzegawczy (np. czerwony) */
+    }
+  }
 }
 
 .person:last-child {
