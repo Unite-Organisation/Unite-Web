@@ -34,6 +34,9 @@
           @if (form.controls['name'].touched && form.controls['name'].hasError('required')) {
             <span class="pe-error">Give it a name</span>
           }
+          @if (serverError('name'); as message) {
+            <span class="pe-error">{{ message }}</span>
+          }
         </div>
 
         <div class="pe-field">
@@ -85,6 +88,9 @@
               <span class="pe-required">*</span>
             </label>
             <app-date-time-field fieldId="startDate" label="Starts" formControlName="startDate" />
+            @if (serverError('startDate'); as message) {
+              <span class="pe-error">{{ message }}</span>
+            }
           </div>
 
           <div class="pe-field">
@@ -96,6 +102,9 @@
               formControlName="endDate"
               [startFrom]="form.controls['startDate'].value"
             />
+            @if (serverError('endDate'); as message) {
+              <span class="pe-error">{{ message }}</span>
+            }
           </div>
         }
 
@@ -117,6 +126,9 @@
             <span class="pe-hint">
               Below this the event does not go ahead.
             </span>
+            @if (serverError('minAttendees'); as message) {
+              <span class="pe-error">{{ message }}</span>
+            }
           </div>
 
           <div class="pe-field">
@@ -134,6 +146,9 @@
             <span class="pe-hint">
               If nobody has settled on a date by then, the best one is kept and the rest drop off.
             </span>
+            @if (serverError('votingDeadline'); as message) {
+              <span class="pe-error">{{ message }}</span>
+            }
           </div>
 
           <div class="dates">
@@ -207,6 +222,9 @@
             ) {
               <span class="pe-error">Tell people who is hosting</span>
             }
+            @if (serverError('displayName'); as message) {
+              <span class="pe-error">{{ message }}</span>
+            }
           </div>
 
           <div class="pe-field">
@@ -229,7 +247,7 @@
             </span>
 
             @if (form.controls['email'].touched && form.controls['email'].invalid) {
-              <span class="pe-error">Enter a valid email address</span>
+              <span class="pe-error">{{ serverError('email') ?? 'Enter a valid email address' }}</span>
             }
           </div>
         </section>
@@ -257,6 +275,9 @@
                 formControlName="location"
                 placeholder="Beach court by the pier"
               />
+              @if (serverError('location'); as message) {
+                <span class="pe-error">{{ message }}</span>
+              }
             </div>
 
             <div class="pe-field">
@@ -268,6 +289,9 @@
                 formControlName="onlineUrl"
                 placeholder="https://..."
               />
+              @if (serverError('onlineUrl'); as message) {
+                <span class="pe-error">{{ message }}</span>
+              }
             </div>
 
             <div class="pe-field">
@@ -280,6 +304,9 @@
                 formControlName="maxAttendees"
                 placeholder="No limit"
               />
+              @if (serverError('maxAttendees'); as message) {
+                <span class="pe-error">{{ message }}</span>
+              }
             </div>
 
             <label class="switch">

@@ -73,7 +73,14 @@ function normalize(
     httpStatus: response.status,
     ...(known ? {} : { unknownCode: appError.code }),
     path: path || urlPath(response.url),
+    ...(typeof appError.field === 'string' && appError.field ? { field: appError.field } : {}),
+    ...(typeof appError.constraint === 'string' ? { constraint: appError.constraint } : {}),
+    ...(isRecord(appError.params) ? { params: appError.params } : {}),
   };
+}
+
+function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
 function synthetic(code: AnyErrorCode, response: HttpErrorResponse): NormalizedError {

@@ -12,6 +12,8 @@ export {
   SERVER_INVALID,
   ServerValidationBinder,
   hasServerError,
+  serverErrorText,
+  type ServerFieldError,
   type ServerValidationOptions,
   type ServerValidationResult,
 } from './server-validation';

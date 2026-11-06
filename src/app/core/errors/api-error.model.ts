@@ -10,6 +10,9 @@ export interface ApiErrorResponse {
 export interface AppError {
   code: string;
   message: string | null;
+  field?: string;
+  constraint?: string;
+  params?: Readonly<Record<string, unknown>>;
 }
 
 export enum ClientErrorCode {
@@ -27,4 +30,7 @@ export interface NormalizedError {
   httpStatus: number;
   unknownCode?: string;
   path: string | null;
+  field?: string;
+  constraint?: string;
+  params?: Readonly<Record<string, unknown>>;
 }

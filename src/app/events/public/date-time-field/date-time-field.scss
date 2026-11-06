@@ -34,6 +34,11 @@
     box-shadow 0.15s ease;
 }
 
+/* Angular puts the control's state on the host, so a rejected date reads like a rejected input */
+:host(.ng-invalid.ng-touched) .field {
+  border-color: var(--color-error);
+}
+
 .field:focus-visible,
 .field--open {
   border-color: var(--color-terracotta);

@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import {
   FormArray,
@@ -15,6 +16,7 @@ import { catchError, finalize, map, switchMap } from 'rxjs/operators';
 import { AuthService } from '../../../auth/services/auth';
 import { RolesService } from '../../../auth/services/roles.service';
 import { BuildingContextService } from '../../../core/building-context.service';
+import { ServerValidationBinder, serverErrorText } from '../../../core/errors';
 import { endOfDay, startOfDay, toLocalDateTime } from '../../../posts/post-dates';
 import { PostService } from '../../../posts/services/post.service';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
@@ -32,6 +34,9 @@ const MAX_DATES = 6;
 const DEFAULT_DATES = 4;
 const DEFAULT_HOUR = 12;
 const FEED_DAYS_WITHOUT_DATE = 30;
+
+/** Inputs inside the collapsed "Place, link, limit" section - it opens when one of them is rejected. */
+const DETAIL_FIELDS = new Set(['location', 'onlineUrl', 'maxAttendees', 'waitlistEnabled', 'requiresApproval']);
 
 /**
  * One card for both modes and both kinds of host. A host with an account gets the same screen as
@@ -53,6 +58,7 @@ export class PublicEventCreate {
   private readonly roles = inject(RolesService);
   private readonly posts = inject(PostService);
   private readonly buildingContext = inject(BuildingContextService);
+  private readonly serverValidation = inject(ServerValidationBinder);
 
   protected readonly mode = SchedulingMode;
   protected readonly maxDates = MAX_DATES;
@@ -119,6 +125,11 @@ export class PublicEventCreate {
     return this.form.controls['schedulingMode'].value === SchedulingMode.POLL;
   }
 
+  /** Form rows of the dates actually sent - the request skips empty rows, so its indexes differ. */
+  private get filledSlotIndexes(): number[] {
+    return this.slots.controls.flatMap((control, index) => (control.value ? [index] : []));
+  }
+
   /** Dates the host actually filled in - empty rows are simply rows they did not use. */
   private get filledDates(): string[] {
     return this.slots.controls.map((control) => control.value).filter((value) => !!value);
@@ -149,8 +160,14 @@ export class PublicEventCreate {
     this.router.navigateByUrl(this.auth.isLoggedIn() ? '/app/home/events' : '/login');
   }
 
+  /** What the backend said about an input, worded for the host - `null` when it had no complaint. */
+  protected serverError(path: string): string | null {
+    return serverErrorText(this.form.get(path));
+  }
+
   submit(): void {
     this.datesError.set(null);
+    this.serverValidation.clear(this.form);
 
     if (this.isGuest) {
       this.form.controls['displayName'].addValidators(Validators.required);
@@ -171,6 +188,7 @@ export class PublicEventCreate {
     this.isSubmitting.set(true);
 
     const request = this.buildRequest();
+    const sentSlots = this.filledSlotIndexes;
 
     this.events
       .create(request)
@@ -187,10 +205,44 @@ export class PublicEventCreate {
             state: { returnCode: created.returnCode, justCreated: true },
           });
         },
-        error: () => {
-          // the interceptor has already said what went wrong
+        error: (error: unknown) => {
+          // the interceptor has already raised the toast - this marks the inputs it was about
+          if (error instanceof HttpErrorResponse) {
+            this.showServerErrors(error, sentSlots);
+          }
         },
       });
+  }
+
+  /**
+   * Turns the inputs the backend rejected red, revealing them first when they sit in the collapsed
+   * section. `slots[1]` in the request is not necessarily the second row of the form, since empty
+   * rows are not sent.
+   */
+  private showServerErrors(error: HttpErrorResponse, sentSlots: number[]): void {
+    const fieldMap: Record<string, string> = {};
+    sentSlots.forEach((row, sent) => {
+      fieldMap[`slots[${sent}].startDate`] = `slots.${row}`;
+      fieldMap[`slots[${sent}].endDate`] = `slots.${row}`;
+    });
+
+    const { applied } = this.serverValidation.apply(this.form, error, { fieldMap, focusFirst: false });
+    if (applied.length === 0) {
+      return;
+    }
+
+    if (applied.some((field) => field === 'slots')) {
+      this.datesError.set(`Propose between ${MIN_DATES} and ${MAX_DATES} dates`);
+    } else if (applied.some((field) => field.startsWith('slots['))) {
+      this.datesError.set('Check the highlighted dates');
+    }
+
+    if (applied.some((field) => DETAIL_FIELDS.has(field))) {
+      this.showDetails.set(true);
+    }
+
+    // after the section has rendered, or there is nothing to scroll to yet
+    setTimeout(() => this.serverValidation.focus(applied[0], fieldMap));
   }
 
   /**
