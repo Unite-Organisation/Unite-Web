@@ -95,6 +95,26 @@ export interface PublicEventCreateRequest {
   device?: DeviceFingerprint | null;
 }
 
+/**
+ * What the host can still change after creating the event. Every field is optional and a field left
+ * out stays as it is; an empty string clears description, location and link.
+ */
+export interface PublicEventUpdateRequest {
+  name?: string;
+  description?: string;
+  location?: string;
+  onlineUrl?: string | null;
+  /** Can only be switched on - once newcomers need approval, they always do. */
+  requiresApproval?: boolean;
+  /**
+   * Only while the group is still voting, not within the last 5 minutes before the current deadline,
+   * at least 5 minutes from now and before every proposed date.
+   */
+  votingDeadline?: string;
+  /** New dates for the vote, same rules as for the deadline; the ones already there cannot change. */
+  addSlots?: SlotRequest[];
+}
+
 export interface PublicEventCreatedResponse {
   slug: string;
   /** The code a guest needs to come back on another device. Null for an account. */

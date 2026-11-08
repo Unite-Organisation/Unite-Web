@@ -458,6 +458,14 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     box-shadow 0.15s ease;
 }
 
+.pe-field input:disabled,
+.pe-field textarea:disabled,
+.pe-field select:disabled {
+  color: var(--color-muted);
+  background: var(--color-cream-dark);
+  cursor: not-allowed;
+}
+
 .pe-field textarea {
   min-height: 88px;
   resize: vertical;

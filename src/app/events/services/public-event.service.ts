@@ -14,6 +14,7 @@ import {
   PublicEvent,
   PublicEventCreateRequest,
   PublicEventCreatedResponse,
+  PublicEventUpdateRequest,
   SlotVote,
 } from '../../models/api-models/public-event.models';
 import { DeviceFingerprintService } from './device-fingerprint.service';
@@ -140,7 +141,8 @@ export class PublicEventService {
     });
   }
 
-  updateEvent(slug: string, data: { name?: string; description?: string; location?: string; onlineUrl?: string | null; requiresApproval?: boolean }): Observable<PublicEvent> {
+  /** Host only. Fields left out stay as they are - see PublicEventUpdateRequest for what can change. */
+  updateEvent(slug: string, data: PublicEventUpdateRequest): Observable<PublicEvent> {
     return this.http.patch<PublicEvent>(`${API_URLS.public_event}/${slug}`, data);
   }
 }

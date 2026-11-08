@@ -155,6 +155,10 @@ export const ERROR_PRESENTATION = {
     text: 'The date is settled — it can no longer be changed.',
     severity: 'warning',
   },
+  [ErrorCode.EVENT_DEADLINE_LOCKED]: {
+    text: 'The deadline can no longer be changed.',
+    severity: 'warning',
+  },
   [ErrorCode.EVENT_VOTES_REQUIRED]: {
     text: 'Pick at least one date that works for you.',
     severity: 'warning',

@@ -49,6 +49,7 @@
 .hero__signout:disabled{opacity:.5;cursor:default}
 .hero__header-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px}
 .hero__header-row .pe-eyebrow{margin:0}
+.hero__header-actions{display:flex;gap:8px}
 .hero__share-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0;background:0 0;color:var(--color-charcoal-mid);border:1.5px solid var(--color-border);border-radius:50%;cursor:pointer;flex-shrink:0}
 .hero__share-btn:hover{background:var(--color-cream-dark);border-color:var(--color-charcoal);color:var(--color-charcoal)}
 .hero__share-btn svg{width:16px;height:16px}
