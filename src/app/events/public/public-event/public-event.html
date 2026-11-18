@@ -251,7 +251,7 @@
                                 type="button"
                                 class="person__remove-btn"
                                 [disabled]="working()"
-                                (click)="confirmRemoveMember(person)"
+                                (click)="askToRemoveMember(person)"
                                 title="Remove"
                               >
                                 ✕
@@ -259,24 +259,6 @@
                             </div>
                           }
 
-                          <!-- Modal z pytaniem po wyrzuceniu (gdy requiresApproval było false) -->
-                          @if (showApprovalPromptModal()) {
-                            <div class="sheet-backdrop" (click)="showApprovalPromptModal.set(false)"></div>
-                            <section class="sheet" role="dialog" aria-modal="true">
-                              <h2 class="sheet__title">Turn on approval?</h2>
-                              <p class="sheet__hint">
-                                This person can still come back through the link. Do you want to approve new people yourself from now on? This can't be undone.
-                              </p>
-                              <div class="sheet__actions">
-                                <app-button variant="primary" size="lg" (clicked)="handleApprovalPromptResponse(true)">
-                                  Yes, turn on approval
-                                </app-button>
-                                <button type="button" class="pe-quiet-link sheet__back" (click)="handleApprovalPromptResponse(false)">
-                                  No, leave it as is
-                                </button>
-                              </div>
-                            </section>
-                          }
                         </li>
                       }
                     </ul>
@@ -351,7 +333,7 @@
                             type="button"
                             class="person__remove-btn"
                             [disabled]="working()"
-                            (click)="confirmRemoveMember(person)"
+                            (click)="askToRemoveMember(person)"
                             title="Remove"
                           >
                             ✕
@@ -359,24 +341,6 @@
                         </div>
                       }
 
-                      <!-- Modal z pytaniem po wyrzuceniu (gdy requiresApproval było false) -->
-                          @if (showApprovalPromptModal()) {
-                            <div class="sheet-backdrop" (click)="showApprovalPromptModal.set(false)"></div>
-                            <section class="sheet" role="dialog" aria-modal="true">
-                              <h2 class="sheet__title">Turn on approval?</h2>
-                              <p class="sheet__hint">
-                                This person can still come back through the link. Do you want to approve new people yourself from now on? This can't be undone.
-                              </p>
-                              <div class="sheet__actions">
-                                <app-button variant="primary" size="lg" (clicked)="handleApprovalPromptResponse(true)">
-                                  Yes, turn on approval
-                                </app-button>
-                                <button type="button" class="pe-quiet-link sheet__back" (click)="handleApprovalPromptResponse(false)">
-                                  No, leave it as is
-                                </button>
-                              </div>
-                            </section>
-                          }
                     </li>
                   }
                 </ul>
@@ -447,7 +411,7 @@
                     <button
                       type="button"
                       class="person__remove-btn"
-                      (click)="confirmRemoveMember(person)"
+                      (click)="askToRemoveMember(person)"
                       title="Remove"
                     >
                       ✕
@@ -457,6 +421,44 @@
               }
             </ul>
           }
+        </section>
+      }
+
+      <!-- Potwierdzenie wyrzucenia - usunięcie to ban, więc pytamy najpierw -->
+      @if (memberToRemove(); as member) {
+        <div class="sheet-backdrop" (click)="cancelRemoveMember()"></div>
+        <section class="sheet" role="dialog" aria-modal="true">
+          <h2 class="sheet__title">Remove {{ member.displayName }}?</h2>
+          <p class="sheet__hint">
+            They won't be able to come back to this event - not with their code, their account or their email.
+          </p>
+          <div class="sheet__actions">
+            <app-button variant="primary" size="lg" [disabled]="working()" (clicked)="confirmRemoveMember()">
+              Yes, remove
+            </app-button>
+            <button type="button" class="pe-quiet-link sheet__back" (click)="cancelRemoveMember()">
+              Cancel
+            </button>
+          </div>
+        </section>
+      }
+
+      <!-- Pytanie po wyrzuceniu (gdy requiresApproval było false) -->
+      @if (showApprovalPromptModal()) {
+        <div class="sheet-backdrop" (click)="showApprovalPromptModal.set(false)"></div>
+        <section class="sheet" role="dialog" aria-modal="true">
+          <h2 class="sheet__title">Turn on approval?</h2>
+          <p class="sheet__hint">
+            This person can't come back, but anyone else with the link can still join. Do you want to approve new people yourself from now on? This can't be undone.
+          </p>
+          <div class="sheet__actions">
+            <app-button variant="primary" size="lg" (clicked)="handleApprovalPromptResponse(true)">
+              Yes, turn on approval
+            </app-button>
+            <button type="button" class="pe-quiet-link sheet__back" (click)="handleApprovalPromptResponse(false)">
+              No, leave it as is
+            </button>
+          </div>
         </section>
       }
 
@@ -648,6 +650,10 @@
                   {{ pickedCount() }}
                   {{ pickedCount() === 1 ? 'date' : 'dates' }} selected
                 </p>
+              }
+
+              @if (bannedNotice()) {
+                <p class="pe-error sheet__notice" role="alert">{{ bannedNotice() }}</p>
               }
 
               <div class="sheet__actions">

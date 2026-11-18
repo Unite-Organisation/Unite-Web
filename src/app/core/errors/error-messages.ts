@@ -131,6 +131,15 @@ export const ERROR_PRESENTATION = {
     text: 'Too many tries. Give it a few minutes.',
     severity: 'warning',
   },
+  [ErrorCode.EVENT_MEMBER_BANNED]: {
+    text: 'The host removed you from this event.',
+    severity: 'warning',
+  },
+  [ErrorCode.EVENT_MEMBER_NOT_FOUND]: {
+    // also what removing someone no longer in the event answers - the join form words its own
+    text: "This person isn't in the event.",
+    severity: 'warning',
+  },
   [ErrorCode.EVENT_MEMBER_AWAITING_APPROVAL]: {
     text: "You're awaiting approval.",
     severity: "info",

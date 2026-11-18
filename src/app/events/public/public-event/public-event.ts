@@ -71,6 +71,8 @@ export class PublicEventPage implements OnInit {
   protected readonly email = signal('');
   protected readonly emailError = signal<string | null>(null);
   protected readonly nameError = signal<string | null>(null);
+  /** Set once the server says the host threw this person out - shown for guests and Unite users alike. */
+  protected readonly bannedNotice = signal<string | null>(null);
 
   /** The name belongs to someone already - which is the question "is that you?". */
   protected readonly askingForCode = signal(false);
@@ -271,6 +273,7 @@ export class PublicEventPage implements OnInit {
     this.joinOpen.set(false);
     this.pickedMember.set(null);
     this.nameError.set(null);
+    this.bannedNotice.set(null);
     this.emailError.set(null);
     this.askingForCode.set(false);
     this.returningWithCode.set(false);
@@ -384,6 +387,7 @@ export class PublicEventPage implements OnInit {
       return;
     }
 
+    this.bannedNotice.set(null);
     const name = this.displayName().trim();
     if (this.isGuest && !name) {
       this.nameError.set('Tell people who you are');
@@ -447,7 +451,27 @@ export class PublicEventPage implements OnInit {
       return;
     }
 
-    const codes = parseApiError(error).map((entry) => entry.code);
+    const errors = parseApiError(error);
+    const codes = errors.map((entry) => entry.code);
+
+    if (codes.includes(ErrorCode.EVENT_MEMBER_BANNED)) {
+      this.nameError.set(null);
+      this.emailError.set(null);
+      // a guest joining anew is stopped by the address they typed, everyone else by who they are
+      const byEmail = errors.some((entry) => entry.code === ErrorCode.EVENT_MEMBER_BANNED && entry.field === 'email');
+      this.bannedNotice.set(
+        byEmail
+          ? "The host removed the person with this email from the event, so it can't be used to join again."
+          : "The host removed you from this event, so you can't join it again."
+      );
+      return;
+    }
+
+    if (codes.includes(ErrorCode.EVENT_MEMBER_NOT_FOUND)) {
+      this.codeInput.set('');
+      this.nameError.set('Nobody in this event goes by that name. Check the spelling, or join as someone new.');
+      return;
+    }
 
     if (codes.includes(ErrorCode.EVENT_MEMBER_NAME_TAKEN)) {
       this.askingForCode.set(true);
@@ -479,6 +503,7 @@ export class PublicEventPage implements OnInit {
   }
 
   useAnotherName(): void {
+    this.bannedNotice.set(null);
     this.askingForCode.set(false);
     this.returningWithCode.set(false);
     this.codeInput.set('');
@@ -685,8 +710,19 @@ export class PublicEventPage implements OnInit {
     }
   }
 
-  confirmRemoveMember(member: EventMemberRow): void {
+  askToRemoveMember(member: EventMemberRow): void {
     if (!this.isHost() || member.isHost) return;
+    this.memberToRemove.set(member);
+  }
+
+  cancelRemoveMember(): void {
+    this.memberToRemove.set(null);
+  }
+
+  confirmRemoveMember(): void {
+    const member = this.memberToRemove();
+    this.memberToRemove.set(null);
+    if (!member || !this.isHost() || member.isHost) return;
 
     this.working.set(true);
     this.events
@@ -696,6 +732,7 @@ export class PublicEventPage implements OnInit {
         next: () => {
           this.toast.success(`Removed ${member.displayName}`);
           this.loadMembers();
+          this.loadAwaitingMembers();
           this.load(); // odświeżenie danych wydarzenia
 
           // Jeśli tryb akceptacji jest wyłączony, zapytaj czy go włączyć
