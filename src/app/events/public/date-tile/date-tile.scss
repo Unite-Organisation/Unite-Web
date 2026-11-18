@@ -67,6 +67,12 @@
   opacity: 0.5;
 }
 
+/* picked on this phone only - dashed until it is sent, so it never reads as a vote */
+.tile--unsaved {
+  border-style: dashed;
+  box-shadow: none;
+}
+
 /* ───────────── Top row ───────────── */
 
 .tile__top {
@@ -191,3 +197,4 @@
   color: var(--color-sage);
   font-weight: 700;
 }
+
