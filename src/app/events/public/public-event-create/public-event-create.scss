@@ -57,6 +57,15 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.mode-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.mode-option--active:disabled {
+  opacity: 1;
+}
+
 .mode-option--active {
   border-color: var(--color-terracotta);
   background: rgba(192, 86, 58, 0.05);
@@ -303,3 +312,9 @@
     }
   }
 }
+/* while an event is loaded for editing - the same placeholder the event page shows */
+.skeleton{display:flex;flex-direction:column;gap:12px}
+.skeleton__line{height:14px;background:var(--color-cream-dark);border-radius:4px;animation:pulse 1.4s ease-in-out infinite}
+.skeleton__line--short{width:35%}
+.skeleton__line--title{height:30px;width:75%}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}

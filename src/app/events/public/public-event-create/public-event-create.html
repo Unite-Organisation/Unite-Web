@@ -4,14 +4,30 @@
     <header class="create-header">
       <button type="button" class="pe-quiet-link" (click)="cancel()">← Back</button>
 
-      <p class="pe-eyebrow">New event</p>
-      <h1 class="pe-title">Set something up</h1>
-      <p class="pe-subtitle">
-        Anyone you send the link to can join — no account needed.
-      </p>
+      @if (isEditing) {
+        <p class="pe-eyebrow">Edit event</p>
+        <h1 class="pe-title">Change the details</h1>
+        <p class="pe-subtitle">
+          People who already joined stay in. Greyed out fields can't be changed any more.
+        </p>
+      } @else {
+        <p class="pe-eyebrow">New event</p>
+        <h1 class="pe-title">Set something up</h1>
+        <p class="pe-subtitle">
+          Anyone you send the link to can join — no account needed.
+        </p>
+      }
     </header>
 
-    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    @if (loadingEvent()) {
+      <div class="pe-card skeleton">
+        <span class="skeleton__line skeleton__line--short"></span>
+        <span class="skeleton__line skeleton__line--title"></span>
+        <span class="skeleton__line"></span>
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate [hidden]="loadingEvent()">
 
       <!-- ─────────── What ─────────── -->
 
@@ -62,6 +78,7 @@
             type="button"
             class="mode-option"
             [class.mode-option--active]="!letsTheGroupPick"
+            [disabled]="isEditing"
             (click)="chooseMode(mode.FIXED)"
           >
             <span class="mode-option__title">I have a date</span>
@@ -72,6 +89,7 @@
             type="button"
             class="mode-option"
             [class.mode-option--active]="letsTheGroupPick"
+            [disabled]="isEditing"
             (click)="chooseMode(mode.POLL)"
           >
             <span class="mode-option__title">Let the group pick</span>
@@ -143,9 +161,16 @@
               formControlName="votingDeadline"
             />
 
-            <span class="pe-hint">
-              If nobody has settled on a date by then, the best one is kept and the rest drop off.
-            </span>
+            @if (deadlineLockedReason(); as reason) {
+              <span class="pe-hint">{{ reason }}</span>
+            } @else {
+              <span class="pe-hint">
+                If nobody has settled on a date by then, the best one is kept and the rest drop off.
+              </span>
+            }
+            @if (deadlineError(); as message) {
+              <span class="pe-error">{{ message }}</span>
+            }
             @if (serverError('votingDeadline'); as message) {
               <span class="pe-error">{{ message }}</span>
             }
@@ -166,7 +191,7 @@
                     [startFrom]="nextSlotDate"
                   />
 
-                  @if (slots.length > minDates) {
+                  @if (canRemoveDate($index)) {
                     <button
                       type="button"
                       class="date-row__remove"
@@ -180,7 +205,17 @@
               }
             </div>
 
-            @if (slots.length < maxDates) {
+            @if (isEditing && existingDates() > 0) {
+              <span class="pe-hint">
+                @if (canAddDates()) {
+                  Dates people have already voted on stay. You can add new ones up to {{ maxDates }}.
+                } @else {
+                  The dates can no longer be changed.
+                }
+              </span>
+            }
+
+            @if (showAddDate) {
               <button type="button" class="dates__add" (click)="addDate()">
                 + Add another date
               </button>
@@ -337,7 +372,11 @@
           type="submit"
           [disabled]="isSubmitting()"
         >
-          @if (isSubmitting()) { Creating… } @else { Create event }
+          @if (isEditing) {
+            @if (isSubmitting()) { Saving… } @else { Save changes }
+          } @else {
+            @if (isSubmitting()) { Creating… } @else { Create event }
+          }
         </app-button>
       </div>
 

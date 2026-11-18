@@ -3,7 +3,8 @@
   class="field"
   [class.field--open]="picker.opened"
   [class.field--empty]="!value()"
-  [class.field--clearable]="clearable() && value()"
+  [class.field--clearable]="clearable() && value() && !disabled()"
+  [disabled]="disabled()"
   [id]="fieldId()"
   [attr.aria-label]="label() + ': ' + text"
   (click)="open()"
@@ -16,7 +17,7 @@
   </svg>
 </button>
 
-@if (clearable() && value()) {
+@if (clearable() && value() && !disabled()) {
   <button
     type="button"
     class="clear"

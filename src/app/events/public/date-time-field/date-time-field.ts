@@ -36,6 +36,7 @@ export class DateTimeField implements ControlValueAccessor {
   protected readonly heldInHand = matchMedia('(max-width: 600px), (pointer: coarse)').matches;
 
   protected readonly value = signal('');
+  protected readonly disabled = signal(false);
   protected readonly time = signal<Date | null>(null);
 
   private confirmed = false;
@@ -58,7 +59,14 @@ export class DateTimeField implements ControlValueAccessor {
     this.onTouched = onTouched;
   }
 
+  setDisabledState(disabled: boolean): void {
+    this.disabled.set(disabled);
+  }
+
   protected open(): void {
+    if (this.disabled()) {
+      return;
+    }
     const start = this.startingPoint();
 
     this.confirmed = false;

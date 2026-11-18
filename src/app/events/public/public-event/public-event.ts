@@ -608,6 +608,11 @@ export class PublicEventPage implements OnInit {
     this.router.navigateByUrl('/event/new');
   }
 
+  editEvent(): void {
+    this.router.navigate(['/event', this.slug, 'edit']);
+  }
+
+
   /** Toggles picks directly from the main event page when logged in */
   toggleMainPagePick(slot: EventSlotResponse): void {
     if (!this.isChoosingDate()) return;

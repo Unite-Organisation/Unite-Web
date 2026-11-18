@@ -9,7 +9,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, finalize, map, switchMap } from 'rxjs/operators';
 
@@ -17,11 +17,16 @@ import { AuthService } from '../../../auth/services/auth';
 import { RolesService } from '../../../auth/services/roles.service';
 import { BuildingContextService } from '../../../core/building-context.service';
 import { ServerValidationBinder, serverErrorText } from '../../../core/errors';
+import { ToastService } from '../../../core/toast/toast.service';
 import { endOfDay, startOfDay, toLocalDateTime } from '../../../posts/post-dates';
 import { PostService } from '../../../posts/services/post.service';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import {
+  EventMemberRole,
+  EventStatus,
+  PublicEvent,
   PublicEventCreateRequest,
+  PublicEventUpdateRequest,
   SchedulingMode,
   SlotRequest,
 } from '../../../models/api-models/public-event.models';
@@ -30,10 +35,15 @@ import { DateTimeField } from '../date-time-field/date-time-field';
 import { toInputValue } from '../event-dates';
 
 const MIN_DATES = 2;
-const MAX_DATES = 6;
+const MAX_DATES = 8;
 const DEFAULT_DATES = 4;
 const DEFAULT_HOUR = 12;
 const FEED_DAYS_WITHOUT_DATE = 30;
+/** Mirrors the backend: the deadline is frozen this close to passing, and cannot be moved closer than this. */
+const DEADLINE_CHANGE_MARGIN_MS = 5 * 60 * 1000;
+
+/** What the host can still change once the event exists - everything else is shown, but disabled. */
+const EDITABLE_FIELDS = new Set(['name', 'description', 'location', 'onlineUrl', 'requiresApproval', 'votingDeadline', 'slots']);
 
 /** Inputs inside the collapsed "Place, link, limit" section - it opens when one of them is rejected. */
 const DETAIL_FIELDS = new Set(['location', 'onlineUrl', 'maxAttendees', 'waitlistEnabled', 'requiresApproval']);
@@ -42,6 +52,9 @@ const DETAIL_FIELDS = new Set(['location', 'onlineUrl', 'maxAttendees', 'waitlis
  * One card for both modes and both kinds of host. A host with an account gets the same screen as
  * someone who has never seen Unite - the only difference is that the account already knows their
  * name, so the field disappears.
+ *
+ * Opened on `/event/:slug/edit` it comes filled in with the event instead, and only what the
+ * backend still lets the host change stays enabled.
  */
 @Component({
   selector: 'app-public-event-create',
@@ -59,15 +72,33 @@ export class PublicEventCreate {
   private readonly posts = inject(PostService);
   private readonly buildingContext = inject(BuildingContextService);
   private readonly serverValidation = inject(ServerValidationBinder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly toast = inject(ToastService);
+
+  /** Set when editing an existing event, `null` when creating one. */
+  protected readonly editedSlug = this.route.snapshot.paramMap.get('slug');
+  protected readonly isEditing = this.editedSlug !== null;
+  protected readonly loadingEvent = signal(this.isEditing);
+  /** Why the deadline is disabled while editing a poll - `null` when it can still be moved. */
+  protected readonly deadlineLockedReason = signal<string | null>(null);
+  /**
+   * Rows holding the dates the event already has. They stay as they are - people have voted on
+   * them - and only rows after them are new dates the host is adding.
+   */
+  protected readonly existingDates = signal(0);
+  /** Editing a poll that is still open for changes - the same rule as for the deadline. */
+  protected readonly canAddDates = signal(false);
+  private editedEvent: PublicEvent | null = null;
 
   protected readonly mode = SchedulingMode;
   protected readonly maxDates = MAX_DATES;
   protected readonly minDates = MIN_DATES;
 
-  protected readonly isGuest = !this.auth.isLoggedIn();
+  protected readonly isGuest = !this.auth.isLoggedIn() && !this.isEditing;
   protected readonly isSubmitting = signal(false);
   protected readonly showDetails = signal(false);
   protected readonly datesError = signal<string | null>(null);
+  protected readonly deadlineError = signal<string | null>(null);
 
   readonly form: FormGroup = this.fb.group({
     name: this.fb.nonNullable.control('', [Validators.required, Validators.maxLength(256)]),
@@ -96,9 +127,78 @@ export class PublicEventCreate {
   });
 
   constructor() {
+    if (this.editedSlug) {
+      this.loadForEditing(this.editedSlug);
+      return;
+    }
+
     const now = new Date();
     this.form.controls['startDate'].setValue(toInputValue(atHour(addDays(now, 7), 18)));
     this.form.controls['votingDeadline'].setValue(toInputValue(atHour(addDays(now, 3), 20)));
+  }
+
+  /**
+   * Only the host gets the form - anyone else who lands here is sent back to the event, where the
+   * page explains what they can do.
+   */
+  private loadForEditing(slug: string): void {
+    this.events
+      .get(slug)
+      .pipe(finalize(() => this.loadingEvent.set(false)))
+      .subscribe({
+        next: (event) => {
+          if (event.me?.role !== EventMemberRole.HOST) {
+            this.router.navigate(['/event', slug], { replaceUrl: true });
+            return;
+          }
+          this.fillFrom(event);
+        },
+        error: () => this.router.navigate(['/event', slug], { replaceUrl: true }),
+      });
+  }
+
+  private fillFrom(event: PublicEvent): void {
+    this.editedEvent = event;
+
+    const dates = [...event.slots]
+      .map((slot) => slot.startDate)
+      .sort()
+      .map((date) => this.fb.nonNullable.control({ value: toFieldValue(date), disabled: true }));
+    this.slots.clear();
+    dates.forEach((control) => this.slots.push(control));
+    this.existingDates.set(dates.length);
+
+    this.form.patchValue({
+      name: event.name,
+      description: event.description ?? '',
+      schedulingMode: event.schedulingMode,
+      startDate: toFieldValue(event.startDate),
+      endDate: toFieldValue(event.endDate),
+      minAttendees: event.minAttendees ?? 1,
+      votingDeadline: toFieldValue(event.votingDeadline),
+      location: event.locationName ?? '',
+      onlineUrl: event.onlineUrl ?? '',
+      maxAttendees: event.maxAttendees,
+      waitlistEnabled: event.waitlistEnabled,
+      requiresApproval: event.requiresApproval,
+    });
+
+    Object.entries(this.form.controls)
+      .filter(([field]) => !EDITABLE_FIELDS.has(field))
+      .forEach(([, control]) => control.disable());
+
+    if (event.requiresApproval) {
+      this.form.controls['requiresApproval'].disable();
+    }
+
+    const locked = deadlineLockedReason(event);
+    this.deadlineLockedReason.set(locked);
+    if (locked) {
+      this.form.controls['votingDeadline'].disable();
+    }
+    this.canAddDates.set(event.schedulingMode === SchedulingMode.POLL && !locked);
+
+    this.showDetails.set(!!(event.locationName || event.onlineUrl || event.maxAttendees || event.requiresApproval));
   }
 
   get slots(): FormArray<FormControl<string>> {
@@ -136,18 +236,31 @@ export class PublicEventCreate {
   }
 
   chooseMode(schedulingMode: SchedulingMode): void {
+    if (this.isEditing) {
+      return;
+    }
     this.form.controls['schedulingMode'].setValue(schedulingMode);
     this.datesError.set(null);
   }
 
+  /** Creating, or editing while the vote still takes new dates - up to the limit either way. */
+  protected get showAddDate(): boolean {
+    return (!this.isEditing || this.canAddDates()) && this.slots.length < MAX_DATES;
+  }
+
+  /** Creating: any row above the minimum. Editing: only a row the host has just added. */
+  protected canRemoveDate(index: number): boolean {
+    return this.isEditing ? index >= this.existingDates() : this.slots.length > MIN_DATES;
+  }
+
   addDate(): void {
-    if (this.slots.length < MAX_DATES) {
+    if (this.showAddDate) {
       this.slots.push(this.fb.nonNullable.control(''));
     }
   }
 
   removeDate(index: number): void {
-    if (this.slots.length > MIN_DATES) {
+    if (this.canRemoveDate(index)) {
       this.slots.removeAt(index);
     }
   }
@@ -157,6 +270,10 @@ export class PublicEventCreate {
   }
 
   cancel(): void {
+    if (this.editedSlug) {
+      this.router.navigate(['/event', this.editedSlug]);
+      return;
+    }
     this.router.navigateByUrl(this.auth.isLoggedIn() ? '/app/home/events' : '/login');
   }
 
@@ -167,6 +284,7 @@ export class PublicEventCreate {
 
   submit(): void {
     this.datesError.set(null);
+    this.deadlineError.set(null);
     this.serverValidation.clear(this.form);
 
     if (this.isGuest) {
@@ -178,6 +296,11 @@ export class PublicEventCreate {
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      return;
+    }
+
+    if (this.editedSlug) {
+      this.saveChanges(this.editedSlug);
       return;
     }
 
@@ -214,16 +337,121 @@ export class PublicEventCreate {
       });
   }
 
+  private saveChanges(slug: string): void {
+    const request = this.buildUpdateRequest();
+    if (request.votingDeadline && !this.validateNewDeadline(request.votingDeadline)) {
+      return;
+    }
+    if (request.addSlots && !this.validateAddedDates(request.votingDeadline ?? this.editedEvent!.votingDeadline!)) {
+      return;
+    }
+    const sentRows = this.addedRows;
+
+    this.isSubmitting.set(true);
+    this.events
+      .updateEvent(slug, request)
+      .pipe(finalize(() => this.isSubmitting.set(false)))
+      .subscribe({
+        next: () => {
+          this.toast.success('Changes saved');
+          this.router.navigate(['/event', slug]);
+        },
+        error: (error: unknown) => {
+          if (error instanceof HttpErrorResponse) {
+            this.showServerErrors(error, sentRows, 'addSlots');
+          }
+        },
+      });
+  }
+
+  /**
+   * Sends only what the host actually changed, so a field the backend no longer lets them touch -
+   * a deadline that is about to pass - does not get the whole save rejected.
+   */
+  private buildUpdateRequest(): PublicEventUpdateRequest {
+    const event = this.editedEvent!;
+    const raw = this.form.getRawValue();
+    const request: PublicEventUpdateRequest = {};
+
+    const name = raw.name.trim();
+    if (name !== event.name) {
+      request.name = name;
+    }
+    if (raw.description.trim() !== (event.description ?? '')) {
+      request.description = raw.description.trim();
+    }
+    if (raw.location.trim() !== (event.locationName ?? '')) {
+      request.location = raw.location.trim();
+    }
+    if (raw.onlineUrl.trim() !== (event.onlineUrl ?? '')) {
+      request.onlineUrl = raw.onlineUrl.trim();
+    }
+    if (raw.requiresApproval && !event.requiresApproval) {
+      request.requiresApproval = true;
+    }
+    if (
+      this.form.controls['votingDeadline'].enabled &&
+      raw.votingDeadline &&
+      raw.votingDeadline !== toFieldValue(event.votingDeadline)
+    ) {
+      request.votingDeadline = withSeconds(raw.votingDeadline);
+    }
+
+    const added = this.addedRows.map((row) => this.slots.at(row).value);
+    if (added.length > 0) {
+      request.addSlots = added.map((startDate) => ({ startDate: withSeconds(startDate), endDate: null }));
+    }
+
+    return request;
+  }
+
+  /** Form rows of the new dates that are filled in - empty rows are not sent. */
+  private get addedRows(): number[] {
+    return this.filledSlotIndexes.filter((row) => row >= this.existingDates());
+  }
+
+  /** The rules the backend applies to new dates, against the deadline as it is about to be. */
+  private validateAddedDates(deadline: string): boolean {
+    const dates = this.filledDates;
+    if (new Set(dates).size !== dates.length) {
+      this.datesError.set('The same date is proposed twice');
+      return false;
+    }
+
+    const added = this.addedRows.map((row) => this.slots.at(row).value);
+    if (added.some((date) => new Date(date) <= new Date(deadline))) {
+      this.datesError.set('Every proposed date has to fall after the deadline for choosing it');
+      return false;
+    }
+    return true;
+  }
+
+  /** The same rules the backend applies, so the host reads them under the field. */
+  private validateNewDeadline(deadline: string): boolean {
+    const fail = (message: string) => {
+      this.deadlineError.set(message);
+      return false;
+    };
+
+    if (new Date(deadline).getTime() < Date.now() + DEADLINE_CHANGE_MARGIN_MS) {
+      return fail('The new deadline has to be at least 5 minutes from now');
+    }
+    if (this.filledDates.some((date) => new Date(date) <= new Date(deadline))) {
+      return fail('Every proposed date has to fall after the deadline for choosing it');
+    }
+    return true;
+  }
+
   /**
    * Turns the inputs the backend rejected red, revealing them first when they sit in the collapsed
    * section. `slots[1]` in the request is not necessarily the second row of the form, since empty
    * rows are not sent.
    */
-  private showServerErrors(error: HttpErrorResponse, sentSlots: number[]): void {
-    const fieldMap: Record<string, string> = {};
+  private showServerErrors(error: HttpErrorResponse, sentSlots: number[], slotsField = 'slots'): void {
+    const fieldMap: Record<string, string> = { [slotsField]: 'slots' };
     sentSlots.forEach((row, sent) => {
-      fieldMap[`slots[${sent}].startDate`] = `slots.${row}`;
-      fieldMap[`slots[${sent}].endDate`] = `slots.${row}`;
+      fieldMap[`${slotsField}[${sent}].startDate`] = `slots.${row}`;
+      fieldMap[`${slotsField}[${sent}].endDate`] = `slots.${row}`;
     });
 
     const { applied } = this.serverValidation.apply(this.form, error, { fieldMap, focusFirst: false });
@@ -231,9 +459,13 @@ export class PublicEventCreate {
       return;
     }
 
-    if (applied.some((field) => field === 'slots')) {
-      this.datesError.set(`Propose between ${MIN_DATES} and ${MAX_DATES} dates`);
-    } else if (applied.some((field) => field.startsWith('slots['))) {
+    if (applied.some((field) => field === slotsField)) {
+      this.datesError.set(
+        this.isEditing
+          ? `An event proposes at most ${MAX_DATES} dates`
+          : `Propose between ${MIN_DATES} and ${MAX_DATES} dates`
+      );
+    } else if (applied.some((field) => field.startsWith(`${slotsField}[`))) {
       this.datesError.set('Check the highlighted dates');
     }
 
@@ -372,4 +604,23 @@ function atHour(date: Date, hour: number): Date {
   const copy = new Date(date);
   copy.setHours(hour, 0, 0, 0);
   return copy;
+}
+
+/** Values from the api carry seconds, the date fields do not. */
+function toFieldValue(value: string | null): string {
+  return value ? value.slice(0, 16) : '';
+}
+
+/** Mirrors EventLifecycleService#moveVotingDeadline - `null` when the deadline may still be moved. */
+function deadlineLockedReason(event: PublicEvent): string | null {
+  if (event.schedulingMode !== SchedulingMode.POLL || !event.votingDeadline) {
+    return null;
+  }
+  if (event.status !== EventStatus.COLLECTING_VOTES) {
+    return 'The group is no longer voting, so the deadline stays as it is.';
+  }
+  if (new Date(event.votingDeadline).getTime() < Date.now() + DEADLINE_CHANGE_MARGIN_MS) {
+    return 'The deadline is less than 5 minutes away and can no longer be moved.';
+  }
+  return null;
 }

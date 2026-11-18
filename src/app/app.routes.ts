@@ -101,6 +101,12 @@ export const routes: Routes = [
     },
 
     {
+        // the same card as creating, filled in, with only what the host may still change enabled
+        path: 'event/:slug/edit',
+        loadComponent: () => import('./events/public/public-event-create/public-event-create').then(m => m.PublicEventCreate)
+    },
+
+    {
         path: 'event/:slug/d/:slotId',
         loadComponent: () => import('./events/public/public-event/public-event').then(m => m.PublicEventPage)
     },
