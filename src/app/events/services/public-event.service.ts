@@ -49,12 +49,14 @@ export class PublicEventService {
       this.http.post<EventSessionResponse>(
         `${API_URLS.public_event}/${slug}/session`,
         { ...payload, device },
-        // a taken name and a wrong code are answers, not failures - the form shows them itself
+        // a taken name, a wrong code or a ban are answers, not failures - the form shows them itself
         {
           context: handleErrorCodes([
             ErrorCode.EVENT_MEMBER_NAME_TAKEN,
             ErrorCode.EVENT_RETURN_CODE_INVALID,
             ErrorCode.EVENT_MEMBER_LOCKED,
+            ErrorCode.EVENT_MEMBER_BANNED,
+            ErrorCode.EVENT_MEMBER_NOT_FOUND,
           ]),
         }
       )
