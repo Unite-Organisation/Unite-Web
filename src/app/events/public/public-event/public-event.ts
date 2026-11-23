@@ -26,6 +26,7 @@ import { DateTile } from '../date-tile/date-tile';
 import { MemberPicker } from '../member-picker/member-picker';
 import { PickedMember } from '../member-picker/picked-member';
 import { formatDayTime, formatTimeLeft } from '../event-dates';
+import { Clipboard } from '@angular/cdk/clipboard';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -52,6 +53,7 @@ export class PublicEventPage implements OnInit {
   private readonly events = inject(PublicEventService);
   private readonly toast = inject(ToastService);
   private readonly auth = inject(AuthService);
+  private readonly clipboard = inject(Clipboard);
 
   protected readonly status = EventStatus;
   protected readonly preference = SlotPreference;
@@ -626,6 +628,10 @@ export class PublicEventPage implements OnInit {
   }
 
   dismissReturnCode(): void {
+    let code = this.returnCode();
+    if (code != null) {
+      this.clipboard.copy(code);
+    }
     this.returnCode.set(null);
   }
 
