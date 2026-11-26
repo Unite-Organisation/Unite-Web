@@ -24,6 +24,8 @@ export class DateTile {
   /** The date that carried the event, marked so it reads as settled rather than merely leading. */
   @Input() chosen = false;
   @Input() showCounts = true;
+  /** The member's pick on this date is only local so far - counted in the bar, but not sent yet. */
+  @Input() unsaved = false;
 
   @Output() picked = new EventEmitter<void>();
 

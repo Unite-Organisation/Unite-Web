@@ -81,3 +81,7 @@
 .pe-actions__pair{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;width:100%}
 .pe-actions .actions__return{display:block;text-align:center;margin-top:12px;width:100%}
 .code-input{font-size:26px!important;font-variant-numeric:tabular-nums;letter-spacing:.5em;text-align:center}
+/* the save button bumps whenever the pick count changes, so it is not missed */
+.pe-actions__nudge{animation:pe-nudge .45s ease}
+@keyframes pe-nudge{0%{transform:scale(1)}35%{transform:scale(1.04)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.pe-actions__nudge{animation:none}}

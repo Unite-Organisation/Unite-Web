@@ -166,7 +166,7 @@
       <!-- ─────────── Dates ─────────── -->
 
       @if (ev.slots.length > 0) {
-        <section class="pe-card">
+        <section class="pe-card" id="pe-dates">
           <div class="dates-head">
             <h2 class="pe-section-title">
               @if (isChoosingDate()) { Which date works } @else { The date }
@@ -199,6 +199,7 @@
                   [selection]="picks()[slot.id] ?? null"
                   [chosen]="slot.id === ev.selectedSlotId"
                   [selectable]="isChoosingDate()"
+                  [unsaved]="unsavedSlotIds().has(slot.id)"
                   (picked)="toggleMainPagePick(slot)"
                 />
               </div>
@@ -270,7 +271,7 @@
             }
           }
 
-        
+
         </section>
       }
 
@@ -381,7 +382,7 @@
       @if (isHost() && event()?.requiresApproval) {
         <section class="pe-card">
           <h2 class="pe-section-title">Awaiting approval ({{ awaitingMembers().length }})</h2>
-          
+
           @if (awaitingLoading()) {
             <p class="who__note">Loading the queue…</p>
           } @else if (awaitingMembers().length === 0) {
@@ -466,14 +467,28 @@
 
       <div class="pe-actions">
         @if (!isMember()) {
-          <app-button
-            variant="primary"
-            size="lg"
-            [disabled]="working()"
-            (clicked)="openJoin()"
-          >
-            @if (isChoosingDate()) { Pick your dates } @else { Count me in }
-          </app-button>
+          @if (isChoosingDate() && pickedCount() === 0) {
+            <app-button variant="outline" size="lg" [disabled]="working()" (clicked)="scrollToDates()">
+              Tap the dates that work for you
+            </app-button>
+          } @else if (isChoosingDate()) {
+            <!-- re-rendered on every change of the count, so the bump plays each time -->
+            @for (count of [pickedCount()]; track count) {
+              <app-button
+                class="pe-actions__nudge"
+                variant="primary"
+                size="lg"
+                [disabled]="working()"
+                (clicked)="openJoin()"
+              >
+                Save my {{ count }} {{ count === 1 ? 'date' : 'dates' }}
+              </app-button>
+            }
+          } @else {
+            <app-button variant="primary" size="lg" [disabled]="working()" (clicked)="openJoin()">
+              Count me in
+            </app-button>
+          }
 
           @if (isGuest) {
             <button type="button" class="pe-quiet-link actions__return" (click)="openReturn()">

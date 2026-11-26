@@ -158,6 +158,17 @@ export class PublicEventPage implements OnInit {
 
   protected readonly pickedCount = computed(() => Object.keys(this.picks()).length);
 
+  /** Dates whose pick differs from what the server holds - drawn as not saved yet on the tiles. */
+  protected readonly unsavedSlotIds = computed(() => {
+    const saved: Record<string, SlotPreference> = {};
+    this.event()?.myVotes.forEach((vote) => (saved[vote.slotId] = vote.preference));
+    return new Set(
+      Object.entries(this.picks())
+        .filter(([slotId, preference]) => saved[slotId] !== preference)
+        .map(([slotId]) => slotId)
+    );
+  });
+
   /** In the event as far as it is concerned - not dropped out, not left behind by the date. */
   private readonly isActiveMember = computed(() => {
     const status = this.me()?.status;
@@ -267,6 +278,11 @@ export class PublicEventPage implements OnInit {
     // Always skip straight to the name/code entry step
     this.joinStep.set('name');
     this.joinOpen.set(true);
+  }
+
+  /** Before anything is picked, the main button only points back up at the dates. */
+  scrollToDates(): void {
+    document.getElementById('pe-dates')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   closeJoin(): void {
