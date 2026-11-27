@@ -3,18 +3,24 @@ import { Injectable } from '@angular/core';
 const TOKEN_KEY = 'auth-token';
 const ROLE_CLAIM = 'role';
 const USER_META_INFO_KEY = 'user-meta-info';
+const SESSION_HINT_KEY = 'has-session';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  
+
   private accessToken: string | null = null;
 
   constructor() {}
 
   public saveToken(token: string): void {
-   this.accessToken = token;
+    this.accessToken = token;
+    localStorage.setItem(SESSION_HINT_KEY, '1');
+  }
+
+  public hasSessionHint(): boolean {
+    return localStorage.getItem(SESSION_HINT_KEY) === '1' || localStorage.getItem(USER_META_INFO_KEY) !== null;
   }
 
   public getToken(): string | null {
@@ -28,6 +34,7 @@ export class AuthService {
   public logout(): void {
     this.accessToken = null;
     localStorage.removeItem(USER_META_INFO_KEY);
+    localStorage.removeItem(SESSION_HINT_KEY);
   }
 
   private getDecodedToken(): any | null {
@@ -42,7 +49,7 @@ export class AuthService {
         console.error('Invalid JWT format.');
         return null;
       }
-      
+
       const payload = JSON.parse(atob(parts[1]));
       return payload;
 
@@ -54,7 +61,7 @@ export class AuthService {
 
   public getUserRole(): string | null {
     const decodedToken = this.getDecodedToken();
-    
+
     if (decodedToken && decodedToken[ROLE_CLAIM]) {
       return decodedToken[ROLE_CLAIM];
     }
@@ -72,7 +79,7 @@ export class AuthService {
 
   public getCurrentUserId(): string | null {
     const decodedToken = this.getDecodedToken();
-    
+
     if (decodedToken && decodedToken['sub']) {
       return decodedToken['sub'];
     }
