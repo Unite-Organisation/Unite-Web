@@ -9,7 +9,7 @@ import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 
 import { routes } from './app.routes';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { AuthInterceptor } from './core/auth-interceptor';
 import { AuthService } from './auth/services/auth';
 import { AuthRefreshService } from './core/auth-refresh.service';
@@ -19,13 +19,19 @@ import { errorToastInterceptor } from './core/errors/error-toast.interceptor';
 function tryRestoreSessionFromRefreshCookie(): Promise<void> {
   const auth = inject(AuthService);
   const refreshService = inject(AuthRefreshService);
-  if (auth.isLoggedIn()) {
+
+  if (auth.isLoggedIn() || !auth.hasSessionHint()) {
     return Promise.resolve();
   }
+
   return refreshService
     .refreshAccessToken()
     .then(() => {})
-    .catch(() => {});
+    .catch((error: unknown) => {
+      if (error instanceof HttpErrorResponse && error.status >= 400 && error.status < 500) {
+        auth.logout();
+      }
+    });
 }
 
 export const appConfig: ApplicationConfig = {
